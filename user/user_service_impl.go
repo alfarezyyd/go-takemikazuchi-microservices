@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
@@ -51,7 +50,7 @@ func NewService(
 	}
 }
 
-func (serviceImpl *ServiceImpl) HandleRegister(ginContext *gin.Context, createUserDto *dto.CreateUserDto) {
+func (serviceImpl *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto) {
 	err := serviceImpl.validatorInstance.Struct(createUserDto)
 	exception.ParseValidationError(err, serviceImpl.engTranslator)
 
@@ -64,7 +63,7 @@ func (serviceImpl *ServiceImpl) HandleRegister(ginContext *gin.Context, createUs
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(ginContext *gin.Context, generateOneTimePassDto *dto.GenerateOtpDto) {
+func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto) {
 	err := serviceImpl.validatorInstance.Struct(generateOneTimePassDto)
 	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -80,7 +79,7 @@ func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(ginContext *gin.Co
 		err = gormTransaction.Create(&oneTimePasswordToken).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		emailPayload := config.EmailPayload{
-			Title:     "OTP Sent",
+			Title:     "One Time Verification Token",
 			Recipient: generateOneTimePassDto.Email,
 			Body:      fmt.Sprintf("One Time Password %s", generatedOneTimePasswordToken),
 			Sender:    serviceImpl.mailerService.ViperConfig.GetString(""),
@@ -90,7 +89,7 @@ func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(ginContext *gin.Co
 		templateFile := fmt.Sprintf("%s/public/static/email_template.html", projectRoot)
 		err = serviceImpl.mailerService.SendEmail(
 			generateOneTimePassDto.Email,
-			"OTP Send",
+			"One Time Verification Token",
 			templateFile,
 			emailPayload)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
@@ -98,7 +97,7 @@ func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(ginContext *gin.Co
 	})
 }
 
-func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(ginContext *gin.Context, verifyOtpDto *dto.VerifyOtpDto) {
+func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.VerifyOtpDto) {
 	err := serviceImpl.validatorInstance.Struct(verifyOtpDto)
 	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -116,42 +115,47 @@ func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(ginContext *gin.Cont
 	})
 }
 
-func (serviceImpl *ServiceImpl) HandleGoogleAuthentication(ginContext *gin.Context) {
-	authEndpoint := serviceImpl.identityProvider.GoogleProviderConfig.AuthCodeURL("randomstate")
-	ginContext.Redirect(http.StatusSeeOther, authEndpoint)
-	ginContext.JSON(http.StatusOK, authEndpoint)
+func (serviceImpl *ServiceImpl) HandleGoogleAuthentication() string {
+	return serviceImpl.identityProvider.GoogleProviderConfig.AuthCodeURL("randomstate")
 }
 
-func (serviceImpl *ServiceImpl) HandleGoogleCallback(ginContext *gin.Context) {
-	state := ginContext.Query("state")
-	if state != "randomstate" {
-		ginContext.JSON(http.StatusBadRequest, exception.ErrBadRequest)
-		return
+func (serviceImpl *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
+	if tokenState != "randomstate" {
+		return &exception.ClientError{
+			StatusCode: http.StatusBadRequest,
+			Message:    exception.ErrBadRequest,
+		}
 	}
-
-	queryCode := ginContext.Query("code")
 
 	googleProviderConfig := serviceImpl.identityProvider.GoogleProviderConfig
 
 	token, err := googleProviderConfig.Exchange(context.Background(), queryCode)
 	if err != nil {
-		ginContext.JSON(http.StatusBadRequest, exception.ErrBadRequest)
-		return
+		return &exception.ClientError{
+			StatusCode: http.StatusBadRequest,
+			Message:    exception.ErrBadRequest,
+		}
 	}
 
 	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
-		ginContext.JSON(http.StatusBadRequest, exception.ErrBadRequest)
+		return &exception.ClientError{
+			StatusCode: http.StatusBadRequest,
+			Message:    exception.ErrBadRequest,
+		}
 	}
 
-	userData, err := io.ReadAll(resp.Body)
+	_, err = io.ReadAll(resp.Body)
 	if err != nil {
-		ginContext.JSON(http.StatusBadRequest, exception.ErrBadRequest)
+		return &exception.ClientError{
+			StatusCode: http.StatusBadRequest,
+			Message:    exception.ErrBadRequest,
+		}
 	}
-	ginContext.JSON(http.StatusOK, string(userData))
+	return nil
 }
 
-func (serviceImpl *ServiceImpl) HandleLogin(ginContext *gin.Context, loginUserDto *dto.LoginUserDto) string {
+func (serviceImpl *ServiceImpl) HandleLogin(loginUserDto *dto.LoginUserDto) string {
 	err := serviceImpl.validatorInstance.Struct(loginUserDto)
 	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	var tokenString string

@@ -1,15 +1,15 @@
 package user
 
 import (
-	"github.com/gin-gonic/gin"
+	"go-takemikazuchi-api/exception"
 	"go-takemikazuchi-api/user/dto"
 )
 
 type Service interface {
-	HandleRegister(ginContext *gin.Context, createUserDto *dto.CreateUserDto)
-	HandleGenerateOneTimePassword(ginContext *gin.Context, generateOtpDto *dto.GenerateOtpDto)
-	HandleVerifyOneTimePassword(ginContext *gin.Context, verifyOtpDto *dto.VerifyOtpDto)
-	HandleGoogleAuthentication(ginContext *gin.Context)
-	HandleGoogleCallback(ginContext *gin.Context)
-	HandleLogin(ginContext *gin.Context, loginUserDto *dto.LoginUserDto) string
+	HandleRegister(createUserDto *dto.CreateUserDto)
+	HandleGenerateOneTimePassword(generateOtpDto *dto.GenerateOtpDto)
+	HandleVerifyOneTimePassword(verifyOtpDto *dto.VerifyOtpDto)
+	HandleGoogleAuthentication() string
+	HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError
+	HandleLogin(loginUserDto *dto.LoginUserDto) string
 }
