@@ -2,16 +2,16 @@ package config
 
 import (
 	"github.com/go-playground/locales/en"
-	ut "github.com/go-playground/universal-translator"
+	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	translations "github.com/go-playground/validator/v10/translations/en"
+	engTranslation "github.com/go-playground/validator/v10/translations/en"
 	"mime/multipart"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func InitializeValidator() (*validator.Validate, ut.Translator) {
+func InitializeValidator() (*validator.Validate, universalTranslator.Translator) {
 	var validatorInstance = validator.New()
 	// Tambahkan validasi kustom untuk 'datetime'
 	validatorInstance.RegisterValidation("date", func(fieldLevel validator.FieldLevel) bool {
@@ -35,9 +35,9 @@ func InitializeValidator() (*validator.Validate, ut.Translator) {
 	validatorInstance.RegisterValidation("obligatoryFile", requiredFileValidationValidation)
 
 	englishLang := en.New()
-	universalTranslator := ut.New(englishLang, englishLang)
-	engTranslator, _ := universalTranslator.GetTranslator("en")
-	_ = translations.RegisterDefaultTranslations(validatorInstance, engTranslator)
+	universalTranslatorInstance := universalTranslator.New(englishLang, englishLang)
+	engTranslator, _ := universalTranslatorInstance.GetTranslator("en")
+	_ = engTranslation.RegisterDefaultTranslations(validatorInstance, engTranslator)
 
 	return validatorInstance, engTranslator
 }
