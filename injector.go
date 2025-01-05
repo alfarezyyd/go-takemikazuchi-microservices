@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/config"
+	"go-takemikazuchi-api/job"
 	"go-takemikazuchi-api/routes"
 	"go-takemikazuchi-api/user"
 	"gorm.io/gorm"
@@ -49,6 +50,15 @@ var categorySet = wire.NewSet(
 	wire.Bind(new(category.Service), new(*category.ServiceImpl)),
 	category.NewHandler,
 	wire.Bind(new(category.Controller), new(*category.Handler)),
+)
+
+var jobSet = wire.NewSet(
+	job.NewRepository,
+	wire.Bind(new(job.Repository), new(*job.RepositoryImpl)),
+	job.NewService,
+	wire.Bind(new(job.Service), new(*job.ServiceImpl)),
+	job.NewHandler,
+	wire.Bind(new(job.Controller), new(*job.Handler)),
 )
 
 // wire.go
