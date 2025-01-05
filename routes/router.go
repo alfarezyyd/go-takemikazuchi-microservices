@@ -10,6 +10,7 @@ type RouterGroup struct {
 
 // ApplicationRoutes holds all route groups
 type ApplicationRoutes struct {
-	AuthRoutes *AuthenticationRoutes
+	AuthenticationRoutes *AuthenticationRoutes
+	ProtectedRoutes      *ProtectedRoutes
 	// Add other route groups here
 }

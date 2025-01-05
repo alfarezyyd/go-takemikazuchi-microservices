@@ -12,6 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/config"
 	"go-takemikazuchi-api/routes"
 	"go-takemikazuchi-api/user"
@@ -26,8 +27,13 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	serviceImpl := user.NewService(repositoryImpl, dbConnection, validatorInstance, engTranslator, mailerService, identityProvider, viperConfig)
 	handler := user.NewHandler(serviceImpl, validatorInstance)
 	authenticationRoutes := ProvideAuthenticationRoutes(ginRouterGroup, handler)
+	categoryRepositoryImpl := category.NewRepository()
+	categoryServiceImpl := category.NewService(categoryRepositoryImpl, dbConnection, validatorInstance, engTranslator)
+	categoryHandler := category.NewHandler(categoryServiceImpl)
+	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler)
 	applicationRoutes := &routes.ApplicationRoutes{
-		AuthRoutes: authenticationRoutes,
+		AuthenticationRoutes: authenticationRoutes,
+		ProtectedRoutes:      protectedRoutes,
 	}
 	return applicationRoutes, nil
 }
@@ -36,6 +42,7 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 
 var routeSet = wire.NewSet(
 	ProvideAuthenticationRoutes,
+	ProvideProtectedRoutes,
 )
 
 func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user.Controller) *routes.AuthenticationRoutes {
@@ -44,4 +51,12 @@ func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController us
 	return authenticationRoutes
 }
 
+func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller) *routes.ProtectedRoutes {
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController)
+	protectedRoutes.Setup()
+	return protectedRoutes
+}
+
 var userSet = wire.NewSet(user.NewRepository, wire.Bind(new(user.Repository), new(*user.RepositoryImpl)), user.NewService, wire.Bind(new(user.Service), new(*user.ServiceImpl)), user.NewHandler, wire.Bind(new(user.Controller), new(*user.Handler)))
+
+var categorySet = wire.NewSet(category.NewRepository, wire.Bind(new(category.Repository), new(*category.RepositoryImpl)), category.NewService, wire.Bind(new(category.Service), new(*category.ServiceImpl)), category.NewHandler, wire.Bind(new(category.Controller), new(*category.Handler)))

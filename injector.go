@@ -5,10 +5,11 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	ut "github.com/go-playground/universal-translator"
+	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
+	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/config"
 	"go-takemikazuchi-api/routes"
 	"go-takemikazuchi-api/user"
@@ -17,12 +18,19 @@ import (
 
 var routeSet = wire.NewSet(
 	ProvideAuthenticationRoutes,
+	ProvideProtectedRoutes,
 )
 
 func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user.Controller) *routes.AuthenticationRoutes {
 	authenticationRoutes := routes.NewAuthenticationRoutes(routerGroup, userController)
 	authenticationRoutes.Setup()
 	return authenticationRoutes
+}
+
+func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller) *routes.ProtectedRoutes {
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController)
+	protectedRoutes.Setup()
+	return protectedRoutes
 }
 
 var userSet = wire.NewSet(
@@ -34,12 +42,21 @@ var userSet = wire.NewSet(
 	wire.Bind(new(user.Controller), new(*user.Handler)),
 )
 
+var categorySet = wire.NewSet(
+	category.NewRepository,
+	wire.Bind(new(category.Repository), new(*category.RepositoryImpl)),
+	category.NewService,
+	wire.Bind(new(category.Service), new(*category.ServiceImpl)),
+	category.NewHandler,
+	wire.Bind(new(category.Controller), new(*category.Handler)),
+)
+
 // wire.go
 func InitializeRoutes(
 	ginRouterGroup *gin.RouterGroup,
 	dbConnection *gorm.DB,
 	validatorInstance *validator.Validate,
-	engTranslator ut.Translator,
+	engTranslator universalTranslator.Translator,
 	viperConfig *viper.Viper,
 	mailerService *config.MailerService,
 	identityProvider *config.IdentityProvider,
@@ -48,6 +65,7 @@ func InitializeRoutes(
 		wire.Struct(new(routes.ApplicationRoutes), "*"),
 		routeSet,
 		userSet,
+		categorySet,
 	)
 	return nil, nil
 }
