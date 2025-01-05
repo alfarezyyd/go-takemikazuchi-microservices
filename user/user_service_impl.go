@@ -121,36 +121,24 @@ func (serviceImpl *ServiceImpl) HandleGoogleAuthentication() string {
 
 func (serviceImpl *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
 	if tokenState != "randomstate" {
-		return &exception.ClientError{
-			StatusCode: http.StatusBadRequest,
-			Message:    exception.ErrBadRequest,
-		}
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
 	}
 
 	googleProviderConfig := serviceImpl.identityProvider.GoogleProviderConfig
 
 	token, err := googleProviderConfig.Exchange(context.Background(), queryCode)
 	if err != nil {
-		return &exception.ClientError{
-			StatusCode: http.StatusBadRequest,
-			Message:    exception.ErrBadRequest,
-		}
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
 	}
 
 	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
-		return &exception.ClientError{
-			StatusCode: http.StatusBadRequest,
-			Message:    exception.ErrBadRequest,
-		}
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
 	}
 
 	_, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return &exception.ClientError{
-			StatusCode: http.StatusBadRequest,
-			Message:    exception.ErrBadRequest,
-		}
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
 	}
 	return nil
 }
