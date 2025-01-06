@@ -42,7 +42,7 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 	return nil
 }
 
-func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, updateJobDto *dto.UpdateJobDto) *exception.ClientError {
+func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, jobId string, updateJobDto *dto.UpdateJobDto) *exception.ClientError {
 	err := jobService.validatorInstance.Struct(updateJobDto)
 	exception.ParseValidationError(err, jobService.engTranslator)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -55,5 +55,17 @@ func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, 
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError))
+	return nil
+}
+
+func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, jobId string) *exception.ClientError {
+	err := jobService.validatorInstance.Var(jobId, "required|gte=1")
+	exception.ParseValidationError(err, jobService.engTranslator)
+	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var userModel model.User
+		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		jobService.jobRepository.Delete(jobId)
+		return nil
+	})
 	return nil
 }
