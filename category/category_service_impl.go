@@ -2,6 +2,7 @@ package category
 
 import (
 	"errors"
+	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/category/dto"
@@ -73,10 +74,12 @@ func (serviceImpl *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *us
 			Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		mapper.MapCategoryDtoIntoCategoryModel(&categoryModel, updateCategoryDto)
-		err = gormTransaction.Where("id = ?", categoryId).Updates(updateCategoryDto).Error
+		fmt.Println(updateCategoryDto)
+		err = gormTransaction.Model(&model.Category{}).Where("id = ?", categoryId).Updates(categoryModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return nil
 }
 

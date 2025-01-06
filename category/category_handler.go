@@ -36,8 +36,8 @@ func (categoryHandler *Handler) Update(ginContext *gin.Context) {
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	categoryId := ginContext.Param("id")
 	clientError := categoryHandler.categoryService.HandleUpdate(categoryId, userJwtClaim, &updateCategoryDto)
-	helper.CheckErrorOperation(clientError, clientError)
-	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Category has been updated", nil))
+	helper.CheckErrorOperation(clientError.GetRawError(), clientError)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Category has been updated", nil))
 }
 
 func (categoryHandler *Handler) Delete(ginContext *gin.Context) {

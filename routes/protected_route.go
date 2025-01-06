@@ -24,6 +24,6 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup, categoryController categor
 
 func (routerGroup *ProtectedRoutes) Setup() {
 	routerGroup.routerGroup.POST("", routerGroup.categoryController.Create)
-	routerGroup.routerGroup.PUT("", routerGroup.categoryController.Update)
-	routerGroup.routerGroup.DELETE("", routerGroup.categoryController.Delete)
+	routerGroup.routerGroup.PUT("/:id", routerGroup.categoryController.Update)
+	routerGroup.routerGroup.DELETE("/:id", routerGroup.categoryController.Delete)
 }
