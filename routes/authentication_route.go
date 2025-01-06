@@ -12,7 +12,7 @@ type AuthenticationRoutes struct {
 
 func NewAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user.Controller) *AuthenticationRoutes {
 	return &AuthenticationRoutes{
-		routerGroup:    routerGroup,
+		routerGroup:    routerGroup.Group("authentication"),
 		userController: userController,
 	}
 }

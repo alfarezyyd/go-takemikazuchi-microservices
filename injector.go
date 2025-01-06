@@ -23,7 +23,7 @@ var routeSet = wire.NewSet(
 )
 
 func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user.Controller) *routes.AuthenticationRoutes {
-	authenticationRoutes := routes.NewAuthenticationRoutes(routerGroup, userController)
+	authenticationRoutes := routes.NewAuthenticationRoutes(authenticationRouterGroup, userController)
 	authenticationRoutes.Setup()
 	return authenticationRoutes
 }
