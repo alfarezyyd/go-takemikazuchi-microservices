@@ -44,6 +44,6 @@ func (categoryHandler *Handler) Delete(ginContext *gin.Context) {
 	categoryId := ginContext.Param("id")
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	clientError := categoryHandler.categoryService.HandleDelete(categoryId, userJwtClaim)
-	helper.CheckErrorOperation(clientError, clientError)
+	helper.CheckErrorOperation(clientError.GetRawError(), clientError)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Category has been deleted", nil))
 }
