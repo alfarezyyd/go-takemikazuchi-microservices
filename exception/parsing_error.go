@@ -56,6 +56,6 @@ func ParseValidationError(validationError error, engTranslator ut.Translator) {
 			fmt.Println(fieldError)
 			parsedMap[fieldError.Field()] = fieldError.Translate(engTranslator)
 		}
-		panic(NewClientError(http.StatusBadRequest, ErrBadRequest, parsedMap))
+		panic(NewClientError(http.StatusBadRequest, ErrBadRequest, validationError, parsedMap))
 	}
 }

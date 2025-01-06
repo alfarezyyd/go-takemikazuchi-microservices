@@ -15,9 +15,9 @@ func MapUserDtoIntoUserModel[T *dto.CreateUserDto](userTransferObject T) *model.
 	var userModel model.User
 	err := mapstructure.Decode(userTransferObject, &userModel)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userModel.Password), 14)
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userModel.Password = string(hashedPassword)
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &userModel
 }
 

@@ -32,7 +32,7 @@ func AuthMiddleware(viperConfig *viper.Viper) gin.HandlerFunc {
 		// Set the token claims to the context
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userJwtClaim, err := mapper.MapJwtClaimIntoUserClaim(claims)
-			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 			ginContext.Set("claims", userJwtClaim)
 		} else {
 			ginContext.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})

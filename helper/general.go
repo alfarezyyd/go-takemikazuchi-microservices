@@ -15,7 +15,6 @@ func CheckErrorOperation(indicatedError error, clientError *exception.ClientErro
 	}
 	return false
 }
-
 func ParseNullableValue(value interface{}) interface{} {
 	v := reflect.ValueOf(value)
 

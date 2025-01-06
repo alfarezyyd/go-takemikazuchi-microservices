@@ -22,17 +22,17 @@ func NewHandler(categoryService Service) *Handler {
 func (categoryHandler *Handler) Create(ginContext *gin.Context) {
 	var categoryCreateDto dto.CreateCategoryDto
 	err := ginContext.ShouldBindBodyWithJSON(&categoryCreateDto)
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	clientError := categoryHandler.categoryService.HandleCreate(userJwtClaim, &categoryCreateDto)
-	helper.CheckErrorOperation(clientError, clientError)
+	helper.CheckErrorOperation(clientError.GetRawError(), clientError)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Category has been created", nil))
 }
 
 func (categoryHandler *Handler) Update(ginContext *gin.Context) {
 	var updateCategoryDto dto.UpdateCategoryDto
 	err := ginContext.ShouldBindBodyWithJSON(&updateCategoryDto)
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	categoryId := ginContext.Param("id")
 	clientError := categoryHandler.categoryService.HandleUpdate(categoryId, userJwtClaim, &updateCategoryDto)

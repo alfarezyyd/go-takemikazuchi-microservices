@@ -1,7 +1,7 @@
 package category
 
 import (
-	"fmt"
+	"errors"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/category/dto"
@@ -43,14 +43,13 @@ func (serviceImpl *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, 
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
+			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("only admin can create a category"))
 		}
 		mapper.MapCategoryDtoIntoCategoryModel(&categoryModel, categoryCreateDto)
 		err = gormTransaction.Create(&categoryModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return nil
 }
@@ -66,7 +65,7 @@ func (serviceImpl *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *us
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
+			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 		}
 		err = gormTransaction.
 			Where("categories.id = ?", categoryId).
@@ -90,7 +89,7 @@ func (serviceImpl *ServiceImpl) HandleDelete(categoryId string, userJwtClaim *us
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
+			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 		}
 		err = gormTransaction.
 			Where("categories.id = ?", categoryId).

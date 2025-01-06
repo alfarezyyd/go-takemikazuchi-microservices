@@ -38,7 +38,7 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 		jobService.jobRepository.Store(jobModel, gormTransaction)
 		return nil
 	})
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 	return nil
 }
 
@@ -54,7 +54,7 @@ func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, 
 		jobService.jobRepository.Update(jobModel, gormTransaction)
 		return nil
 	})
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 	return nil
 }
 

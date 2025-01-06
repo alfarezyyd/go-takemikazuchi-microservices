@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	ut "github.com/go-playground/universal-translator"
@@ -57,7 +58,7 @@ func (serviceImpl *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
 		err = gormTransaction.Create(userModel).Error
-		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -92,7 +93,7 @@ func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePas
 			"One Time Verification Token",
 			templateFile,
 			emailPayload)
-		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
 }
@@ -106,11 +107,11 @@ func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.Ve
 		err = gormTransaction.Where("email = ?", verifyOtpDto.Email).First(&userModel).Error
 		gormTransaction.Where("user_id = ?", userModel.ID).Order("expires_at desc").First(&oneTimePasswordToken)
 		if !(time.Now().Before(oneTimePasswordToken.ExpiresAt)) {
-			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "OTP has expired"))
+			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "OTP has expired", err))
 		}
 		fmt.Println(oneTimePasswordToken.HashedToken, verifyOtpDto.OneTimePasswordToken)
 		err := bcrypt.CompareHashAndPassword([]byte(oneTimePasswordToken.HashedToken), []byte(verifyOtpDto.OneTimePasswordToken))
-		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
 }
@@ -121,24 +122,24 @@ func (serviceImpl *ServiceImpl) HandleGoogleAuthentication() string {
 
 func (serviceImpl *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
 	if tokenState != "randomstate" {
-		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid token state"))
 	}
 
 	googleProviderConfig := serviceImpl.identityProvider.GoogleProviderConfig
 
 	token, err := googleProviderConfig.Exchange(context.Background(), queryCode)
 	if err != nil {
-		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
 
 	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
-		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
 
 	_, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest)
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
 	return nil
 }
@@ -152,14 +153,14 @@ func (serviceImpl *ServiceImpl) HandleLogin(loginUserDto *dto.LoginUserDto) stri
 		err = gormTransaction.Where("email = ?", loginUserDto.UserIdentifier).Or("phone_number = ?", loginUserDto.UserIdentifier).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = bcrypt.CompareHashAndPassword([]byte(userModel.Password), []byte(loginUserDto.Password))
-		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, "User credentials invalid"))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, "User credentials invalid", err))
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"email":        userModel.Email,
 			"phone_number": helper.ParseNullableValue(userModel.PhoneNumber),
 			"exp":          time.Now().Add(time.Hour * 72).Unix(),
 		})
 		tokenString, err = tokenInstance.SignedString([]byte(serviceImpl.viperConfig.GetString("JWT_SECRET")))
-		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		return nil
 	})
 	return tokenString
