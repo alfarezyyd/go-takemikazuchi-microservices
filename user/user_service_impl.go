@@ -109,7 +109,6 @@ func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.Ve
 		if !(time.Now().Before(oneTimePasswordToken.ExpiresAt)) {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "OTP has expired", err))
 		}
-		fmt.Println(oneTimePasswordToken.HashedToken, verifyOtpDto.OneTimePasswordToken)
 		err := bcrypt.CompareHashAndPassword([]byte(oneTimePasswordToken.HashedToken), []byte(verifyOtpDto.OneTimePasswordToken))
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
