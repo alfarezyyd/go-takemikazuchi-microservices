@@ -14,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/config"
+	"go-takemikazuchi-api/job"
 	"go-takemikazuchi-api/routes"
 	"go-takemikazuchi-api/user"
 	"gorm.io/gorm"
@@ -30,7 +31,7 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	categoryRepositoryImpl := category.NewRepository()
 	categoryServiceImpl := category.NewService(categoryRepositoryImpl, dbConnection, validatorInstance, engTranslator)
 	categoryHandler := category.NewHandler(categoryServiceImpl)
-	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler)
+	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
 		AuthenticationRoutes: authenticationRoutes,
 		ProtectedRoutes:      protectedRoutes,
@@ -51,8 +52,8 @@ func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController us
 	return authenticationRoutes
 }
 
-func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController)
+func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller, viperConfig *viper.Viper) *routes.ProtectedRoutes {
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, viperConfig)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -60,3 +61,5 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController cat
 var userSet = wire.NewSet(user.NewRepository, wire.Bind(new(user.Repository), new(*user.RepositoryImpl)), user.NewService, wire.Bind(new(user.Service), new(*user.ServiceImpl)), user.NewHandler, wire.Bind(new(user.Controller), new(*user.Handler)))
 
 var categorySet = wire.NewSet(category.NewRepository, wire.Bind(new(category.Repository), new(*category.RepositoryImpl)), category.NewService, wire.Bind(new(category.Service), new(*category.ServiceImpl)), category.NewHandler, wire.Bind(new(category.Controller), new(*category.Handler)))
+
+var jobSet = wire.NewSet(job.NewRepository, wire.Bind(new(job.Repository), new(*job.RepositoryImpl)), job.NewService, wire.Bind(new(job.Service), new(*job.ServiceImpl)), job.NewHandler, wire.Bind(new(job.Controller), new(*job.Handler)))

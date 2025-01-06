@@ -23,13 +23,13 @@ var routeSet = wire.NewSet(
 )
 
 func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user.Controller) *routes.AuthenticationRoutes {
-	authenticationRoutes := routes.NewAuthenticationRoutes(authenticationRouterGroup, userController)
+	authenticationRoutes := routes.NewAuthenticationRoutes(routerGroup, userController)
 	authenticationRoutes.Setup()
 	return authenticationRoutes
 }
 
-func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController)
+func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller, viperConfig *viper.Viper) *routes.ProtectedRoutes {
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, viperConfig)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
