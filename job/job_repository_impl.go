@@ -17,3 +17,8 @@ func (jobRepository *RepositoryImpl) Store(jobModel model.Job, gormTransaction *
 	err := gormTransaction.Create(&jobModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
+
+func (jobRepository *RepositoryImpl) Update(jobModel model.Job, gormTransaction *gorm.DB) {
+	err := gormTransaction.Updates(&jobModel).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}

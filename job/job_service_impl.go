@@ -26,16 +26,32 @@ func NewService() *ServiceImpl {
 	return &ServiceImpl{}
 }
 
-func (serviceImpl *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *dto.CreateJobDto) *exception.ClientError {
-	err := serviceImpl.validatorInstance.Struct(createJobDto)
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *dto.CreateJobDto) *exception.ClientError {
+	err := jobService.validatorInstance.Struct(createJobDto)
+	exception.ParseValidationError(err, jobService.engTranslator)
+	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var jobModel model.Job
 		var userModel model.User
-		serviceImpl.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
 		mapper.MapJobDtoIntoJobModel(createJobDto, &jobModel)
 		jobModel.UserId = userModel.ID
-		serviceImpl.jobRepository.Store(jobModel, gormTransaction)
+		jobService.jobRepository.Store(jobModel, gormTransaction)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError))
+	return nil
+}
+
+func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, updateJobDto *dto.UpdateJobDto) *exception.ClientError {
+	err := jobService.validatorInstance.Struct(updateJobDto)
+	exception.ParseValidationError(err, jobService.engTranslator)
+	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var jobModel model.Job
+		var userModel model.User
+		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		mapper.MapJobDtoIntoJobModel(updateJobDto, &jobModel)
+		jobModel.UserId = userModel.ID
+		jobService.jobRepository.Update(jobModel, gormTransaction)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError))
