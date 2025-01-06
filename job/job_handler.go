@@ -22,7 +22,7 @@ func (jobHandler *Handler) Create(ginContext *gin.Context) {
 	err := ginContext.ShouldBindBodyWithJSON(&createJobDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
-	operationResult := jobHandler.jobService.HandleCreate(userJwtClaim, createJobDto)
+	operationResult := jobHandler.jobService.HandleCreate(userJwtClaim, &createJobDto)
 	helper.CheckErrorOperation(operationResult, operationResult)
 	ginContext.JSON(http.StatusCreated, operationResult)
 }
@@ -33,7 +33,7 @@ func (jobHandler *Handler) Update(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	jobId := ginContext.Param("id")
-	operationResult := jobHandler.jobService.HandleUpdate(userJwtClaim, jobId, updateJobDto)
+	operationResult := jobHandler.jobService.HandleUpdate(userJwtClaim, jobId, &updateJobDto)
 	helper.CheckErrorOperation(operationResult, operationResult)
 	ginContext.JSON(http.StatusOK, operationResult)
 }
