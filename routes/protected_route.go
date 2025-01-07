@@ -22,7 +22,7 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 ) *ProtectedRoutes {
 	routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	return &ProtectedRoutes{
-		routerGroup:        routerGroup.Group("categories"),
+		routerGroup:        routerGroup,
 		categoryController: categoryController,
 		jobController:      jobController,
 		viperConfig:        viperConfig,
@@ -30,9 +30,11 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 }
 
 func (routerGroup *ProtectedRoutes) Setup() {
-	routerGroup.routerGroup.POST("", routerGroup.categoryController.Create)
-	routerGroup.routerGroup.PUT("/:id", routerGroup.categoryController.Update)
-	routerGroup.routerGroup.DELETE("/:id", routerGroup.categoryController.Delete)
+	categoryRouterGroup := routerGroup.routerGroup.Group("categories")
+	categoryRouterGroup.POST("", routerGroup.categoryController.Create)
+	categoryRouterGroup.PUT("/:id", routerGroup.categoryController.Update)
+	categoryRouterGroup.DELETE("/:id", routerGroup.categoryController.Delete)
 
-	routerGroup.routerGroup.POST("", routerGroup.jobController.Create)
+	jobRouterGroup := routerGroup.routerGroup.Group("jobs")
+	jobRouterGroup.POST("", routerGroup.jobController.Create)
 }

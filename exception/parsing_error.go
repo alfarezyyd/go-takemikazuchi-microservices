@@ -2,6 +2,7 @@ package exception
 
 import (
 	"errors"
+	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
@@ -9,6 +10,9 @@ import (
 )
 
 func ParseGormError(err error) *ClientError {
+	if err != nil {
+		fmt.Println(err)
+	}
 	switch {
 	case errors.Is(err, gorm.ErrRecordNotFound):
 		return &ClientError{
@@ -40,10 +44,12 @@ func ParseGormError(err error) *ClientError {
 			StatusCode: http.StatusBadRequest,
 		}
 	default:
-		return &ClientError{
-			Message:    "Database error occurred",
-			StatusCode: http.StatusInternalServerError,
+		var clientError *ClientError
+		isClientError := errors.As(err, &clientError)
+		if isClientError {
+			return NewClientError(clientError.StatusCode, clientError.Message, clientError.rawError)
 		}
+		return NewClientError(http.StatusInternalServerError, "Database error occurred", errors.New("database error occurred"))
 	}
 }
 
