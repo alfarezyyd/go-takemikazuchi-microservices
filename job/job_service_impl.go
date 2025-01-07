@@ -2,6 +2,7 @@ package job
 
 import (
 	"errors"
+	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/category"
@@ -25,11 +26,25 @@ type ServiceImpl struct {
 	engTranslator      ut.Translator
 }
 
-func NewService() *ServiceImpl {
-	return &ServiceImpl{}
+func NewService(validatorInstance *validator.Validate,
+	jobRepository Repository,
+	userRepository userFeature.Repository,
+	categoryRepository category.Repository,
+	dbConnection *gorm.DB,
+	engTranslator ut.Translator) *ServiceImpl {
+	return &ServiceImpl{
+		validatorInstance:  validatorInstance,
+		jobRepository:      jobRepository,
+		userRepository:     userRepository,
+		categoryRepository: categoryRepository,
+		dbConnection:       dbConnection,
+		engTranslator:      engTranslator,
+	}
 }
 
 func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *dto.CreateJobDto) *exception.ClientError {
+	fmt.Println("adwadwa")
+	fmt.Println(jobService.dbConnection)
 	err := jobService.validatorInstance.Struct(createJobDto)
 	exception.ParseValidationError(err, jobService.engTranslator)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {

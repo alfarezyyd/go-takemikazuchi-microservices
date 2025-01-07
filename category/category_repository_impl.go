@@ -16,6 +16,6 @@ func (repositoryImpl *RepositoryImpl) IsCategoryExists(categoryId uint64, gormTr
 	var isCategoryExists bool
 	gormTransaction.Model(&model.Category{}).
 		Select("COUNT(*) > 0").
-		Where("id = ?", categoryId).First(isCategoryExists)
+		Where("id = ?", categoryId).First(&isCategoryExists)
 	return isCategoryExists
 }

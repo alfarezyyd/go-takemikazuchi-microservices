@@ -13,8 +13,10 @@ type Handler struct {
 	jobService Service
 }
 
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(jobService Service) *Handler {
+	return &Handler{
+		jobService: jobService,
+	}
 }
 
 func (jobHandler *Handler) Create(ginContext *gin.Context) {
@@ -23,8 +25,8 @@ func (jobHandler *Handler) Create(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	operationResult := jobHandler.jobService.HandleCreate(userJwtClaim, &createJobDto)
-	helper.CheckErrorOperation(operationResult, operationResult)
-	ginContext.JSON(http.StatusCreated, operationResult)
+	helper.CheckErrorOperation(operationResult.GetRawError(), operationResult)
+	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
 }
 
 func (jobHandler *Handler) Update(ginContext *gin.Context) {

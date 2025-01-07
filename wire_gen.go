@@ -31,7 +31,9 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	categoryRepositoryImpl := category.NewRepository()
 	categoryServiceImpl := category.NewService(categoryRepositoryImpl, dbConnection, validatorInstance, engTranslator)
 	categoryHandler := category.NewHandler(categoryServiceImpl)
-	jobHandler := job.NewHandler()
+	jobRepositoryImpl := job.NewRepository()
+	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, dbConnection, engTranslator)
+	jobHandler := job.NewHandler(jobServiceImpl)
 	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
 		AuthenticationRoutes: authenticationRoutes,
