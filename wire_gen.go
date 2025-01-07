@@ -31,7 +31,8 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	categoryRepositoryImpl := category.NewRepository()
 	categoryServiceImpl := category.NewService(categoryRepositoryImpl, dbConnection, validatorInstance, engTranslator)
 	categoryHandler := category.NewHandler(categoryServiceImpl)
-	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, viperConfig)
+	jobHandler := job.NewHandler()
+	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
 		AuthenticationRoutes: authenticationRoutes,
 		ProtectedRoutes:      protectedRoutes,
@@ -52,8 +53,11 @@ func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController us
 	return authenticationRoutes
 }
 
-func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller, viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, viperConfig)
+func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
+	categoryController category.Controller,
+	jobController job.Controller,
+	viperConfig *viper.Viper) *routes.ProtectedRoutes {
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }

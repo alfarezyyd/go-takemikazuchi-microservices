@@ -28,8 +28,11 @@ func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController us
 	return authenticationRoutes
 }
 
-func ProvideProtectedRoutes(routerGroup *gin.RouterGroup, categoryController category.Controller, viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, viperConfig)
+func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
+	categoryController category.Controller,
+	jobController job.Controller,
+	viperConfig *viper.Viper) *routes.ProtectedRoutes {
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -75,6 +78,7 @@ func InitializeRoutes(
 		wire.Struct(new(routes.ApplicationRoutes), "*"),
 		routeSet,
 		userSet,
+		jobSet,
 		categorySet,
 	)
 	return nil, nil
