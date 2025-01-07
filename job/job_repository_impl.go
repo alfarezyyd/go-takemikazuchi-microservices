@@ -23,7 +23,7 @@ func (jobRepository *RepositoryImpl) Update(jobModel model.Job, gormTransaction 
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (jobRepository *RepositoryImpl) Delete(jobId string, userId string, gormTransaction *gorm.DB) {
+func (jobRepository *RepositoryImpl) Delete(jobId string, userId uint64, gormTransaction *gorm.DB) {
 	err := gormTransaction.Joins("Users").Where("id = ? AND users.id = ?", jobId, userId).Delete(&model.Job{}).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

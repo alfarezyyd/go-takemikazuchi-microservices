@@ -1,8 +1,10 @@
 package job
 
 import (
+	"errors"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/exception"
 	"go-takemikazuchi-api/helper"
 	"go-takemikazuchi-api/job/dto"
@@ -15,11 +17,12 @@ import (
 )
 
 type ServiceImpl struct {
-	validatorInstance *validator.Validate
-	jobRepository     Repository
-	userRepository    userFeature.Repository
-	dbConnection      *gorm.DB
-	engTranslator     ut.Translator
+	validatorInstance  *validator.Validate
+	jobRepository      Repository
+	userRepository     userFeature.Repository
+	categoryRepository category.Repository
+	dbConnection       *gorm.DB
+	engTranslator      ut.Translator
 }
 
 func NewService() *ServiceImpl {
@@ -33,6 +36,10 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 		var jobModel model.Job
 		var userModel model.User
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		isCategoryExists := jobService.categoryRepository.IsCategoryExists(createJobDto.CategoryId, gormTransaction)
+		if !isCategoryExists {
+			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
+		}
 		mapper.MapJobDtoIntoJobModel(createJobDto, &jobModel)
 		jobModel.UserId = userModel.ID
 		jobService.jobRepository.Store(jobModel, gormTransaction)
@@ -64,7 +71,7 @@ func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, 
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
-		jobService.jobRepository.Delete(jobId)
+		jobService.jobRepository.Delete(jobId, userModel.ID, gormTransaction)
 		return nil
 	})
 	return nil
