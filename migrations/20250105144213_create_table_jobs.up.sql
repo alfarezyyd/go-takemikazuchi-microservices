@@ -5,7 +5,6 @@ CREATE TABLE jobs
     category_id BIGINT UNSIGNED NOT NULL,
     title       VARCHAR(255)    NOT NULL,
     description TEXT            NOT NULL,
-    location    POINT,
     latitude    DECIMAL(9, 6),
     longitude   DECIMAL(9, 6),
     address     TEXT,
