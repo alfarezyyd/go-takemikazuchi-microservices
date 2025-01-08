@@ -6,13 +6,15 @@ import (
 	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/job"
 	"go-takemikazuchi-api/middleware"
+	"go-takemikazuchi-api/transaction"
 )
 
 type ProtectedRoutes struct {
-	routerGroup        *gin.RouterGroup
-	categoryController category.Controller
-	jobController      job.Controller
-	viperConfig        *viper.Viper
+	routerGroup           *gin.RouterGroup
+	categoryController    category.Controller
+	jobController         job.Controller
+	transactionController transaction.Controller
+	viperConfig           *viper.Viper
 }
 
 func NewProtectedRoutes(routerGroup *gin.RouterGroup,
@@ -37,4 +39,5 @@ func (routerGroup *ProtectedRoutes) Setup() {
 
 	jobRouterGroup := routerGroup.routerGroup.Group("jobs")
 	jobRouterGroup.POST("", routerGroup.jobController.Create)
+
 }
