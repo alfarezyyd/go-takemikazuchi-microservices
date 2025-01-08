@@ -1,6 +1,6 @@
 CREATE TABLE transactions
 (
-    id             BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,                      -- ID transaksi unik
+    id             VARCHAR(255) PRIMARY KEY,                                        -- ID transaksi unik
     job_id         BIGINT UNSIGNED         NOT NULL,                                -- ID pekerjaan terkait
     payer_id       BIGINT UNSIGNED         NOT NULL,                                -- ID pemberi kerja (pembayar)
     payee_id       BIGINT UNSIGNED         NOT NULL,                                -- ID pekerja (penerima)

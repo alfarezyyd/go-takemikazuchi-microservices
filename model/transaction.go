@@ -1,9 +1,13 @@
 package model
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+	"time"
+)
 
 type Transaction struct {
-	ID            uint64     `gorm:"column:id;primary_key;autoIncrement"`
+	ID            string     `gorm:"column:id;primary_key"`
 	JobID         uint64     `gorm:"column:job_id"`
 	PayerID       uint64     `gorm:"column:payer_id"`
 	PayeeID       uint64     `gorm:"column:payee_id"`
@@ -16,4 +20,9 @@ type Transaction struct {
 	Job           *Job       `gorm:"foreignKey:job_id;references:job_id"`
 	PayerUser     *User      `gorm:"foreignKey:payer_id;references:id"`
 	PayeeUser     *User      `gorm:"foreignKey:payee_id;references:id"`
+}
+
+func (transactionModel *Transaction) BeforeCreate(gormTransaction *gorm.DB) error {
+	transactionModel.ID = uuid.New().String()
+	return nil
 }
