@@ -1,3 +1,7 @@
 package job_application
 
-type Service interface{}
+import "go-takemikazuchi-api/job_application/dto"
+
+type Service interface {
+	HandleApply(applyJobApplicationDto *dto.ApplyJobApplicationDto)
+}
