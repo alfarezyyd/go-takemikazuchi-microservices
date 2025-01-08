@@ -5,16 +5,18 @@ import (
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/job"
+	"go-takemikazuchi-api/job_application"
 	"go-takemikazuchi-api/middleware"
 	"go-takemikazuchi-api/transaction"
 )
 
 type ProtectedRoutes struct {
-	routerGroup           *gin.RouterGroup
-	categoryController    category.Controller
-	jobController         job.Controller
-	transactionController transaction.Controller
-	viperConfig           *viper.Viper
+	routerGroup              *gin.RouterGroup
+	categoryController       category.Controller
+	jobController            job.Controller
+	transactionController    transaction.Controller
+	jobApplicationController job_application.Controller
+	viperConfig              *viper.Viper
 }
 
 func NewProtectedRoutes(routerGroup *gin.RouterGroup,
@@ -31,13 +33,15 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 	}
 }
 
-func (routerGroup *ProtectedRoutes) Setup() {
-	categoryRouterGroup := routerGroup.routerGroup.Group("categories")
-	categoryRouterGroup.POST("", routerGroup.categoryController.Create)
-	categoryRouterGroup.PUT("/:id", routerGroup.categoryController.Update)
-	categoryRouterGroup.DELETE("/:id", routerGroup.categoryController.Delete)
+func (protectedRoutes *ProtectedRoutes) Setup() {
+	categoryRouterGroup := protectedRoutes.routerGroup.Group("categories")
+	categoryRouterGroup.POST("", protectedRoutes.categoryController.Create)
+	categoryRouterGroup.PUT("/:id", protectedRoutes.categoryController.Update)
+	categoryRouterGroup.DELETE("/:id", protectedRoutes.categoryController.Delete)
 
-	jobRouterGroup := routerGroup.routerGroup.Group("jobs")
-	jobRouterGroup.POST("", routerGroup.jobController.Create)
+	jobRouterGroup := protectedRoutes.routerGroup.Group("jobs")
+	jobRouterGroup.POST("", protectedRoutes.jobController.Create)
 
+	jobApplicationRouterGroup := protectedRoutes.routerGroup.Group("job-applications")
+	jobApplicationRouterGroup.POST("/apply", protectedRoutes.jobApplicationController.Apply)
 }

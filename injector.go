@@ -12,6 +12,7 @@ import (
 	"go-takemikazuchi-api/category"
 	"go-takemikazuchi-api/config"
 	"go-takemikazuchi-api/job"
+	"go-takemikazuchi-api/job_application"
 	"go-takemikazuchi-api/routes"
 	"go-takemikazuchi-api/user"
 	"gorm.io/gorm"
@@ -64,6 +65,15 @@ var jobSet = wire.NewSet(
 	wire.Bind(new(job.Controller), new(*job.Handler)),
 )
 
+var jobApplicationSet = wire.NewSet(
+	job_application.NewRepository,
+	wire.Bind(new(job_application.Repository), new(*job_application.RepositoryImpl)),
+	job_application.NewService,
+	wire.Bind(new(job_application.Service), new(*job_application.ServiceImpl)),
+	job_application.NewHandler,
+	wire.Bind(new(job_application.Controller), new(*job_application.Handler)),
+)
+
 // wire.go
 func InitializeRoutes(
 	ginRouterGroup *gin.RouterGroup,
@@ -79,6 +89,7 @@ func InitializeRoutes(
 		routeSet,
 		userSet,
 		jobSet,
+		jobApplicationSet,
 		categorySet,
 	)
 	return nil, nil
