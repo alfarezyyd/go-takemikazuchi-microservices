@@ -1,0 +1,21 @@
+package storage
+
+import (
+	"github.com/spf13/viper"
+	"mime/multipart"
+)
+
+// FileStorage defines the methods for file storage operations.
+type FileStorage interface {
+	UploadFile(file multipart.File, fileName string) (string, error) // Upload file and return URL
+	DeleteFile(fileName string) error                                // Delete file
+	GetFileURL(fileName string) (string, error)                      // Get file URL
+}
+
+func ProvideFileStorage(viperConfig *viper.Viper) FileStorage {
+	storageType := viperConfig.GetString("STORAGE_BACKEND")
+	switch storageType {
+	default:
+		return &LocalStorage{}
+	}
+}
