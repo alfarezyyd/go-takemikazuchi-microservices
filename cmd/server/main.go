@@ -46,7 +46,8 @@ func main() {
 		engTranslator,
 		viperConfig,
 		mailerService,
-		identityProvider)
+		identityProvider,
+	)
 	if initRoutesError != nil {
 		panic(initRoutesError)
 	}
