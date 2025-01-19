@@ -6,7 +6,7 @@ GO := go
 RUN_CMD := $(GO) run cmd/server/main.go
 
 # Command utama
-.PHONY: run build clean test fmt vet lint
+.PHONY: run build clean test fmt vet lint wire gen inject
 
 # Menjalankan aplikasi
 default: run
@@ -40,3 +40,7 @@ lint:
 
 # Menjalankan semua check sekaligus
 check: fmt vet lint test
+
+# Build injection
+inject:
+	wire gen ./cmd/injection/injector.go
