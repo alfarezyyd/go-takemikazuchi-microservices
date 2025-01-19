@@ -16,7 +16,7 @@ run:
 
 # Build aplikasi
 build:
-	$(GO) build -o bin/app cmd/server/.
+	$(GO) build -o bin/app cmd/server/main.go
 
 # Membersihkan file hasil build
 clean:
