@@ -10,11 +10,13 @@ import (
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/configs"
-	category2 "go-takemikazuchi-api/internal/category"
-	job2 "go-takemikazuchi-api/internal/job"
-	job_application2 "go-takemikazuchi-api/internal/job_application"
-	routes2 "go-takemikazuchi-api/internal/routes"
-	user2 "go-takemikazuchi-api/internal/user"
+	categoryFeature "go-takemikazuchi-api/internal/category"
+	jobFeature "go-takemikazuchi-api/internal/job"
+	jobApplicationFeature "go-takemikazuchi-api/internal/job_application"
+	jobResourceFeature "go-takemikazuchi-api/internal/job_resource"
+	"go-takemikazuchi-api/internal/routes"
+	"go-takemikazuchi-api/internal/storage"
+	userFeature "go-takemikazuchi-api/internal/user"
 	"gorm.io/gorm"
 )
 
@@ -23,55 +25,60 @@ var routeSet = wire.NewSet(
 	ProvideProtectedRoutes,
 )
 
-func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController user2.Controller) *routes2.AuthenticationRoutes {
-	authenticationRoutes := routes2.NewAuthenticationRoutes(routerGroup, userController)
+func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController userFeature.Controller) *routes.AuthenticationRoutes {
+	authenticationRoutes := routes.NewAuthenticationRoutes(routerGroup, userController)
 	authenticationRoutes.Setup()
 	return authenticationRoutes
 }
 
 func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
-	categoryController category2.Controller,
-	jobController job2.Controller,
-	viperConfig *viper.Viper) *routes2.ProtectedRoutes {
-	protectedRoutes := routes2.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig)
+	categoryController categoryFeature.Controller,
+	jobController jobFeature.Controller,
+	viperConfig *viper.Viper) *routes.ProtectedRoutes {
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
 
 var userSet = wire.NewSet(
-	user2.NewRepository,
-	wire.Bind(new(user2.Repository), new(*user2.RepositoryImpl)),
-	user2.NewService,
-	wire.Bind(new(user2.Service), new(*user2.ServiceImpl)),
-	user2.NewHandler,
-	wire.Bind(new(user2.Controller), new(*user2.Handler)),
+	userFeature.NewRepository,
+	wire.Bind(new(userFeature.Repository), new(*userFeature.RepositoryImpl)),
+	userFeature.NewService,
+	wire.Bind(new(userFeature.Service), new(*userFeature.ServiceImpl)),
+	userFeature.NewHandler,
+	wire.Bind(new(userFeature.Controller), new(*userFeature.Handler)),
 )
 
 var categorySet = wire.NewSet(
-	category2.NewRepository,
-	wire.Bind(new(category2.Repository), new(*category2.RepositoryImpl)),
-	category2.NewService,
-	wire.Bind(new(category2.Service), new(*category2.ServiceImpl)),
-	category2.NewHandler,
-	wire.Bind(new(category2.Controller), new(*category2.Handler)),
+	categoryFeature.NewRepository,
+	wire.Bind(new(categoryFeature.Repository), new(*categoryFeature.RepositoryImpl)),
+	categoryFeature.NewService,
+	wire.Bind(new(categoryFeature.Service), new(*categoryFeature.ServiceImpl)),
+	categoryFeature.NewHandler,
+	wire.Bind(new(categoryFeature.Controller), new(*categoryFeature.Handler)),
 )
 
 var jobSet = wire.NewSet(
-	job2.NewRepository,
-	wire.Bind(new(job2.Repository), new(*job2.RepositoryImpl)),
-	job2.NewService,
-	wire.Bind(new(job2.Service), new(*job2.ServiceImpl)),
-	job2.NewHandler,
-	wire.Bind(new(job2.Controller), new(*job2.Handler)),
+	jobFeature.NewRepository,
+	wire.Bind(new(jobFeature.Repository), new(*jobFeature.RepositoryImpl)),
+	jobFeature.NewService,
+	wire.Bind(new(jobFeature.Service), new(*jobFeature.ServiceImpl)),
+	jobFeature.NewHandler,
+	wire.Bind(new(jobFeature.Controller), new(*jobFeature.Handler)),
 )
 
 var jobApplicationSet = wire.NewSet(
-	job_application2.NewRepository,
-	wire.Bind(new(job_application2.Repository), new(*job_application2.RepositoryImpl)),
-	job_application2.NewService,
-	wire.Bind(new(job_application2.Service), new(*job_application2.ServiceImpl)),
-	job_application2.NewHandler,
-	wire.Bind(new(job_application2.Controller), new(*job_application2.Handler)),
+	jobApplicationFeature.NewRepository,
+	wire.Bind(new(jobApplicationFeature.Repository), new(*jobApplicationFeature.RepositoryImpl)),
+	jobApplicationFeature.NewService,
+	wire.Bind(new(jobApplicationFeature.Service), new(*jobApplicationFeature.ServiceImpl)),
+	jobApplicationFeature.NewHandler,
+	wire.Bind(new(jobApplicationFeature.Controller), new(*jobApplicationFeature.Handler)),
+)
+
+var jobResourceSet = wire.NewSet(
+	jobResourceFeature.NewRepository,
+	wire.Bind(new(jobResourceFeature.Repository), new(*jobResourceFeature.RepositoryImpl)),
 )
 
 // wire.go
@@ -83,13 +90,15 @@ func InitializeRoutes(
 	viperConfig *viper.Viper,
 	mailerService *configs.MailerService,
 	identityProvider *configs.IdentityProvider,
-) (*routes2.ApplicationRoutes, error) {
+) (*routes.ApplicationRoutes, error) {
 	wire.Build(
-		wire.Struct(new(routes2.ApplicationRoutes), "*"),
+		wire.Struct(new(routes.ApplicationRoutes), "*"),
 		routeSet,
 		userSet,
 		jobSet,
 		categorySet,
+		jobResourceSet,
+		storage.ProvideFileStorage, // Fungsi untuk memilih implementasi yang sesuai
 	)
 	return nil, nil
 }

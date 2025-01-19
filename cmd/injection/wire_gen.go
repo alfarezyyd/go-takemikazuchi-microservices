@@ -16,7 +16,9 @@ import (
 	"go-takemikazuchi-api/internal/category"
 	"go-takemikazuchi-api/internal/job"
 	"go-takemikazuchi-api/internal/job_application"
+	"go-takemikazuchi-api/internal/job_resource"
 	"go-takemikazuchi-api/internal/routes"
+	"go-takemikazuchi-api/internal/storage"
 	"go-takemikazuchi-api/internal/user"
 	"gorm.io/gorm"
 )
@@ -33,7 +35,9 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	categoryServiceImpl := category.NewService(categoryRepositoryImpl, dbConnection, validatorInstance, engTranslator)
 	categoryHandler := category.NewHandler(categoryServiceImpl)
 	jobRepositoryImpl := job.NewRepository()
-	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, dbConnection, engTranslator)
+	job_resourceRepositoryImpl := job_resource.NewRepository()
+	fileStorage := storage.ProvideFileStorage(viperConfig)
+	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage)
 	jobHandler := job.NewHandler(jobServiceImpl)
 	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
@@ -72,3 +76,5 @@ var categorySet = wire.NewSet(category.NewRepository, wire.Bind(new(category.Rep
 var jobSet = wire.NewSet(job.NewRepository, wire.Bind(new(job.Repository), new(*job.RepositoryImpl)), job.NewService, wire.Bind(new(job.Service), new(*job.ServiceImpl)), job.NewHandler, wire.Bind(new(job.Controller), new(*job.Handler)))
 
 var jobApplicationSet = wire.NewSet(job_application.NewRepository, wire.Bind(new(job_application.Repository), new(*job_application.RepositoryImpl)), job_application.NewService, wire.Bind(new(job_application.Service), new(*job_application.ServiceImpl)), job_application.NewHandler, wire.Bind(new(job_application.Controller), new(*job_application.Handler)))
+
+var jobResourceSet = wire.NewSet(job_resource.NewRepository, wire.Bind(new(job_resource.Repository), new(*job_resource.RepositoryImpl)))
