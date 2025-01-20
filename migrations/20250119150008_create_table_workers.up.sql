@@ -3,6 +3,7 @@ CREATE TABLE workers
     id                     BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT NOT NULL,
     user_id                BIGINT UNSIGNED UNIQUE                     NOT NULL,
     rating                 FLOAT        DEFAULT 0,
+    revenue                INT UNSIGNED DEFAULT 0,
     completed_jobs         INT UNSIGNED DEFAULT 0,
     location               VARCHAR(255),
     availability           BOOLEAN      DEFAULT TRUE,
