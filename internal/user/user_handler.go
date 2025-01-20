@@ -3,9 +3,9 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	dto2 "go-takemikazuchi-api/internal/user/dto"
-	exception2 "go-takemikazuchi-api/pkg/exception"
-	helper2 "go-takemikazuchi-api/pkg/helper"
+	userDto "go-takemikazuchi-api/internal/user/dto"
+	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-api/pkg/helper"
 	"net/http"
 )
 
@@ -22,35 +22,35 @@ func NewHandler(userService Service, validatorInstance *validator.Validate) *Han
 }
 
 func (userHandler *Handler) Register(ginContext *gin.Context) {
-	var createUserDto dto2.CreateUserDto
+	var createUserDto userDto.CreateUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&createUserDto)
-	helper2.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.HandleRegister(&createUserDto)
-	ginContext.JSON(http.StatusOK, helper2.WriteSuccess("User created successfully", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
 }
 
 func (userHandler *Handler) GenerateOneTimePassword(ginContext *gin.Context) {
-	var generateOneTimePassDto dto2.GenerateOtpDto
+	var generateOneTimePassDto userDto.GenerateOtpDto
 	err := ginContext.ShouldBindBodyWithJSON(&generateOneTimePassDto)
-	helper2.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.HandleGenerateOneTimePassword(&generateOneTimePassDto)
-	ginContext.JSON(http.StatusOK, helper2.WriteSuccess("OTP generated successfully", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("OTP generated successfully", nil))
 }
 
 func (userHandler *Handler) VerifyOneTimePassword(ginContext *gin.Context) {
-	var VerifyOneTimePassDto dto2.VerifyOtpDto
+	var VerifyOneTimePassDto userDto.VerifyOtpDto
 	err := ginContext.ShouldBindBodyWithJSON(&VerifyOneTimePassDto)
-	helper2.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.HandleVerifyOneTimePassword(&VerifyOneTimePassDto)
-	ginContext.JSON(http.StatusOK, helper2.WriteSuccess("OTP verified successfully", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("OTP verified successfully", nil))
 }
 
 func (userHandler *Handler) Login(ginContext *gin.Context) {
-	var loginUserDto dto2.LoginUserDto
+	var loginUserDto userDto.LoginUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
-	helper2.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	generatedToken := userHandler.userService.HandleLogin(&loginUserDto)
-	ginContext.JSON(http.StatusOK, helper2.WriteSuccess("User logged successfully", gin.H{
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User logged successfully", gin.H{
 		"token": generatedToken,
 	}))
 }
@@ -65,5 +65,5 @@ func (userHandler *Handler) GoogleProviderCallback(ginContext *gin.Context) {
 	tokenState := ginContext.Query("state")
 	queryCode := ginContext.Query("code")
 	err := userHandler.userService.HandleGoogleCallback(tokenState, queryCode)
-	helper2.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 }
