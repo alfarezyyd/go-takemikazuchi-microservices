@@ -1,0 +1,20 @@
+package mapper
+
+import (
+	"errors"
+	"github.com/go-viper/mapstructure/v2"
+	"go-takemikazuchi-api/internal/model"
+	"go-takemikazuchi-api/internal/worker/dto"
+	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-api/pkg/helper"
+	"net/http"
+)
+
+func MapCreateWorkerDtoIntoWorkerModel(workerModel *model.Worker, createWorkerDto *dto.CreateWorkerDto) {
+	err := mapstructure.Decode(workerModel, createWorkerDto)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
+}
+
+func MapCreateWorkerWalletDtoIntoWorkerWalletModel(workerWalletModel *model.WorkerWallet, createWorkerWalletDto *dto.CreateWorkerWalletDto) {
+	mapstructure.Decode()
+}
