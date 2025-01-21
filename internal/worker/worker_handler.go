@@ -3,6 +3,7 @@ package worker
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	userDto "go-takemikazuchi-api/internal/user/dto"
 	"go-takemikazuchi-api/internal/worker/dto"
 	workerResourceDto "go-takemikazuchi-api/internal/worker_resource/dto"
 	"go-takemikazuchi-api/pkg/exception"
@@ -22,17 +23,17 @@ func NewHandler(workerService Service) *Handler {
 
 func (workerHandler *Handler) Register(ginContext *gin.Context) {
 	var createWorkerDto dto.CreateWorkerDto
-	err := ginContext.ShouldBindBodyWithJSON(createWorkerDto)
+	err := ginContext.ShouldBind(&createWorkerDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	identityCard, _ := ginContext.FormFile("identityCard")
 	policeCertificate, _ := ginContext.FormFile("policeCertificate")
 	driverLicense, _ := ginContext.FormFile("driverLicense")
-
+	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	createWorkerWalletDto := &workerResourceDto.CreateWorkerWalletDocumentDto{
 		IdentityCard:      identityCard,
 		PoliceCertificate: policeCertificate,
 		DriverLicense:     driverLicense,
 	}
-	workerHandler.WorkerService.Create(&createWorkerDto, createWorkerWalletDto)
+	workerHandler.WorkerService.Create(userJwtClaim, &createWorkerDto, createWorkerWalletDto)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
 }

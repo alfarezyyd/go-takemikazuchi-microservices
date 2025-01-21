@@ -12,11 +12,11 @@ import (
 )
 
 func MapCreateWorkerDtoIntoWorkerModel(workerModel *model.Worker, createWorkerDto *dto.CreateWorkerDto) {
-	err := mapstructure.Decode(workerModel, createWorkerDto)
+	err := mapstructure.Decode(createWorkerDto, workerModel)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 }
 
 func MapCreateWorkerWalletDtoIntoWorkerWalletModel(workerWalletModel *model.WorkerWallet, createWorkerWalletDto *workerWalletDto.CreateWorkerWalletDto) {
-	err := mapstructure.Decode(workerWalletModel, createWorkerWalletDto)
+	err := mapstructure.Decode(createWorkerWalletDto, workerWalletModel)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 }
