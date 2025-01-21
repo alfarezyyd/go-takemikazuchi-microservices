@@ -5,7 +5,7 @@ import (
 )
 
 type CreateWorkerDto struct {
-	EmergencyPhoneNumber string `json:"emergency_phone_number" validate:"required;min=8,max=32"`
-	Location             string `json:"location" validate:"required;min=1,max=200"`
+	EmergencyPhoneNumber string `form:"emergency_phone_number" validate:"required,min=8,max=32"`
+	Location             string `form:"location" validate:"required,min=1,max=200"`
 	WalletInformation    workerWalletDto.CreateWorkerWalletDto
 }
