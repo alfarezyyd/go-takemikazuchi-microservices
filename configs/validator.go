@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"fmt"
 	"github.com/go-playground/locales/en"
 	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
@@ -39,6 +40,29 @@ func InitializeValidator() (*validator.Validate, universalTranslator.Translator)
 	engTranslator, _ := universalTranslatorInstance.GetTranslator("en")
 	_ = engTranslation.RegisterDefaultTranslations(validatorInstance, engTranslator)
 
+	// Register custom error message
+	validatorInstance.RegisterTranslation("maxSize", engTranslator, func(ut universalTranslator.Translator) error {
+		return ut.Add("maxSize", "File size must be at most {0} MB", true)
+	}, func(ut universalTranslator.Translator, fe validator.FieldError) string {
+		return fmt.Sprintf("File size must be at most %s MB", fe.Param())
+	})
+	// Register translations for "obligatoryFile"
+	validatorInstance.RegisterTranslation("obligatoryFile", engTranslator,
+		func(ut universalTranslator.Translator) error {
+			return ut.Add("obligatoryFile", "File is required", true)
+		},
+		func(ut universalTranslator.Translator, fe validator.FieldError) string {
+			return "File is required"
+		})
+
+	// Register translations for "fileExtension"
+	validatorInstance.RegisterTranslation("extensionFile", engTranslator,
+		func(ut universalTranslator.Translator) error {
+			return ut.Add("extensionFile", "File extension must be one of {0}", true)
+		},
+		func(ut universalTranslator.Translator, fe validator.FieldError) string {
+			return fmt.Sprintf("File extension must be one of %s", fe.Param())
+		})
 	return validatorInstance, engTranslator
 }
 
