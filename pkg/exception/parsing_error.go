@@ -2,7 +2,6 @@ package exception
 
 import (
 	"errors"
-	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
@@ -11,7 +10,6 @@ import (
 
 func ParseGormError(err error) *ClientError {
 	if err != nil {
-		fmt.Println(err)
 	}
 	switch {
 	case errors.Is(err, gorm.ErrRecordNotFound):

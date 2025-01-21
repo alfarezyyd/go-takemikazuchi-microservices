@@ -74,7 +74,6 @@ func (serviceImpl *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *us
 			Error
 		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
 		mapper.MapCategoryDtoIntoCategoryModel(&categoryModel, updateCategoryDto)
-		fmt.Println(updateCategoryDto)
 		err = gormTransaction.Model(&model2.Category{}).Where("id = ?", categoryId).Updates(categoryModel).Error
 		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
 		return nil
