@@ -1,8 +1,10 @@
 package storage
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"mime/multipart"
+	"os"
 )
 
 // FileStorage defines the methods for file storage operations.
@@ -16,6 +18,7 @@ func ProvideFileStorage(viperConfig *viper.Viper) FileStorage {
 	storageType := viperConfig.GetString("STORAGE_BACKEND")
 	switch storageType {
 	default:
-		return &LocalStorage{}
+		workingDirectory, _ := os.Getwd()
+		return NewLocalStorage(fmt.Sprintf("%s/%s", workingDirectory, viperConfig.GetString("BASE_PATH")))
 	}
 }

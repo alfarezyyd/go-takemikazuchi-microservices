@@ -2,3 +2,9 @@ DROP DATABASE IF EXISTS go_takemikazuchi_api;
 CREATE DATABASE go_takemikazuchi_api;
 USE go_takemikazuchi_api;
 
+SELECT * FROM workers;
+SELECT * FROM worker_resources;
+SELECT * FROM worker_wallets;
+DELETE FROM workers;
+DELETE FROM worker_resources;
+DELETE FROM worker_wallets;

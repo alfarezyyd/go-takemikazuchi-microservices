@@ -4,6 +4,7 @@ import (
 	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/internal/storage"
 	"go-takemikazuchi-api/internal/user"
@@ -60,31 +61,32 @@ func (workerService *ServiceImpl) Create(userJwtClaim *userDto.JwtClaimDto, crea
 		var workerModel model.Worker
 		var workerWalletModel model.WorkerWallet
 		var userModel model.User
-		fmt.Println(createWorkerDto)
 		workerService.userRepository.FindUserByEmail(userJwtClaim.Email, &userModel, gormTransaction)
 		mapper.MapCreateWorkerDtoIntoWorkerModel(&workerModel, createWorkerDto)
 		mapper.MapCreateWorkerWalletDtoIntoWorkerWalletModel(&workerWalletModel, &createWorkerDto.WalletInformation)
 		workerModel.UserId = userModel.ID
 		workerService.workerRepository.Store(gormTransaction, &workerModel)
 		workerWalletModel.WorkerID = workerModel.ID
-		fmt.Println(workerWalletModel)
 		workerService.workerWalletRepository.Store(gormTransaction, &workerWalletModel)
-		//driverLicenseFile, _ := createWorkerWalletDocumentDto.DriverLicense.Open()
-		//identityCardFile, _ := createWorkerWalletDocumentDto.IdentityCard.Open()
-		//policeCertificateFile, _ := createWorkerWalletDocumentDto.PoliceCertificate.Open()
-		//defer driverLicenseFile.Close()
-		//defer identityCardFile.Close()
-		//defer policeCertificateFile.Close()
-		//uuidString := uuid.New().String()
-		//driveLicensePath, _ := workerService.fileStorage.UploadFile(driverLicenseFile, fmt.Sprintf("%s-%s", uuidString, "driverLicense"))
-		//policeCertificatePath, _ := workerService.fileStorage.UploadFile(policeCertificateFile, fmt.Sprintf("%s-%s", uuidString, "driverLicense"))
-		//identityCardPath, _ := workerService.fileStorage.UploadFile(identityCardFile, fmt.Sprintf("%s-%s", uuidString, "driverLicense"))
-		//workerResourcesModel := mapper.MapStringIntoWorkerResourceModel(workerModel.ID,
-		//	[]string{driveLicensePath, policeCertificatePath, identityCardPath},
-		//	[]string{"Identity Card", "Police Certificate", "Driver License"},
-		//	3,
-		//)
-		//workerService.workerResourceRepository.BulkStore(gormTransaction, workerResourcesModel)
+		driverLicenseFile, _ := createWorkerWalletDocumentDto.DriverLicense.Open()
+		identityCardFile, _ := createWorkerWalletDocumentDto.IdentityCard.Open()
+		policeCertificateFile, _ := createWorkerWalletDocumentDto.PoliceCertificate.Open()
+		defer driverLicenseFile.Close()
+		defer identityCardFile.Close()
+		defer policeCertificateFile.Close()
+		uuidString := uuid.New().String()
+		driverLicensePath := fmt.Sprintf("%s-%s-%s", uuidString, "driverLicense", createWorkerWalletDocumentDto.DriverLicense.Filename)
+		policeCertificatePath := fmt.Sprintf("%s-%s-%s", uuidString, "policeCertificate", createWorkerWalletDocumentDto.PoliceCertificate.Filename)
+		identityCardPath := fmt.Sprintf("%s-%s-%s", uuidString, "identityCard", createWorkerWalletDocumentDto.IdentityCard.Filename)
+		workerService.fileStorage.UploadFile(driverLicenseFile, driverLicensePath)
+		workerService.fileStorage.UploadFile(policeCertificateFile, policeCertificatePath)
+		workerService.fileStorage.UploadFile(identityCardFile, identityCardPath)
+		workerResourcesModel := mapper.MapStringIntoWorkerResourceModel(workerModel.ID,
+			[]string{driverLicensePath, policeCertificatePath, identityCardPath},
+			[]string{"Driver License", "Police Certificate", "Identity Card"},
+			3,
+		)
+		workerService.workerResourceRepository.BulkStore(gormTransaction, workerResourcesModel)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
