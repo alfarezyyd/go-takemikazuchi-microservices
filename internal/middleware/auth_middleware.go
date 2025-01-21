@@ -4,7 +4,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	exception2 "go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
 	"net/http"
@@ -32,7 +32,7 @@ func AuthMiddleware(viperConfig *viper.Viper) gin.HandlerFunc {
 		// Set the token claims to the context
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			userJwtClaim, err := mapper.MapJwtClaimIntoUserClaim(claims)
-			helper.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 			ginContext.Set("claims", userJwtClaim)
 		} else {
 			ginContext.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})

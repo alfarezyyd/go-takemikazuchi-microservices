@@ -2,13 +2,12 @@ package category
 
 import (
 	"errors"
-	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	dto2 "go-takemikazuchi-api/internal/category/dto"
-	model2 "go-takemikazuchi-api/internal/model"
+	"go-takemikazuchi-api/internal/category/dto"
+	"go-takemikazuchi-api/internal/model"
 	userDto "go-takemikazuchi-api/internal/user/dto"
-	exception2 "go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
 	"gorm.io/gorm"
@@ -35,69 +34,69 @@ func NewService(
 	}
 }
 
-func (serviceImpl *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto2.CreateCategoryDto) *exception2.ClientError {
+func (serviceImpl *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError {
 	err := serviceImpl.validationInstance.Struct(categoryCreateDto)
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userModel model2.User
-		var categoryModel model2.Category
+		var userModel model.User
+		var categoryModel model.Category
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, errors.New("only admin can create a category"))
+			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("only admin can create a category"))
 		}
 		mapper.MapCategoryDtoIntoCategoryModel(&categoryModel, categoryCreateDto)
 		err = gormTransaction.Create(&categoryModel).Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
-	helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return nil
 }
 
-func (serviceImpl *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto2.UpdateCategoryDto) *exception2.ClientError {
+func (serviceImpl *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError {
 	err := serviceImpl.validationInstance.Struct(updateCategoryDto)
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.validationInstance.Var(categoryId, "required,gte=1")
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var categoryModel model2.Category
-		var userModel model2.User
+		var categoryModel model.Category
+		var userModel model.User
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err)
+			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 		}
 		err = gormTransaction.
 			Where("categories.id = ?", categoryId).
 			First(&categoryModel).
 			Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		mapper.MapCategoryDtoIntoCategoryModel(&categoryModel, updateCategoryDto)
-		err = gormTransaction.Model(&model2.Category{}).Where("id = ?", categoryId).Updates(categoryModel).Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		err = gormTransaction.Model(&model.Category{}).Where("id = ?", categoryId).Updates(categoryModel).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
-	helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return nil
 }
 
-func (serviceImpl *ServiceImpl) HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception2.ClientError {
+func (serviceImpl *ServiceImpl) HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception.ClientError {
 	err := serviceImpl.validationInstance.Var(categoryId, "required,number,gte=1")
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var categoryModel model2.Category
-		var userModel model2.User
+		var categoryModel model.Category
+		var userModel model.User
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err)
+			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 		}
 		err = gormTransaction.
 			Where("categories.id = ?", categoryId).
 			Delete(&categoryModel).
 			Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
 	return nil

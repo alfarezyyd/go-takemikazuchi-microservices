@@ -9,9 +9,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/configs"
-	model2 "go-takemikazuchi-api/internal/model"
-	dto2 "go-takemikazuchi-api/internal/user/dto"
-	exception2 "go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-api/internal/model"
+	"go-takemikazuchi-api/internal/user/dto"
+	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
 	"golang.org/x/crypto/bcrypt"
@@ -51,34 +51,34 @@ func NewService(
 	}
 }
 
-func (serviceImpl *ServiceImpl) HandleRegister(createUserDto *dto2.CreateUserDto) {
+func (serviceImpl *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto) {
 	err := serviceImpl.validatorInstance.Struct(createUserDto)
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
 		err = gormTransaction.Create(userModel).Error
-		helper.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
-	helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto2.GenerateOtpDto) {
+func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto) {
 	err := serviceImpl.validatorInstance.Struct(generateOneTimePassDto)
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userModel model2.User
-		var oneTimePasswordToken model2.OneTimePasswordToken
+		var userModel model.User
+		var oneTimePasswordToken model.OneTimePasswordToken
 		err = gormTransaction.Where("email = ?", generateOneTimePassDto.Email).First(&userModel).Error
 		generatedOneTimePasswordToken := helper.GenerateOneTimePasswordToken()
 		hashedGeneratedOneTimePasswordToken, err := bcrypt.GenerateFromPassword([]byte(generatedOneTimePasswordToken), 10)
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		oneTimePasswordToken.UserId = userModel.ID
 		oneTimePasswordToken.HashedToken = string(hashedGeneratedOneTimePasswordToken)
 		oneTimePasswordToken.ExpiresAt = time.Now().Add(15 * time.Minute)
 		err = gormTransaction.Create(&oneTimePasswordToken).Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		emailPayload := configs.EmailPayload{
 			Title:     "One Time Verification Token",
 			Recipient: generateOneTimePassDto.Email,
@@ -93,24 +93,24 @@ func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePas
 			"One Time Verification Token",
 			templateFile,
 			emailPayload)
-		helper.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
 }
 
-func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto2.VerifyOtpDto) {
+func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.VerifyOtpDto) {
 	err := serviceImpl.validatorInstance.Struct(verifyOtpDto)
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userModel model2.User
-		var oneTimePasswordToken model2.OneTimePasswordToken
+		var userModel model.User
+		var oneTimePasswordToken model.OneTimePasswordToken
 		err = gormTransaction.Where("email = ?", verifyOtpDto.Email).First(&userModel).Error
 		gormTransaction.Where("user_id = ?", userModel.ID).Order("expires_at desc").First(&oneTimePasswordToken)
 		if !(time.Now().Before(oneTimePasswordToken.ExpiresAt)) {
-			exception2.ThrowClientError(exception2.NewClientError(http.StatusBadRequest, "OTP has expired", err))
+			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "OTP has expired", err))
 		}
 		err := bcrypt.CompareHashAndPassword([]byte(oneTimePasswordToken.HashedToken), []byte(verifyOtpDto.OneTimePasswordToken))
-		helper.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
 }
@@ -119,47 +119,47 @@ func (serviceImpl *ServiceImpl) HandleGoogleAuthentication() string {
 	return serviceImpl.identityProvider.GoogleProviderConfig.AuthCodeURL("randomstate")
 }
 
-func (serviceImpl *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception2.ClientError {
+func (serviceImpl *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
 	if tokenState != "randomstate" {
-		return exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, errors.New("invalid token state"))
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid token state"))
 	}
 
 	googleProviderConfig := serviceImpl.identityProvider.GoogleProviderConfig
 
 	token, err := googleProviderConfig.Exchange(context.Background(), queryCode)
 	if err != nil {
-		return exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err)
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
 
 	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
-		return exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err)
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
 
 	_, err = io.ReadAll(resp.Body)
 	if err != nil {
-		return exception2.NewClientError(http.StatusBadRequest, exception2.ErrBadRequest, err)
+		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
 	return nil
 }
 
-func (serviceImpl *ServiceImpl) HandleLogin(loginUserDto *dto2.LoginUserDto) string {
+func (serviceImpl *ServiceImpl) HandleLogin(loginUserDto *dto.LoginUserDto) string {
 	err := serviceImpl.validatorInstance.Struct(loginUserDto)
-	exception2.ParseValidationError(err, serviceImpl.engTranslator)
+	exception.ParseValidationError(err, serviceImpl.engTranslator)
 	var tokenString string
 	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userModel model2.User
+		var userModel model.User
 		err = gormTransaction.Where("email = ?", loginUserDto.UserIdentifier).Or("phone_number = ?", loginUserDto.UserIdentifier).First(&userModel).Error
-		helper.CheckErrorOperation(err, exception2.ParseGormError(err))
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = bcrypt.CompareHashAndPassword([]byte(userModel.Password), []byte(loginUserDto.Password))
-		helper.CheckErrorOperation(err, exception2.NewClientError(http.StatusBadRequest, "User credentials invalid", err))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, "User credentials invalid", err))
 		tokenInstance := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"email":        userModel.Email,
 			"phone_number": helper.ParseNullableValue(userModel.PhoneNumber),
 			"exp":          time.Now().Add(time.Hour * 72).Unix(),
 		})
 		tokenString, err = tokenInstance.SignedString([]byte(serviceImpl.viperConfig.GetString("JWT_SECRET")))
-		helper.CheckErrorOperation(err, exception2.NewClientError(http.StatusInternalServerError, exception2.ErrInternalServerError, err))
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		return nil
 	})
 	return tokenString
