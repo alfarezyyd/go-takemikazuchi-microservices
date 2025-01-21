@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"go-takemikazuchi-api/internal/worker/dto"
+	workerResourceDto "go-takemikazuchi-api/internal/worker_resource/dto"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"net/http"
@@ -27,7 +28,7 @@ func (workerHandler *Handler) Register(ginContext *gin.Context) {
 	policeCertificate, _ := ginContext.FormFile("policeCertificate")
 	driverLicense, _ := ginContext.FormFile("driverLicense")
 
-	createWorkerWalletDto := &dto.CreateWorkerWalletDocumentDto{
+	createWorkerWalletDto := &workerResourceDto.CreateWorkerWalletDocumentDto{
 		IdentityCard:      identityCard,
 		PoliceCertificate: policeCertificate,
 		DriverLicense:     driverLicense,
