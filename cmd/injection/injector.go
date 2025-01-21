@@ -17,6 +17,9 @@ import (
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
 	userFeature "go-takemikazuchi-api/internal/user"
+	workerFeature "go-takemikazuchi-api/internal/worker"
+	workerResourceFeature "go-takemikazuchi-api/internal/worker_resource"
+	workerWalletFeature "go-takemikazuchi-api/internal/worker_wallet"
 	"gorm.io/gorm"
 )
 
@@ -34,8 +37,9 @@ func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController us
 func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	categoryController categoryFeature.Controller,
 	jobController jobFeature.Controller,
+	workerController workerFeature.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -65,6 +69,25 @@ var jobSet = wire.NewSet(
 	wire.Bind(new(jobFeature.Service), new(*jobFeature.ServiceImpl)),
 	jobFeature.NewHandler,
 	wire.Bind(new(jobFeature.Controller), new(*jobFeature.Handler)),
+)
+
+var workerSet = wire.NewSet(
+	workerFeature.NewRepository,
+	wire.Bind(new(workerFeature.Repository), new(*workerFeature.RepositoryImpl)),
+	workerFeature.NewService,
+	wire.Bind(new(workerFeature.Service), new(*workerFeature.ServiceImpl)),
+	workerFeature.NewHandler,
+	wire.Bind(new(workerFeature.Controller), new(*workerFeature.Handler)),
+)
+
+var workerResourceSet = wire.NewSet(
+	workerResourceFeature.NewRepository,
+	wire.Bind(new(workerResourceFeature.Repository), new(*workerResourceFeature.RepositoryImpl)),
+)
+
+var workerWalletSet = wire.NewSet(
+	workerWalletFeature.NewRepository,
+	wire.Bind(new(workerWalletFeature.Repository), new(*workerWalletFeature.RepositoryImpl)),
 )
 
 var jobApplicationSet = wire.NewSet(
@@ -98,6 +121,9 @@ func InitializeRoutes(
 		jobSet,
 		categorySet,
 		jobResourceSet,
+		workerSet,
+		workerWalletSet,
+		workerResourceSet,
 		storage.ProvideFileStorage, // Fungsi untuk memilih implementasi yang sesuai
 	)
 	return nil, nil

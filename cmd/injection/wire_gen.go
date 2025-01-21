@@ -20,6 +20,9 @@ import (
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
 	"go-takemikazuchi-api/internal/user"
+	"go-takemikazuchi-api/internal/worker"
+	"go-takemikazuchi-api/internal/worker_resource"
+	"go-takemikazuchi-api/internal/worker_wallet"
 	"gorm.io/gorm"
 )
 
@@ -39,7 +42,12 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	fileStorage := storage.ProvideFileStorage(viperConfig)
 	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage)
 	jobHandler := job.NewHandler(jobServiceImpl)
-	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, viperConfig)
+	workerRepositoryImpl := worker.NewRepository()
+	worker_walletRepositoryImpl := worker_wallet.NewRepository()
+	worker_resourceRepositoryImpl := worker_resource.NewRepository()
+	workerServiceImpl := worker.NewService(workerRepositoryImpl, validatorInstance, engTranslator, dbConnection, worker_walletRepositoryImpl, worker_resourceRepositoryImpl, fileStorage)
+	workerHandler := worker.NewHandler(workerServiceImpl)
+	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, workerHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
 		AuthenticationRoutes: authenticationRoutes,
 		ProtectedRoutes:      protectedRoutes,
@@ -63,8 +71,9 @@ func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController us
 func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	categoryController category.Controller,
 	jobController job.Controller,
+	workerController worker.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -74,6 +83,12 @@ var userSet = wire.NewSet(user.NewRepository, wire.Bind(new(user.Repository), ne
 var categorySet = wire.NewSet(category.NewRepository, wire.Bind(new(category.Repository), new(*category.RepositoryImpl)), category.NewService, wire.Bind(new(category.Service), new(*category.ServiceImpl)), category.NewHandler, wire.Bind(new(category.Controller), new(*category.Handler)))
 
 var jobSet = wire.NewSet(job.NewRepository, wire.Bind(new(job.Repository), new(*job.RepositoryImpl)), job.NewService, wire.Bind(new(job.Service), new(*job.ServiceImpl)), job.NewHandler, wire.Bind(new(job.Controller), new(*job.Handler)))
+
+var workerSet = wire.NewSet(worker.NewRepository, wire.Bind(new(worker.Repository), new(*worker.RepositoryImpl)), worker.NewService, wire.Bind(new(worker.Service), new(*worker.ServiceImpl)), worker.NewHandler, wire.Bind(new(worker.Controller), new(*worker.Handler)))
+
+var workerResourceSet = wire.NewSet(worker_resource.NewRepository, wire.Bind(new(worker_resource.Repository), new(*worker_resource.RepositoryImpl)))
+
+var workerWalletSet = wire.NewSet(worker_wallet.NewRepository, wire.Bind(new(worker_wallet.Repository), new(*worker_wallet.RepositoryImpl)))
 
 var jobApplicationSet = wire.NewSet(job_application.NewRepository, wire.Bind(new(job_application.Repository), new(*job_application.RepositoryImpl)), job_application.NewService, wire.Bind(new(job_application.Service), new(*job_application.ServiceImpl)), job_application.NewHandler, wire.Bind(new(job_application.Controller), new(*job_application.Handler)))
 
