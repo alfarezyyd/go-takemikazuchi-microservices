@@ -9,6 +9,7 @@ import (
 	"go-takemikazuchi-api/internal/storage"
 	"go-takemikazuchi-api/internal/worker/dto"
 	workerResource "go-takemikazuchi-api/internal/worker_resource"
+	workerResourceDto "go-takemikazuchi-api/internal/worker_resource/dto"
 	workerWallet "go-takemikazuchi-api/internal/worker_wallet"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
@@ -46,7 +47,7 @@ func NewService(
 	}
 }
 
-func (workerService *ServiceImpl) Create(createWorkerDto *dto.CreateWorkerDto, createWorkerWalletDocumentDto *dto.CreateWorkerWalletDocumentDto) {
+func (workerService *ServiceImpl) Create(createWorkerDto *dto.CreateWorkerDto, createWorkerWalletDocumentDto *workerResourceDto.CreateWorkerWalletDocumentDto) {
 	err := workerService.validatorInstance.Struct(createWorkerDto)
 	exception.ParseValidationError(err, workerService.engTranslator)
 	err = workerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
