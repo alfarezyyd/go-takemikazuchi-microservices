@@ -54,6 +54,8 @@ func NewService(
 func (workerService *ServiceImpl) Create(userJwtClaim *userDto.JwtClaimDto, createWorkerDto *dto.CreateWorkerDto, createWorkerWalletDocumentDto *workerResourceDto.CreateWorkerWalletDocumentDto) {
 	err := workerService.validatorInstance.Struct(createWorkerDto)
 	exception.ParseValidationError(err, workerService.engTranslator)
+	err = workerService.validatorInstance.Struct(createWorkerWalletDocumentDto)
+	exception.ParseValidationError(err, workerService.engTranslator)
 	err = workerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var workerModel model.Worker
 		var workerWalletModel model.WorkerWallet

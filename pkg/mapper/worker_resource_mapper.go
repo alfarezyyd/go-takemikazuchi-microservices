@@ -1,6 +1,8 @@
 package mapper
 
-import "go-takemikazuchi-api/internal/model"
+import (
+	"go-takemikazuchi-api/internal/model"
+)
 
 func MapStringIntoWorkerResourceModel(workerId uint64, filesPath []string, typeFile []string, countFile int) []*model.WorkerResource {
 	var workerResourcesModel []*model.WorkerResource
