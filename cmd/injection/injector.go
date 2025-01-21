@@ -20,6 +20,7 @@ import (
 	workerFeature "go-takemikazuchi-api/internal/worker"
 	workerResourceFeature "go-takemikazuchi-api/internal/worker_resource"
 	workerWalletFeature "go-takemikazuchi-api/internal/worker_wallet"
+	"googlemaps.github.io/maps"
 	"gorm.io/gorm"
 )
 
@@ -113,6 +114,7 @@ func InitializeRoutes(
 	viperConfig *viper.Viper,
 	mailerService *configs.MailerService,
 	identityProvider *configs.IdentityProvider,
+	googleMapsClient *maps.Client,
 ) (*routes.ApplicationRoutes, error) {
 	wire.Build(
 		wire.Struct(new(routes.ApplicationRoutes), "*"),

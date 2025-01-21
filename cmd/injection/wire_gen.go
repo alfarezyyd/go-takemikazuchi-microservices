@@ -23,13 +23,14 @@ import (
 	"go-takemikazuchi-api/internal/worker"
 	"go-takemikazuchi-api/internal/worker_resource"
 	"go-takemikazuchi-api/internal/worker_wallet"
+	"googlemaps.github.io/maps"
 	"gorm.io/gorm"
 )
 
 // Injectors from injector.go:
 
 // wire.go
-func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, validatorInstance *validator.Validate, engTranslator ut.Translator, viperConfig *viper.Viper, mailerService *configs.MailerService, identityProvider *configs.IdentityProvider) (*routes.ApplicationRoutes, error) {
+func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, validatorInstance *validator.Validate, engTranslator ut.Translator, viperConfig *viper.Viper, mailerService *configs.MailerService, identityProvider *configs.IdentityProvider, googleMapsClient *maps.Client) (*routes.ApplicationRoutes, error) {
 	repositoryImpl := user.NewRepository()
 	serviceImpl := user.NewService(repositoryImpl, dbConnection, validatorInstance, engTranslator, mailerService, identityProvider, viperConfig)
 	handler := user.NewHandler(serviceImpl, validatorInstance)
@@ -40,7 +41,7 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	jobRepositoryImpl := job.NewRepository()
 	job_resourceRepositoryImpl := job_resource.NewRepository()
 	fileStorage := storage.ProvideFileStorage(viperConfig)
-	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage)
+	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage, googleMapsClient)
 	jobHandler := job.NewHandler(jobServiceImpl)
 	workerRepositoryImpl := worker.NewRepository()
 	worker_walletRepositoryImpl := worker_wallet.NewRepository()
