@@ -10,4 +10,5 @@ type Repository interface {
 	Update(jobModel model.Job, gormTransaction *gorm.DB)
 	Delete(jobId string, userId uint64, gormTransaction *gorm.DB)
 	IsExists(jobId uint64, gormTransaction *gorm.DB) bool
+	VerifyJobOwner(gormTransaction *gorm.DB, userEmail *string, jobId *uint64)
 }

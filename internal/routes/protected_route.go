@@ -53,4 +53,5 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 
 	jobApplicationRouterGroup := protectedRoutes.routerGroup.Group("job-applications")
 	jobApplicationRouterGroup.POST("", protectedRoutes.jobApplicationController.Apply)
+	jobApplicationRouterGroup.GET("/:jobId", protectedRoutes.jobApplicationController.FindAllApplication)
 }

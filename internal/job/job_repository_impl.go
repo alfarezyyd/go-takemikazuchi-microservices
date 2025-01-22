@@ -35,3 +35,14 @@ func (jobRepository *RepositoryImpl) IsExists(jobId uint64, gormTransaction *gor
 		Where("id = ?", jobId).First(&isJobExists)
 	return isJobExists
 }
+
+func (jobRepository *RepositoryImpl) VerifyJobOwner(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) {
+	var isJobValid bool
+	err := gormTransaction.Model(&model.Job{}).
+		Joins("JOIN users ON users.id = jobs.user_id").
+		Select("COUNT(*) > 0").
+		Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
+		First(&isJobValid).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+}

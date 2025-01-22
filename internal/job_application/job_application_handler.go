@@ -22,6 +22,13 @@ func NewHandler(
 	}
 }
 
+func (jobApplicationHandler Handler) FindAllApplication(ginContext *gin.Context) {
+	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
+	jobId := ginContext.Param("jobId")
+	jobApplicationsResponseDto := jobApplicationHandler.jobApplicationService.FindAllApplication(userJwtClaim, jobId)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", jobApplicationsResponseDto))
+}
+
 func (jobApplicationHandler Handler) Apply(ginContext *gin.Context) {
 	var applyJobApplication *dto.ApplyJobApplicationDto
 	err := ginContext.ShouldBindBodyWithJSON(&applyJobApplication)
