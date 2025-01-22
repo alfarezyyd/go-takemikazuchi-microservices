@@ -117,7 +117,7 @@ func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, 
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
 		mapper.MapJobDtoIntoJobModel(updateJobDto, &jobModel)
 		jobModel.UserId = userModel.ID
-		jobService.jobRepository.Update(jobModel, gormTransaction)
+		jobService.jobRepository.Update(&jobModel, gormTransaction)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))

@@ -84,8 +84,7 @@ func (jobApplicationService *ServiceImpl) SelectApplication(userJwtClaims *userD
 	exception.ParseValidationError(err, jobApplicationService.engTranslator)
 	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		jobApplicationModel := jobApplicationService.jobApplicationRepository.FindById(gormTransaction, &selectApplicationDto.UserId, &selectApplicationDto.JobId)
-		jobModel, err := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, &selectApplicationDto.JobId, userJwtClaims.Email)
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		jobModel := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, userJwtClaims.Email, &selectApplicationDto.JobId)
 		jobModel.Status = "On Working"
 		jobApplicationModel.Status = "Accepted"
 		jobApplicationService.jobApplicationRepository.BulkRejectUpdate(gormTransaction, &jobModel.ID)

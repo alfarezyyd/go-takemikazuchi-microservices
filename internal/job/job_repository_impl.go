@@ -56,13 +56,13 @@ func (jobRepository *RepositoryImpl) VerifyJobOwner(gormTransaction *gorm.DB, us
 
 }
 
-func (jobRepository *RepositoryImpl) FindVerifyById(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) {
-	var isJobValid bool
+func (jobRepository *RepositoryImpl) FindVerifyById(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) *model.Job {
+	var jobModel model.Job
 	err := gormTransaction.Model(&model.Job{}).
 		Joins("JOIN users ON users.id = jobs.user_id").
 		Select("*").
 		Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
-		First(&isJobValid).Error
+		First(&jobModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-
+	return &jobModel
 }
