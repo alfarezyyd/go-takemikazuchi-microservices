@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-viper/mapstructure/v2"
 	"go-takemikazuchi-api/internal/model"
@@ -8,6 +9,7 @@ import (
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"golang.org/x/crypto/bcrypt"
+	"googlemaps.github.io/maps"
 	"net/http"
 )
 
@@ -28,4 +30,45 @@ func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*dto.JwtClaimDto, error) 
 		return nil, err
 	}
 	return &userClaim, nil
+}
+
+func MapReverseGeocodingIntoUserAddresses(geocodingResult *maps.GeocodingResult,
+	userAddress *model.UserAddress,
+	userId uint64,
+	addressAdditionalAddress string) {
+	userAddress.FormattedAddress = geocodingResult.FormattedAddress
+	userAddress.PlaceId = geocodingResult.PlaceID
+	userAddress.UserId = userId
+	userAddress.Longitude = geocodingResult.Geometry.Location.Lng
+	userAddress.Latitude = geocodingResult.Geometry.Location.Lat
+	userAddress.AdditionalInformation = addressAdditionalAddress
+	for _, addressComponent := range geocodingResult.AddressComponents {
+		switch addressComponent.Types[0] {
+		case "street_address":
+		case "street_number":
+			userAddress.StreetNumber += fmt.Sprintf("%s ", addressComponent.LongName)
+			break
+		case "route":
+			userAddress.Route += fmt.Sprintf("%s ", addressComponent.LongName)
+			break
+		case "administrative_area_level_4":
+			userAddress.Village += fmt.Sprintf("%s ", addressComponent.LongName)
+			break
+		case "administrative_area_level_3":
+			userAddress.District += fmt.Sprintf("%s ", addressComponent.LongName)
+			break
+		case "administrative_area_level_2":
+			userAddress.City += fmt.Sprintf("%s ", addressComponent.LongName)
+			break
+		case "administrative_area_level_1":
+			userAddress.Province += fmt.Sprintf("%s ", addressComponent.LongName)
+			break
+		case "country":
+			userAddress.Country = addressComponent.LongName
+			break
+		case "postal_code":
+			userAddress.PostalCode = addressComponent.LongName
+			break
+		}
+	}
 }

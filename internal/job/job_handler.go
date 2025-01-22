@@ -23,11 +23,11 @@ func (jobHandler *Handler) Create(ginContext *gin.Context) {
 	var createJobDto jobDto.CreateJobDto
 	err := ginContext.ShouldBindBodyWithJSON(&createJobDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	multipartForm, err := ginContext.MultipartForm()
+	//multipartForm, err := ginContext.MultipartForm()
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	uploadedFiles := multipartForm.File["images[]"]
+	//uploadedFiles := multipartForm.File["images[]"]
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
-	operationResult := jobHandler.jobService.HandleCreate(userJwtClaim, &createJobDto, uploadedFiles)
+	operationResult := jobHandler.jobService.HandleCreate(userJwtClaim, &createJobDto, nil)
 	helper.CheckErrorOperation(operationResult.GetRawError(), operationResult)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
 }

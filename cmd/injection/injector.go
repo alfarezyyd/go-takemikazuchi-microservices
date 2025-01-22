@@ -17,6 +17,7 @@ import (
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
 	userFeature "go-takemikazuchi-api/internal/user"
+	userAddressFeature "go-takemikazuchi-api/internal/user_address"
 	workerFeature "go-takemikazuchi-api/internal/worker"
 	workerResourceFeature "go-takemikazuchi-api/internal/worker_resource"
 	workerWalletFeature "go-takemikazuchi-api/internal/worker_wallet"
@@ -52,6 +53,11 @@ var userSet = wire.NewSet(
 	wire.Bind(new(userFeature.Service), new(*userFeature.ServiceImpl)),
 	userFeature.NewHandler,
 	wire.Bind(new(userFeature.Controller), new(*userFeature.Handler)),
+)
+
+var userAddressSet = wire.NewSet(
+	userAddressFeature.NewUserAddressRepository,
+	wire.Bind(new(userAddressFeature.Repository), new(*userAddressFeature.RepositoryImpl)),
 )
 
 var categorySet = wire.NewSet(
@@ -125,6 +131,7 @@ func InitializeRoutes(
 		jobResourceSet,
 		workerSet,
 		workerWalletSet,
+		userAddressSet,
 		workerResourceSet,
 		storage.ProvideFileStorage, // Fungsi untuk memilih implementasi yang sesuai
 	)

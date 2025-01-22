@@ -20,6 +20,7 @@ import (
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
 	"go-takemikazuchi-api/internal/user"
+	"go-takemikazuchi-api/internal/user_address"
 	"go-takemikazuchi-api/internal/worker"
 	"go-takemikazuchi-api/internal/worker_resource"
 	"go-takemikazuchi-api/internal/worker_wallet"
@@ -41,7 +42,8 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	jobRepositoryImpl := job.NewRepository()
 	job_resourceRepositoryImpl := job_resource.NewRepository()
 	fileStorage := storage.ProvideFileStorage(viperConfig)
-	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage, googleMapsClient)
+	user_addressRepositoryImpl := user_address.NewUserAddressRepository()
+	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage, googleMapsClient, user_addressRepositoryImpl)
 	jobHandler := job.NewHandler(jobServiceImpl)
 	workerRepositoryImpl := worker.NewRepository()
 	worker_walletRepositoryImpl := worker_wallet.NewRepository()
@@ -80,6 +82,8 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 }
 
 var userSet = wire.NewSet(user.NewRepository, wire.Bind(new(user.Repository), new(*user.RepositoryImpl)), user.NewService, wire.Bind(new(user.Service), new(*user.ServiceImpl)), user.NewHandler, wire.Bind(new(user.Controller), new(*user.Handler)))
+
+var userAddressSet = wire.NewSet(user_address.NewUserAddressRepository, wire.Bind(new(user_address.Repository), new(*user_address.RepositoryImpl)))
 
 var categorySet = wire.NewSet(category.NewRepository, wire.Bind(new(category.Repository), new(*category.RepositoryImpl)), category.NewService, wire.Bind(new(category.Service), new(*category.ServiceImpl)), category.NewHandler, wire.Bind(new(category.Controller), new(*category.Handler)))
 

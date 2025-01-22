@@ -17,4 +17,5 @@ type UserAddress struct {
 	Latitude              float64 `gorm:"column:latitude"`
 	Longitude             float64 `gorm:"column:longitude"`
 	User                  User    `gorm:"foreignKey:user_id;references:id"`
+	Jobs                  []Job   `gorm:"foreignKey:address_id;references:id"`
 }
