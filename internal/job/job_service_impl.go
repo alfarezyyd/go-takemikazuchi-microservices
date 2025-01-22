@@ -71,18 +71,17 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 		var userAddress model.UserAddress
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
 		if createJobDto.AddressId == nil {
-			fmt.Println("test")
 			geoCodingRequest := &maps.GeocodingRequest{
 				LatLng: &maps.LatLng{Lat: createJobDto.Latitude, Lng: createJobDto.Longitude},
 			}
 			reverseGeocodingResponse, err := jobService.mapsClient.ReverseGeocode(context.Background(), geoCodingRequest)
+			fmt.Println(err)
 			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 			mapper.MapReverseGeocodingIntoUserAddresses(&reverseGeocodingResponse[0], &userAddress, userModel.ID, createJobDto.AdditionalInformationAddress)
 			jobService.userAddressRepository.Store(gormTransaction, &userAddress)
 		} else {
 			jobService.userAddressRepository.FindById(gormTransaction, createJobDto.AddressId, &userAddress)
 		}
-
 		isCategoryExists := jobService.categoryRepository.IsCategoryExists(createJobDto.CategoryId, gormTransaction)
 		if !isCategoryExists {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
