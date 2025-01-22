@@ -16,6 +16,7 @@ type Job struct {
 	Status         string           `gorm:"column:status;default:'Open'"`
 	CreatedAt      *time.Time       `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt      *time.Time       `gorm:"column:updated_at;autoCreateTime;autoUpdateTime"`
+	User           *User            `gorm:"foreignKey:user_id;references:id"`
 	Transaction    *Transaction     `gorm:"foreignKey:job_id;references:id"`
 	UserAddress    *UserAddress     `gorm:"foreignKey:address_id;references:id"`
 	JobApplication []JobApplication `gorm:"foreignKey:job_id;references:id"`

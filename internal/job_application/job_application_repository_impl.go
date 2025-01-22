@@ -38,7 +38,7 @@ func (jobApplicationRepository *RepositoryImpl) BulkRejectUpdate(gormTransaction
 func (jobApplicationRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, userId *uint64, jobId *uint64) *model.JobApplication {
 	var jobApplication model.JobApplication
 	err := gormTransaction.
-		Where("job_id = ? AND user_id = ?", jobId, userId).
+		Where("job_id = ? AND applicant_id = ?", jobId, userId).
 		Find(&jobApplication).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return &jobApplication

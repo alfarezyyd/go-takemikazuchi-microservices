@@ -35,7 +35,7 @@ func (jobApplicationHandler Handler) SelectApplication(ginContext *gin.Context) 
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	jobApplicationHandler.jobApplicationService.SelectApplication(userJwtClaim, &selectApplicationDto)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", selectApplicationDto))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
 }
 
 func (jobApplicationHandler Handler) Apply(ginContext *gin.Context) {

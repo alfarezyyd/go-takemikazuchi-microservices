@@ -1,6 +1,7 @@
 package job
 
 import (
+	"fmt"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
@@ -28,7 +29,8 @@ func (jobRepository *RepositoryImpl) Store(jobModel *model.Job, gormTransaction 
 }
 
 func (jobRepository *RepositoryImpl) Update(jobModel *model.Job, gormTransaction *gorm.DB) {
-	err := gormTransaction.Updates(&jobModel).Error
+	err := gormTransaction.Debug().Where("id = ?", jobModel.ID).Updates(&jobModel).Error
+	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
@@ -60,7 +62,7 @@ func (jobRepository *RepositoryImpl) FindVerifyById(gormTransaction *gorm.DB, us
 	var jobModel model.Job
 	err := gormTransaction.Model(&model.Job{}).
 		Joins("JOIN users ON users.id = jobs.user_id").
-		Select("*").
+		Select("jobs.*").
 		Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
 		First(&jobModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
