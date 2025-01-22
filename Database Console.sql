@@ -3,6 +3,8 @@ CREATE DATABASE go_takemikazuchi_api;
 USE go_takemikazuchi_api;
 
 SELECT * FROM workers;
+SELECT * FROM jobs;
+SELECT * FROM job_applications;
 SELECT * FROM worker_resources;
 SELECT * FROM worker_wallets;
 SELECT * FROM user_addresses;
