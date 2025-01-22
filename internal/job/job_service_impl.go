@@ -1,6 +1,7 @@
 package job
 
 import (
+	"context"
 	"errors"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
@@ -11,9 +12,11 @@ import (
 	"go-takemikazuchi-api/internal/storage"
 	userFeature "go-takemikazuchi-api/internal/user"
 	userDto "go-takemikazuchi-api/internal/user/dto"
+	userAddressFeature "go-takemikazuchi-api/internal/user_address"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
+	"googlemaps.github.io/maps"
 	"gorm.io/gorm"
 	"mime/multipart"
 	"net/http"
@@ -28,6 +31,8 @@ type ServiceImpl struct {
 	engTranslator         ut.Translator
 	jobResourceRepository jobResourceFeature.Repository
 	fileStorage           storage.FileStorage
+	mapsClient            *maps.Client
+	userAddressRepository userAddressFeature.Repository
 }
 
 func NewService(validatorInstance *validator.Validate,
@@ -37,7 +42,11 @@ func NewService(validatorInstance *validator.Validate,
 	jobResourceRepository jobResourceFeature.Repository,
 	dbConnection *gorm.DB,
 	engTranslator ut.Translator,
-	fileStorage storage.FileStorage) *ServiceImpl {
+	fileStorage storage.FileStorage,
+	mapsClient *maps.Client,
+	userAddressRepository userAddressFeature.Repository,
+) *ServiceImpl {
+
 	return &ServiceImpl{
 		validatorInstance:     validatorInstance,
 		jobRepository:         jobRepository,
@@ -47,7 +56,8 @@ func NewService(validatorInstance *validator.Validate,
 		engTranslator:         engTranslator,
 		jobResourceRepository: jobResourceRepository,
 		fileStorage:           fileStorage,
-	}
+		mapsClient:            mapsClient,
+		userAddressRepository: userAddressRepository}
 }
 
 func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError {
@@ -56,15 +66,24 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var jobModel model.Job
 		var userModel model.User
+		var userAddress model.UserAddress
+
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		geoCodingRequest := &maps.GeocodingRequest{
+			LatLng: &maps.LatLng{Lat: createJobDto.Latitude, Lng: createJobDto.Longitude},
+		}
+		reverseGeocodingResponse, err := jobService.mapsClient.ReverseGeocode(context.Background(), geoCodingRequest)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
+		mapper.MapReverseGeocodingIntoUserAddresses(&reverseGeocodingResponse[0], &userAddress, userModel.ID, createJobDto.AdditionalInformationAddress)
+		jobService.userAddressRepository.Store(gormTransaction, &userAddress)
 		isCategoryExists := jobService.categoryRepository.IsCategoryExists(createJobDto.CategoryId, gormTransaction)
 		if !isCategoryExists {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
 		}
 		mapper.MapJobDtoIntoJobModel(createJobDto, &jobModel)
 		jobModel.UserId = userModel.ID
+		jobModel.AddressId = userAddress.ID
 		jobService.jobRepository.Store(jobModel, gormTransaction)
-
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
