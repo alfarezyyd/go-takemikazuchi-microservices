@@ -1,1 +1,1 @@
-DROP DATABASE IF EXISTS worker_skills;
+DROP TABLE IF EXISTS worker_skills;
