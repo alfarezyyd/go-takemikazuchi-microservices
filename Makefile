@@ -52,13 +52,13 @@ inject:
 	wire gen ./cmd/injection/injector.go
 
 migration-up:
-	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations/ up
+	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations up
 
 migration-down:
-	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations/ down
+	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations down
 
 migration-create:
 	$(MIGRATE_COMMAND) create -ext sql -dir ./migrations $(name)
 
 migration-force:
-	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations/ force $(version)
+	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations force $(version)
