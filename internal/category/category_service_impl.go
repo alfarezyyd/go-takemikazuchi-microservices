@@ -43,7 +43,7 @@ func (serviceImpl *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, 
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("only admin can create a category"))
+			return exception.NewClientError(http.StatusUnauthorized, exception.ErrUnauthorized, errors.New("only admin can create a category"))
 		}
 		mapper.MapCategoryDtoIntoCategoryModel(&categoryModel, categoryCreateDto)
 		err = gormTransaction.Create(&categoryModel).Error
