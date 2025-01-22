@@ -5,6 +5,7 @@ USE go_takemikazuchi_api;
 SELECT * FROM workers;
 SELECT * FROM worker_resources;
 SELECT * FROM worker_wallets;
+SELECT * FROM user_addresses;
 SELECT * FROM users;
 UPDATE users SET role = 'Admin' WHERE id = 1;
 DELETE FROM workers;
