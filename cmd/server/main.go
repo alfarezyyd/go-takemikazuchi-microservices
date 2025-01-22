@@ -34,6 +34,9 @@ func main() {
 	validatorInstance, engTranslator := configs.InitializeValidator()
 	identityProvider := configs.NewIdentityProvider(viperConfig)
 	mailerService := configs.NewMailerService(viperConfig)
+
+	googleMapsInstance := configs.NewGoogleMaps(viperConfig)
+	googleMapsClient := googleMapsInstance.InitializeGoogleMaps()
 	// Gin Initialization
 	ginEngine := gin.Default()
 	ginEngine.Use(gin.Recovery())
@@ -47,6 +50,7 @@ func main() {
 		viperConfig,
 		mailerService,
 		identityProvider,
+		googleMapsClient,
 	)
 	if initRoutesError != nil {
 		panic(initRoutesError)
