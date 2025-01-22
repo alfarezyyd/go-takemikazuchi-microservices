@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/internal/category"
 	"go-takemikazuchi-api/internal/job"
-	"go-takemikazuchi-api/internal/job_application"
+	jobApplication "go-takemikazuchi-api/internal/job_application"
 	"go-takemikazuchi-api/internal/middleware"
 	"go-takemikazuchi-api/internal/transaction"
 	"go-takemikazuchi-api/internal/worker"
@@ -17,7 +17,7 @@ type ProtectedRoutes struct {
 	jobController            job.Controller
 	workerController         worker.Controller
 	transactionController    transaction.Controller
-	jobApplicationController job_application.Controller
+	jobApplicationController jobApplication.Controller
 	viperConfig              *viper.Viper
 }
 
@@ -26,15 +26,16 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 	jobController job.Controller,
 	viperConfig *viper.Viper,
 	workerController worker.Controller,
-
+	jobApplicationController jobApplication.Controller,
 ) *ProtectedRoutes {
 	routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	return &ProtectedRoutes{
-		routerGroup:        routerGroup,
-		categoryController: categoryController,
-		jobController:      jobController,
-		workerController:   workerController,
-		viperConfig:        viperConfig,
+		routerGroup:              routerGroup,
+		categoryController:       categoryController,
+		jobController:            jobController,
+		workerController:         workerController,
+		viperConfig:              viperConfig,
+		jobApplicationController: jobApplicationController,
 	}
 }
 
@@ -49,4 +50,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 
 	workerRouterGroup := protectedRoutes.routerGroup.Group("workers")
 	workerRouterGroup.POST("", protectedRoutes.workerController.Register)
+
+	jobApplicationRouterGroup := protectedRoutes.routerGroup.Group("job-applications")
+	jobApplicationRouterGroup.POST("", protectedRoutes.jobApplicationController.Apply)
 }

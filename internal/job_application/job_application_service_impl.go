@@ -24,8 +24,21 @@ type ServiceImpl struct {
 	userRepository           userFeature.Repository
 }
 
-func NewService() *ServiceImpl {
-	return &ServiceImpl{}
+func NewService(
+	validationInstance *validator.Validate,
+	engTranslator ut.Translator,
+	jobApplicationRepository Repository,
+	dbConnection *gorm.DB,
+	jobRepository job.Repository,
+	userRepository userFeature.Repository) *ServiceImpl {
+	return &ServiceImpl{
+		validationInstance:       validationInstance,
+		engTranslator:            engTranslator,
+		jobApplicationRepository: jobApplicationRepository,
+		dbConnection:             dbConnection,
+		jobRepository:            jobRepository,
+		userRepository:           userRepository,
+	}
 }
 
 func (jobApplicationService *ServiceImpl) HandleApply(userJwtClaims *userDto.JwtClaimDto, applyJobApplicationDto *dto.ApplyJobApplicationDto) {

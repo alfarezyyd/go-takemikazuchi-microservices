@@ -45,12 +45,15 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	user_addressRepositoryImpl := user_address.NewUserAddressRepository()
 	jobServiceImpl := job.NewService(validatorInstance, jobRepositoryImpl, repositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage, googleMapsClient, user_addressRepositoryImpl)
 	jobHandler := job.NewHandler(jobServiceImpl)
+	job_applicationRepositoryImpl := job_application.NewRepository()
+	job_applicationServiceImpl := job_application.NewService(validatorInstance, engTranslator, job_applicationRepositoryImpl, dbConnection, jobRepositoryImpl, repositoryImpl)
+	job_applicationHandler := job_application.NewHandler(job_applicationServiceImpl)
 	workerRepositoryImpl := worker.NewRepository()
 	worker_walletRepositoryImpl := worker_wallet.NewRepository()
 	worker_resourceRepositoryImpl := worker_resource.NewRepository()
 	workerServiceImpl := worker.NewService(workerRepositoryImpl, validatorInstance, engTranslator, dbConnection, repositoryImpl, worker_walletRepositoryImpl, worker_resourceRepositoryImpl, fileStorage)
 	workerHandler := worker.NewHandler(workerServiceImpl)
-	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, workerHandler, viperConfig)
+	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, job_applicationHandler, workerHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
 		AuthenticationRoutes: authenticationRoutes,
 		ProtectedRoutes:      protectedRoutes,
@@ -74,9 +77,10 @@ func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController us
 func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	categoryController category.Controller,
 	jobController job.Controller,
+	jobApplicationController job_application.Controller,
 	workerController worker.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, jobApplicationController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
