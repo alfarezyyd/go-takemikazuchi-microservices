@@ -6,5 +6,6 @@ import (
 )
 
 type Repository interface {
+	FindById(gormTransaction *gorm.DB, id *uint64, userAddress *model.UserAddress)
 	Store(gormTransaction *gorm.DB, userAddress *model.UserAddress)
 }

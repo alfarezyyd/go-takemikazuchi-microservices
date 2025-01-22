@@ -14,6 +14,11 @@ func NewUserAddressRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
+func (userAddressRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, id *uint64, userAddress *model.UserAddress) {
+	err := gormTransaction.Where("id = ?", id).Find(userAddress).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}
+
 func (userAddressRepository *RepositoryImpl) Store(gormTransaction *gorm.DB, userAddress *model.UserAddress) {
 	err := gormTransaction.Create(userAddress).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

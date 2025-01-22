@@ -11,4 +11,5 @@ const (
 	ErrTooManyRequests     = "Too Many Requests"
 	ErrInternalServerError = "Internal Server Error"
 	ErrBadRequest          = "Bad Request"
+	ErrNotFound            = "Not Found"
 )
