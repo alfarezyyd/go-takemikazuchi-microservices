@@ -8,10 +8,6 @@ type Job struct {
 	CategoryId  uint64       `gorm:"column:category_id" mapstructure:"CategoryId"`
 	Title       string       `gorm:"column:title" mapstructure:"Title"`
 	Description string       `gorm:"column:description" mapstructure:"Description"`
-	Latitude    float64      `gorm:"column:latitude"`
-	Longitude   float64      `gorm:"column:longitude"`
-	Address     string       `gorm:"column:address"`
-	PlaceId     string       `gorm:"column:place_id"`
 	Price       float64      `gorm:"column:price" mapstructure:"Price"`
 	Status      string       `gorm:"column:status;default:'Open'"`
 	CreatedAt   *time.Time   `gorm:"column:created_at;autoCreateTime"`
