@@ -29,6 +29,15 @@ func (jobApplicationHandler Handler) FindAllApplication(ginContext *gin.Context)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", jobApplicationsResponseDto))
 }
 
+func (jobApplicationHandler Handler) SelectApplication(ginContext *gin.Context) {
+	var selectApplicationDto dto.SelectApplicationDto
+	err := ginContext.ShouldBindBodyWithJSON(&selectApplicationDto)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
+	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
+	jobApplicationHandler.jobApplicationService.SelectApplication(userJwtClaim, selectApplicationDto)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", selectApplicationDto))
+}
+
 func (jobApplicationHandler Handler) Apply(ginContext *gin.Context) {
 	var applyJobApplication *dto.ApplyJobApplicationDto
 	err := ginContext.ShouldBindBodyWithJSON(&applyJobApplication)

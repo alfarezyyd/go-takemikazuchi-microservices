@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 type Job struct {
 	ID             uint64           `gorm:"column:id;autoIncrement;primaryKey"`
@@ -16,4 +19,10 @@ type Job struct {
 	Transaction    *Transaction     `gorm:"foreignKey:job_id;references:id"`
 	UserAddress    *UserAddress     `gorm:"foreignKey:address_id;references:id"`
 	JobApplication []JobApplication `gorm:"foreignKey:job_id;references:id"`
+}
+
+func (jobModel *Job) BeforeUpdate(tx *gorm.DB) (err error) {
+	timeNow := time.Now()
+	jobModel.UpdatedAt = &timeNow
+	return nil
 }

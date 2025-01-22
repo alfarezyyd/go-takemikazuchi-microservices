@@ -13,7 +13,7 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (jobApplicationRepository RepositoryImpl) FindAllApplication(gormTransaction *gorm.DB, jobId *uint64) []model.JobApplication {
+func (jobApplicationRepository *RepositoryImpl) FindAllApplication(gormTransaction *gorm.DB, jobId *uint64) []model.JobApplication {
 	var jobApplications []model.JobApplication
 	err := gormTransaction.
 		Preload("Job").
@@ -26,4 +26,27 @@ func (jobApplicationRepository RepositoryImpl) FindAllApplication(gormTransactio
 
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return jobApplications
+}
+
+func (jobApplicationRepository *RepositoryImpl) BulkRejectUpdate(gormTransaction *gorm.DB, jobId *uint64) {
+	err := gormTransaction.Where("job_id = ?", jobId).Updates(model.JobApplication{
+		Status: "Rejected",
+	}).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}
+
+func (jobApplicationRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, userId *uint64, jobId *uint64) *model.JobApplication {
+	var jobApplication model.JobApplication
+	err := gormTransaction.
+		Where("job_id = ? AND user_id = ?", jobId, userId).
+		Find(&jobApplication).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return &jobApplication
+}
+
+func (jobApplicationRepository *RepositoryImpl) Update(gormTransaction *gorm.DB, jobApplicationModel *model.JobApplication) {
+	err := gormTransaction.
+		Where("id = ?", jobApplicationModel.ID).
+		Updates(jobApplicationModel).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

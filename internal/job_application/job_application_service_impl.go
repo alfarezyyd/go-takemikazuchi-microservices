@@ -78,3 +78,19 @@ func (jobApplicationService *ServiceImpl) HandleApply(userJwtClaims *userDto.Jwt
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
+
+func (jobApplicationService *ServiceImpl) SelectApplication(userJwtClaims *userDto.JwtClaimDto, selectApplicationDto *dto.SelectApplicationDto) {
+	err := jobApplicationService.validationInstance.Struct(selectApplicationDto)
+	exception.ParseValidationError(err, jobApplicationService.engTranslator)
+	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		jobApplicationModel := jobApplicationService.jobApplicationRepository.FindById(gormTransaction, &selectApplicationDto.UserId, &selectApplicationDto.JobId)
+		jobModel, err := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, &selectApplicationDto.JobId, userJwtClaims.Email)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		jobModel.Status = "On Working"
+		jobApplicationModel.Status = "Accepted"
+		jobApplicationService.jobApplicationRepository.BulkRejectUpdate(gormTransaction, &jobModel.ID)
+		jobApplicationService.jobApplicationRepository.Update(gormTransaction, jobApplicationModel)
+		jobApplicationService.jobRepository.Update(jobModel, gormTransaction)
+		return nil
+	})
+}

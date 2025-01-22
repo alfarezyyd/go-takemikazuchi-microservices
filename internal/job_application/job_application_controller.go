@@ -4,5 +4,6 @@ import "github.com/gin-gonic/gin"
 
 type Controller interface {
 	FindAllApplication(ginContext *gin.Context)
+	SelectApplication(ginContext *gin.Context)
 	Apply(ginContext *gin.Context)
 }
