@@ -18,6 +18,7 @@ func NewLocalStorage(basePath string) *LocalStorage {
 
 // UploadFile saves the file to the local filesystem.
 func (localStorage *LocalStorage) UploadFile(file multipart.File, fileName string) (string, error) {
+	defer file.Close()
 	path := filepath.Join(localStorage.BasePath, fileName)
 	outFile, err := os.Create(path)
 	if err != nil {

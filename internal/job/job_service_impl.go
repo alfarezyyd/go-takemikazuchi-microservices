@@ -6,6 +6,7 @@ import (
 	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"go-takemikazuchi-api/internal/category"
 	jobDto "go-takemikazuchi-api/internal/job/dto"
 	jobResourceFeature "go-takemikazuchi-api/internal/job_resource"
@@ -81,6 +82,7 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 		} else {
 			jobService.userAddressRepository.FindById(gormTransaction, createJobDto.AddressId, &userAddress)
 		}
+
 		isCategoryExists := jobService.categoryRepository.IsCategoryExists(createJobDto.CategoryId, gormTransaction)
 		if !isCategoryExists {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
@@ -88,7 +90,18 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 		mapper.MapJobDtoIntoJobModel(createJobDto, &jobModel)
 		jobModel.UserId = userModel.ID
 		jobModel.AddressId = userAddress.ID
-		jobService.jobRepository.Store(jobModel, gormTransaction)
+		jobService.jobRepository.Store(&jobModel, gormTransaction)
+		uuidString := uuid.New().String()
+		var allFileName []string
+		for _, uploadedFile := range uploadedFiles {
+			openedFile, _ := uploadedFile.Open()
+			driverLicensePath := fmt.Sprintf("%s-%d-%s", uuidString, jobModel.ID, uploadedFile.Filename)
+			_, err = jobService.fileStorage.UploadFile(openedFile, driverLicensePath)
+			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("upload file failed")))
+			allFileName = append(allFileName, uploadedFile.Filename)
+		}
+		resourceModel := mapper.MapStringIntoJobResourceModel(jobModel.ID, allFileName)
+		jobService.jobResourceRepository.BulkCreate(gormTransaction, resourceModel)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))

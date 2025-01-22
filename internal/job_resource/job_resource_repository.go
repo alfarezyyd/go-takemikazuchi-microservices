@@ -7,4 +7,5 @@ import (
 
 type Repository interface {
 	Create(gormTransaction *gorm.DB, jobResourceModel *model.JobResource)
+	BulkCreate(gormTransaction *gorm.DB, jobResourceModels []*model.JobResource)
 }

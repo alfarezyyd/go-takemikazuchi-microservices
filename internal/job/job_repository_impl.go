@@ -13,8 +13,8 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (jobRepository *RepositoryImpl) Store(jobModel model.Job, gormTransaction *gorm.DB) {
-	err := gormTransaction.Create(&jobModel).Error
+func (jobRepository *RepositoryImpl) Store(jobModel *model.Job, gormTransaction *gorm.DB) {
+	err := gormTransaction.Create(jobModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
