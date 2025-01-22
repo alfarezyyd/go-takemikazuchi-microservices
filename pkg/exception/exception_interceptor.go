@@ -14,6 +14,7 @@ func Interceptor() gin.HandlerFunc {
 				fmt.Println("panic occurred", occurredError)
 				// Check if it's our custom error
 				if clientError, ok := occurredError.(*ClientError); ok {
+					fmt.Println("panic occurred", clientError.GetRawError())
 					ginContext.AbortWithStatusJSON(
 						clientError.StatusCode,
 						web.NewResponseContract(false, clientError.Message, nil, &clientError.Trace),
