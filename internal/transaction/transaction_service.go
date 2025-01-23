@@ -7,4 +7,5 @@ import (
 
 type Service interface {
 	Create(userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto) string
+	PostPayment(transactionNotificationDto *dto.TransactionNotificationDto)
 }

@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-takemikazuchi-api/internal/transaction/dto"
 	userDto "go-takemikazuchi-api/internal/user/dto"
@@ -35,6 +34,6 @@ func (transactionHandler *Handler) Create(ginContext *gin.Context) {
 func (transactionHandler *Handler) Notification(ginContext *gin.Context) {
 	var transactionNotificationDto dto.TransactionNotificationDto
 	err := ginContext.ShouldBindBodyWithJSON(&transactionNotificationDto)
-	fmt.Println(transactionNotificationDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrInvalidRequestBody, errors.New("failed to parse body")))
+	transactionHandler.transactionService.PostPayment(&transactionNotificationDto)
 }

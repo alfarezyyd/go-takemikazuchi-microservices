@@ -86,7 +86,7 @@ func (jobApplicationService *ServiceImpl) SelectApplication(userJwtClaims *userD
 	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		jobApplicationModel := jobApplicationService.jobApplicationRepository.FindById(gormTransaction, &selectApplicationDto.UserId, &selectApplicationDto.JobId)
 		jobModel := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, userJwtClaims.Email, &selectApplicationDto.JobId)
-		jobModel.Status = "On Working"
+		jobModel.Status = "Process"
 		jobApplicationModel.Status = "Accepted"
 		fmt.Println(jobModel)
 		jobApplicationService.jobApplicationRepository.BulkRejectUpdate(gormTransaction, &jobModel.ID)

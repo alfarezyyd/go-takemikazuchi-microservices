@@ -3,8 +3,9 @@ package dto
 type TransactionNotificationDto struct {
 	TransactionId          string `json:"transaction_id"`
 	TransactionTime        string `json:"transaction_time"`
+	TransactionStatus      string `json:"transaction_status"`
 	StatusMessage          string `json:"status_message"`
-	StatusCode             int    `json:"status_code"`
+	StatusCode             string `json:"status_code"`
 	SignatureKey           string `json:"signature_key"`
 	PaymentType            string `json:"payment_type"`
 	OrderId                string `json:"order_id"`
