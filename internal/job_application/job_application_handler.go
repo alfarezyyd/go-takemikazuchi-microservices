@@ -26,7 +26,7 @@ func (jobApplicationHandler Handler) FindAllApplication(ginContext *gin.Context)
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	jobId := ginContext.Param("jobId")
 	jobApplicationsResponseDto := jobApplicationHandler.jobApplicationService.FindAllApplication(userJwtClaim, jobId)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", jobApplicationsResponseDto))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Data retrieve successfully", jobApplicationsResponseDto))
 }
 
 func (jobApplicationHandler Handler) SelectApplication(ginContext *gin.Context) {
@@ -35,7 +35,7 @@ func (jobApplicationHandler Handler) SelectApplication(ginContext *gin.Context) 
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	jobApplicationHandler.jobApplicationService.SelectApplication(userJwtClaim, &selectApplicationDto)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Application successfully selected", nil))
 }
 
 func (jobApplicationHandler Handler) Apply(ginContext *gin.Context) {
@@ -44,5 +44,5 @@ func (jobApplicationHandler Handler) Apply(ginContext *gin.Context) {
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	jobApplicationHandler.jobApplicationService.HandleApply(userJwtClaim, applyJobApplication)
-	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Successfully apply to the job", nil))
 }

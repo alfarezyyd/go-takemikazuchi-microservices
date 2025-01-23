@@ -69,7 +69,7 @@ func (jobApplicationService *ServiceImpl) HandleApply(userJwtClaims *userDto.Jwt
 		jobApplicationService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
 		isJobExists := jobApplicationService.jobRepository.IsExists(applyJobApplicationDto.JobId, gormTransaction)
 		if !isJobExists {
-			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("job not exists")))
+			exception.ThrowClientError(exception.NewClientError(http.StatusNotFound, exception.ErrNotFound, errors.New("job not exists")))
 		}
 		jobApplicationModel.ApplicantId = userModel.ID
 		jobApplicationModel.JobId = applyJobApplicationDto.JobId
