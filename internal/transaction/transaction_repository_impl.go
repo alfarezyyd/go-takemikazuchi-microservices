@@ -26,10 +26,13 @@ func (transactionRepository *RepositoryImpl) FindWithRelationship(gormTransactio
 	err := gormTransaction.
 		Model(&model.Transaction{}).
 		Preload("PayerUser").
+		Preload("Job").
 		Joins("JOIN users ON users.id = transactions.payer_id").
+		Joins("JOIN jobs ON jobs.id = transactions.job_id").
 		Select(`
 			transactions.*,
-			users.id AS user_id, users.name AS user_name, users.email AS user_email
+			users.id AS user_id, users.name AS user_name, users.email AS user_email,
+			jobs.id AS job_id, jobs.status AS job_status
 		`).Where("transactions.id = ?", id).
 		First(&transactionModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

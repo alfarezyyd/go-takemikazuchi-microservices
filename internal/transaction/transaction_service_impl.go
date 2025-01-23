@@ -114,6 +114,7 @@ func (transactionService *ServiceImpl) PostPayment(transactionNotificationDto *d
 		}
 		transactionService.paymentOperation(transactionNotificationDto, transactionModel)
 		transactionService.transactionRepository.Update(gormTransaction, transactionModel)
+		transactionService.jobRepository.Update(transactionModel.Job, gormTransaction)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
