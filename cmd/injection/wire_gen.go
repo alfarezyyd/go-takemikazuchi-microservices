@@ -11,6 +11,7 @@ import (
 	"github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
+	"github.com/midtrans/midtrans-go/snap"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/configs"
 	"go-takemikazuchi-api/internal/category"
@@ -19,6 +20,7 @@ import (
 	"go-takemikazuchi-api/internal/job_resource"
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
+	"go-takemikazuchi-api/internal/transaction"
 	"go-takemikazuchi-api/internal/user"
 	"go-takemikazuchi-api/internal/user_address"
 	"go-takemikazuchi-api/internal/worker"
@@ -31,7 +33,7 @@ import (
 // Injectors from injector.go:
 
 // wire.go
-func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, validatorInstance *validator.Validate, engTranslator ut.Translator, viperConfig *viper.Viper, mailerService *configs.MailerService, identityProvider *configs.IdentityProvider, googleMapsClient *maps.Client) (*routes.ApplicationRoutes, error) {
+func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, validatorInstance *validator.Validate, engTranslator ut.Translator, viperConfig *viper.Viper, mailerService *configs.MailerService, identityProvider *configs.IdentityProvider, googleMapsClient *maps.Client, midtransClient *snap.Client) (*routes.ApplicationRoutes, error) {
 	repositoryImpl := user.NewRepository()
 	serviceImpl := user.NewService(repositoryImpl, dbConnection, validatorInstance, engTranslator, mailerService, identityProvider, viperConfig)
 	handler := user.NewHandler(serviceImpl, validatorInstance)
@@ -53,7 +55,9 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	worker_resourceRepositoryImpl := worker_resource.NewRepository()
 	workerServiceImpl := worker.NewService(workerRepositoryImpl, validatorInstance, engTranslator, dbConnection, repositoryImpl, worker_walletRepositoryImpl, worker_resourceRepositoryImpl, fileStorage)
 	workerHandler := worker.NewHandler(workerServiceImpl)
-	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, job_applicationHandler, workerHandler, viperConfig)
+	transactionServiceImpl := transaction.NewService(validatorInstance, engTranslator, dbConnection, midtransClient)
+	transactionHandler := transaction.NewHandler(transactionServiceImpl)
+	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, job_applicationHandler, workerHandler, transactionHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
 		AuthenticationRoutes: authenticationRoutes,
 		ProtectedRoutes:      protectedRoutes,
@@ -79,8 +83,9 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	jobController job.Controller,
 	jobApplicationController job_application.Controller,
 	workerController worker.Controller,
+	transactionController transaction.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, jobApplicationController)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -100,5 +105,7 @@ var workerResourceSet = wire.NewSet(worker_resource.NewRepository, wire.Bind(new
 var workerWalletSet = wire.NewSet(worker_wallet.NewRepository, wire.Bind(new(worker_wallet.Repository), new(*worker_wallet.RepositoryImpl)))
 
 var jobApplicationSet = wire.NewSet(job_application.NewRepository, wire.Bind(new(job_application.Repository), new(*job_application.RepositoryImpl)), job_application.NewService, wire.Bind(new(job_application.Service), new(*job_application.ServiceImpl)), job_application.NewHandler, wire.Bind(new(job_application.Controller), new(*job_application.Handler)))
+
+var transactionSet = wire.NewSet(transaction.NewRepository, wire.Bind(new(transaction.Repository), new(*transaction.RepositoryImpl)), transaction.NewService, wire.Bind(new(transaction.Service), new(*transaction.ServiceImpl)), transaction.NewHandler, wire.Bind(new(transaction.Controller), new(*transaction.Handler)))
 
 var jobResourceSet = wire.NewSet(job_resource.NewRepository, wire.Bind(new(job_resource.Repository), new(*job_resource.RepositoryImpl)))

@@ -8,6 +8,7 @@ import (
 	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/wire"
+	"github.com/midtrans/midtrans-go/snap"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/configs"
 	categoryFeature "go-takemikazuchi-api/internal/category"
@@ -16,6 +17,7 @@ import (
 	jobResourceFeature "go-takemikazuchi-api/internal/job_resource"
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
+	transactionFeature "go-takemikazuchi-api/internal/transaction"
 	userFeature "go-takemikazuchi-api/internal/user"
 	userAddressFeature "go-takemikazuchi-api/internal/user_address"
 	workerFeature "go-takemikazuchi-api/internal/worker"
@@ -41,8 +43,9 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	jobController jobFeature.Controller,
 	jobApplicationController jobApplicationFeature.Controller,
 	workerController workerFeature.Controller,
+	transactionController transactionFeature.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, jobApplicationController)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -107,6 +110,15 @@ var jobApplicationSet = wire.NewSet(
 	wire.Bind(new(jobApplicationFeature.Controller), new(*jobApplicationFeature.Handler)),
 )
 
+var transactionSet = wire.NewSet(
+	transactionFeature.NewRepository,
+	wire.Bind(new(transactionFeature.Repository), new(*transactionFeature.RepositoryImpl)),
+	transactionFeature.NewService,
+	wire.Bind(new(transactionFeature.Service), new(*transactionFeature.ServiceImpl)),
+	transactionFeature.NewHandler,
+	wire.Bind(new(transactionFeature.Controller), new(*transactionFeature.Handler)),
+)
+
 var jobResourceSet = wire.NewSet(
 	jobResourceFeature.NewRepository,
 	wire.Bind(new(jobResourceFeature.Repository), new(*jobResourceFeature.RepositoryImpl)),
@@ -122,6 +134,7 @@ func InitializeRoutes(
 	mailerService *configs.MailerService,
 	identityProvider *configs.IdentityProvider,
 	googleMapsClient *maps.Client,
+	midtransClient *snap.Client,
 ) (*routes.ApplicationRoutes, error) {
 	wire.Build(
 		wire.Struct(new(routes.ApplicationRoutes), "*"),
@@ -134,6 +147,7 @@ func InitializeRoutes(
 		workerSet,
 		workerWalletSet,
 		userAddressSet,
+		transactionSet,
 		workerResourceSet,
 		storage.ProvideFileStorage, // Fungsi untuk memilih implementasi yang sesuai
 	)
