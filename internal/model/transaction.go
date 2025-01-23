@@ -7,7 +7,7 @@ import (
 )
 
 type Transaction struct {
-	ID            string     `gorm:"column:id;primary_key"`
+	ID            string     `gorm:"column:id;primaryKey"`
 	JobID         uint64     `gorm:"column:job_id"`
 	PayerID       uint64     `gorm:"column:payer_id"`
 	PayeeID       uint64     `gorm:"column:payee_id"`
