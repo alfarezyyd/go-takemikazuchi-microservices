@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/cmd/injection"
@@ -42,6 +43,9 @@ func main() {
 	ginEngine.Use(gin.Recovery())
 	ginEngine.Use(exception.Interceptor())
 	rootRouterGroup := ginEngine.Group("/")
+	midtransService := configs.NewMidtransService(viperConfig)
+	midtransClient := midtransService.InitializeMidtransConfiguration()
+	fmt.Println(midtransClient)
 	_, initRoutesError := injection.InitializeRoutes(
 		rootRouterGroup,
 		databaseConnection,
@@ -51,6 +55,7 @@ func main() {
 		mailerService,
 		identityProvider,
 		googleMapsClient,
+		midtransClient,
 	)
 	if initRoutesError != nil {
 		panic(initRoutesError)
