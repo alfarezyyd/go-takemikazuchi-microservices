@@ -19,6 +19,7 @@ type Job struct {
 	User           *User            `gorm:"foreignKey:user_id;references:id"`
 	Transaction    *Transaction     `gorm:"foreignKey:job_id;references:id"`
 	UserAddress    *UserAddress     `gorm:"foreignKey:address_id;references:id"`
+	Category       *Category        `gorm:"foreignKey:category_id;references:id"`
 	JobApplication []JobApplication `gorm:"foreignKey:job_id;references:id"`
 }
 
