@@ -16,29 +16,36 @@ func CheckErrorOperation(indicatedError error, clientError *exception.ClientErro
 	return false
 }
 
-func ParseNullableValue(value interface{}) interface{} {
+func ParseNullableValue(value interface{}) string {
 	v := reflect.ValueOf(value)
 
 	// Handle pointer types
 	if v.Kind() == reflect.Ptr {
+		if v.IsNil() {
+			return "" // Jika nil, kembalikan string kosong
+		}
 		v = v.Elem()
 	}
 
 	// Check for sql.Null* types
 	if v.Kind() == reflect.Struct {
 		validField := v.FieldByName("Valid")
-		valueField := v.FieldByName("String") // Default to String; change for other nullable types
+		valueField := v.FieldByName("String") // Sesuaikan jika nullable bukan string
 
 		if validField.IsValid() && validField.Kind() == reflect.Bool {
 			if validField.Bool() {
-				return valueField.Interface()
+				return valueField.String() // Ambil nilai sebagai string
 			}
-			return nil
+			return ""
 		}
 	}
 
-	// If not a nullable type, return the value as is
-	return value
+	// Jika bukan tipe nullable, langsung ubah menjadi string
+	if v.IsValid() && v.CanInterface() {
+		return fmt.Sprintf("%v", v.Interface())
+	}
+
+	return "" // Jika tidak valid, kembalikan string kosong
 }
 
 func GenerateOneTimePasswordToken() string {
