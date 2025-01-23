@@ -55,7 +55,8 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	worker_resourceRepositoryImpl := worker_resource.NewRepository()
 	workerServiceImpl := worker.NewService(workerRepositoryImpl, validatorInstance, engTranslator, dbConnection, repositoryImpl, worker_walletRepositoryImpl, worker_resourceRepositoryImpl, fileStorage)
 	workerHandler := worker.NewHandler(workerServiceImpl)
-	transactionServiceImpl := transaction.NewService(validatorInstance, engTranslator, dbConnection, midtransClient)
+	transactionRepositoryImpl := transaction.NewRepository()
+	transactionServiceImpl := transaction.NewService(validatorInstance, engTranslator, dbConnection, midtransClient, jobRepositoryImpl, transactionRepositoryImpl, job_applicationRepositoryImpl)
 	transactionHandler := transaction.NewHandler(transactionServiceImpl)
 	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, job_applicationHandler, workerHandler, transactionHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
