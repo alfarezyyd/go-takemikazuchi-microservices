@@ -37,7 +37,7 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	repositoryImpl := job.NewRepository()
 	transactionRepositoryImpl := transaction.NewRepository()
 	job_applicationRepositoryImpl := job_application.NewRepository()
-	serviceImpl := transaction.NewService(validatorInstance, engTranslator, dbConnection, midtransClient, repositoryImpl, transactionRepositoryImpl, job_applicationRepositoryImpl)
+	serviceImpl := transaction.NewService(validatorInstance, engTranslator, dbConnection, midtransClient, repositoryImpl, transactionRepositoryImpl, job_applicationRepositoryImpl, viperConfig)
 	handler := transaction.NewHandler(serviceImpl)
 	publicRoutes := ProvidePublicRoutes(ginRouterGroup, handler)
 	userRepositoryImpl := user.NewRepository()
