@@ -28,9 +28,16 @@ import (
 )
 
 var routeSet = wire.NewSet(
+	ProvidePublicRoutes,
 	ProvideAuthenticationRoutes,
 	ProvideProtectedRoutes,
 )
+
+func ProvidePublicRoutes(routerGroup *gin.RouterGroup, transactionController transactionFeature.Controller) *routes.PublicRoutes {
+	publicRoutes := routes.NewPublicRoutes(routerGroup, transactionController)
+	publicRoutes.Setup()
+	return publicRoutes
+}
 
 func ProvideAuthenticationRoutes(routerGroup *gin.RouterGroup, userController userFeature.Controller) *routes.AuthenticationRoutes {
 	authenticationRoutes := routes.NewAuthenticationRoutes(routerGroup, userController)
