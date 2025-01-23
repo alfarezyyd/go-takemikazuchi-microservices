@@ -11,7 +11,7 @@ type Transaction struct {
 	JobID         uint64     `gorm:"column:job_id"`
 	PayerID       uint64     `gorm:"column:payer_id"`
 	PayeeID       uint64     `gorm:"column:payee_id"`
-	Amount        uint64     `gorm:"column:amount"`
+	Amount        float64    `gorm:"column:amount"`
 	SnapToken     string     `gorm:"column:snap_token"`
 	PaymentMethod string     `gorm:"column:payment_method"`
 	Status        string     `gorm:"column:status;default:Pending"`
