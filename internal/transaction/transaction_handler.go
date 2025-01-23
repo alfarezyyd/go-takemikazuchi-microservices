@@ -25,6 +25,11 @@ func (transactionHandler *Handler) Create(ginContext *gin.Context) {
 	err := ginContext.ShouldBindBodyWithJSON(&createTransactionDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("failed to parse body")))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
-	transactionHandler.transactionService.Create(userJwtClaim, &createTransactionDto)
-	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Transaction has been created", nil))
+	midtransSnapToken := transactionHandler.transactionService.Create(userJwtClaim, &createTransactionDto)
+	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Transaction has been created", gin.H{
+		"token": midtransSnapToken,
+	}))
+}
+
+func (transactionHandler *Handler) Notification(ginContext *gin.Context) {
 }

@@ -52,7 +52,8 @@ func NewService(
 	}
 }
 
-func (transactionService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto) {
+func (transactionService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto) string {
+	var midtransSnapToken string
 	err := transactionService.validatorInstance.Struct(createTransactionDto)
 	exception.ParseValidationError(err, transactionService.engTranslator)
 	err = transactionService.gormTransaction.Transaction(func(gormTransaction *gorm.DB) error {
@@ -88,8 +89,10 @@ func (transactionService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto
 			return nil
 		}
 		transactionModel.SnapToken = midtransResponse.Token
+		midtransSnapToken = midtransResponse.Token
 		transactionService.transactionRepository.Update(gormTransaction, &transactionModel)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return midtransSnapToken
 }

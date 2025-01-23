@@ -6,5 +6,5 @@ import (
 )
 
 type Service interface {
-	Create(userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto)
+	Create(userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto) string
 }

@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/cmd/injection"
 	"go-takemikazuchi-api/configs"
 	"go-takemikazuchi-api/pkg/exception"
+	"time"
 )
 
 //TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
@@ -40,12 +41,20 @@ func main() {
 	googleMapsClient := googleMapsInstance.InitializeGoogleMaps()
 	// Gin Initialization
 	ginEngine := gin.Default()
+	ginEngine.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"*"},
+		AllowHeaders:     []string{"*"},
+		ExposeHeaders:    []string{"*"},
+		AllowCredentials: true,
+
+		MaxAge: 12 * time.Hour,
+	}))
 	ginEngine.Use(gin.Recovery())
 	ginEngine.Use(exception.Interceptor())
 	rootRouterGroup := ginEngine.Group("/")
 	midtransService := configs.NewMidtransService(viperConfig)
 	midtransClient := midtransService.InitializeMidtransConfiguration()
-	fmt.Println(midtransClient)
 	_, initRoutesError := injection.InitializeRoutes(
 		rootRouterGroup,
 		databaseConnection,
