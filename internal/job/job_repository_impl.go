@@ -30,7 +30,6 @@ func (jobRepository *RepositoryImpl) Store(jobModel *model.Job, gormTransaction 
 
 func (jobRepository *RepositoryImpl) Update(jobModel *model.Job, gormTransaction *gorm.DB) {
 	err := gormTransaction.Debug().Where("id = ?", jobModel.ID).Updates(&jobModel).Error
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
@@ -83,7 +82,6 @@ func (jobRepository *RepositoryImpl) FindWithRelationship(gormTransaction *gorm.
 			categories.id AS category_id, categories.name AS category_name
 		`).Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
 		First(&jobModel).Error
-	fmt.Println(jobModel)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return &jobModel
 }

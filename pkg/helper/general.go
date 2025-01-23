@@ -52,9 +52,3 @@ func GenerateOneTimePasswordToken() string {
 	num := rand.Intn(9000) + 1000
 	return strconv.Itoa(num)
 }
-
-func LogError(err error) {
-	if err != nil {
-		fmt.Println("error occurred", err)
-	}
-}

@@ -17,7 +17,6 @@ func NewUserAddressRepository() *RepositoryImpl {
 
 func (userAddressRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, id *uint64, userAddress *model.UserAddress) {
 	err := gormTransaction.Where("id = ?", id).First(userAddress).Error
-	fmt.Println(err, userAddress)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 

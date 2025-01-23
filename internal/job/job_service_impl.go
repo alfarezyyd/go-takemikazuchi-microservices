@@ -75,7 +75,6 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 				LatLng: &maps.LatLng{Lat: createJobDto.Latitude, Lng: createJobDto.Longitude},
 			}
 			reverseGeocodingResponse, err := jobService.mapsClient.ReverseGeocode(context.Background(), geoCodingRequest)
-			fmt.Println(err)
 			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 			mapper.MapReverseGeocodingIntoUserAddresses(&reverseGeocodingResponse[0], &userAddress, userModel.ID, createJobDto.AdditionalInformationAddress)
 			jobService.userAddressRepository.Store(gormTransaction, &userAddress)

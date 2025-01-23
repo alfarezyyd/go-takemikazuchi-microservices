@@ -88,7 +88,6 @@ func (jobApplicationService *ServiceImpl) SelectApplication(userJwtClaims *userD
 		jobModel := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, userJwtClaims.Email, &selectApplicationDto.JobId)
 		jobModel.Status = "Process"
 		jobApplicationModel.Status = "Accepted"
-		fmt.Println(jobModel)
 		jobApplicationService.jobApplicationRepository.BulkRejectUpdate(gormTransaction, &jobModel.ID)
 		jobApplicationService.jobApplicationRepository.Update(gormTransaction, jobApplicationModel)
 		jobApplicationService.jobRepository.Update(jobModel, gormTransaction)

@@ -1,7 +1,6 @@
 package job_application
 
 import (
-	"fmt"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
@@ -41,7 +40,6 @@ func (jobApplicationRepository *RepositoryImpl) FindById(gormTransaction *gorm.D
 	err := gormTransaction.
 		Where("job_id = ? AND applicant_id = ?", jobId, userId).
 		First(&jobApplication).Error
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return &jobApplication
 }
