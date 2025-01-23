@@ -9,6 +9,7 @@ SELECT * FROM worker_resources;
 SELECT * FROM worker_wallets;
 SELECT * FROM user_addresses;
 SELECT * FROM users;
+SELECT * FROM transactions;
 UPDATE users SET role = 'Admin' WHERE id = 1;
 DELETE FROM workers;
 DELETE FROM worker_resources;
