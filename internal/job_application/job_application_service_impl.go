@@ -2,7 +2,6 @@ package job_application
 
 import (
 	"errors"
-	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/internal/job"

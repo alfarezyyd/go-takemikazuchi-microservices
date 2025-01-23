@@ -15,3 +15,4 @@ UPDATE users SET role = 'Admin' WHERE id = 1;
 DELETE FROM workers;
 DELETE FROM worker_resources;
 DELETE FROM worker_wallets;
+DELETE FROM transactions;
