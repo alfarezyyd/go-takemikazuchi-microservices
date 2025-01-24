@@ -10,8 +10,8 @@ type Transaction struct {
 	PayerID       uint64     `gorm:"column:payer_id"`
 	PayeeID       uint64     `gorm:"column:payee_id"`
 	Amount        float64    `gorm:"column:amount"`
-	SnapToken     string     `gorm:"column:snap_token"`
-	PaymentMethod string     `gorm:"column:payment_method"`
+	SnapToken     *string    `gorm:"column:snap_token"`
+	PaymentMethod *string    `gorm:"column:payment_method"`
 	Status        string     `gorm:"column:status;default:Pending"`
 	CreatedAt     *time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt     *time.Time `gorm:"column:updated_at;autoCreateTime;autoUpdateTime"`
