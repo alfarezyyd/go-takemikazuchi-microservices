@@ -15,6 +15,7 @@ import (
 	jobFeature "go-takemikazuchi-api/internal/job"
 	jobApplicationFeature "go-takemikazuchi-api/internal/job_application"
 	jobResourceFeature "go-takemikazuchi-api/internal/job_resource"
+	reviewFeature "go-takemikazuchi-api/internal/review"
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
 	transactionFeature "go-takemikazuchi-api/internal/transaction"
@@ -51,6 +52,7 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	jobApplicationController jobApplicationFeature.Controller,
 	workerController workerFeature.Controller,
 	transactionController transactionFeature.Controller,
+	reviewController reviewFeature.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
 	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController)
 	protectedRoutes.Setup()
@@ -126,6 +128,15 @@ var transactionSet = wire.NewSet(
 	wire.Bind(new(transactionFeature.Controller), new(*transactionFeature.Handler)),
 )
 
+var reviewSet = wire.NewSet(
+	reviewFeature.NewRepository,
+	wire.Bind(new(reviewFeature.Repository), new(*reviewFeature.RepositoryImpl)),
+	reviewFeature.NewService,
+	wire.Bind(new(reviewFeature.Service), new(*reviewFeature.ServiceImpl)),
+	reviewFeature.NewHandler,
+	wire.Bind(new(reviewFeature.Controller), new(*reviewFeature.Handler)),
+)
+
 var jobResourceSet = wire.NewSet(
 	jobResourceFeature.NewRepository,
 	wire.Bind(new(jobResourceFeature.Repository), new(*jobResourceFeature.RepositoryImpl)),
@@ -156,6 +167,7 @@ func InitializeRoutes(
 		userAddressSet,
 		transactionSet,
 		workerResourceSet,
+		reviewSet,
 		storage.ProvideFileStorage, // Fungsi untuk memilih implementasi yang sesuai
 	)
 	return nil, nil

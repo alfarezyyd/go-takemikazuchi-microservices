@@ -23,7 +23,7 @@ type ServiceImpl struct {
 	userRepository    user.Repository
 }
 
-func NewReviewService(
+func NewService(
 	dbConnection *gorm.DB,
 	validatorInstance *validator.Validate,
 	reviewRepository Repository,
