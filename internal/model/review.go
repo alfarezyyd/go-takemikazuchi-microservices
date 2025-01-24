@@ -5,9 +5,14 @@ import "time"
 type Review struct {
 	ID         uint64    `gorm:"column:id;primaryKey;autoIncrement"`
 	ReviewerId uint64    `gorm:"column:reviewer_id"`
-	RevieweeId uint64    `gorm:"column:reviewee_id"`
+	ReviewedId uint64    `gorm:"column:reviewed_id"`
+	JobId      uint64    `gorm:"column:job_id"`
+	Role       string    `gorm:"column:role"`
 	Rating     uint64    `gorm:"column:rating"`
-	Comment    string    `gorm:"column:comment"`
+	ReviewText string    `gorm:"column:review_text"`
 	CreatedAt  time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"column:updated_at;autoCreateTime;autoUpdateTime"`
+	Reviewer   *User     `gorm:"foreignKey:reviewer_id;references:id"`
+	Reviewed   *User     `gorm:"foreignKey:reviewed_id;references:id"`
+	Job        *Job      `gorm:"foreignKey:job_id;references:id"`
 }
