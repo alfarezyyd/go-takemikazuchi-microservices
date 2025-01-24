@@ -25,5 +25,5 @@ func (reviewHandler *Handler) Create(ginContext *gin.Context) {
 	err := ginContext.ShouldBindBodyWithJSON(&createReviewDto)
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
-	reviewHandler.reviewService.Create(userJwtClaim, createReviewDto)
+	reviewHandler.reviewService.Create(userJwtClaim, &createReviewDto)
 }
