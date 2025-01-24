@@ -48,5 +48,12 @@ func (jobHandler *Handler) Delete(ginContext *gin.Context) {
 	jobId := ginContext.Param("id")
 	operationResult := jobHandler.jobService.HandleDelete(userJwtClaim, jobId)
 	helper.CheckErrorOperation(operationResult, operationResult)
-	ginContext.JSON(http.StatusOK, operationResult)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", operationResult))
+}
+
+func (jobHandler *Handler) RequestCompleted(ginContext *gin.Context) {
+	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
+	jobId := ginContext.Param("id")
+	jobHandler.jobService.HandleRequestCompleted(userJwtClaim, jobId)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", nil))
 }

@@ -9,12 +9,14 @@ import (
 	"github.com/google/uuid"
 	"go-takemikazuchi-api/internal/category"
 	jobDto "go-takemikazuchi-api/internal/job/dto"
+	jobApplicationFeature "go-takemikazuchi-api/internal/job_application"
 	jobResourceFeature "go-takemikazuchi-api/internal/job_resource"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/internal/storage"
 	userFeature "go-takemikazuchi-api/internal/user"
 	userDto "go-takemikazuchi-api/internal/user/dto"
 	userAddressFeature "go-takemikazuchi-api/internal/user_address"
+	"go-takemikazuchi-api/internal/worker"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
@@ -22,19 +24,22 @@ import (
 	"gorm.io/gorm"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 )
 
 type ServiceImpl struct {
-	validatorInstance     *validator.Validate
-	jobRepository         Repository
-	userRepository        userFeature.Repository
-	categoryRepository    category.Repository
-	dbConnection          *gorm.DB
-	engTranslator         ut.Translator
-	jobResourceRepository jobResourceFeature.Repository
-	fileStorage           storage.FileStorage
-	mapsClient            *maps.Client
-	userAddressRepository userAddressFeature.Repository
+	validatorInstance        *validator.Validate
+	jobRepository            Repository
+	userRepository           userFeature.Repository
+	categoryRepository       category.Repository
+	dbConnection             *gorm.DB
+	engTranslator            ut.Translator
+	jobResourceRepository    jobResourceFeature.Repository
+	fileStorage              storage.FileStorage
+	mapsClient               *maps.Client
+	userAddressRepository    userAddressFeature.Repository
+	jobApplicationRepository jobApplicationFeature.Repository
+	workerRepository         worker.Repository
 }
 
 func NewService(validatorInstance *validator.Validate,
@@ -47,6 +52,7 @@ func NewService(validatorInstance *validator.Validate,
 	fileStorage storage.FileStorage,
 	mapsClient *maps.Client,
 	userAddressRepository userAddressFeature.Repository,
+	workerRepository worker.Repository,
 ) *ServiceImpl {
 
 	return &ServiceImpl{
@@ -132,4 +138,26 @@ func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, 
 		return nil
 	})
 	return nil
+}
+
+func (jobService *ServiceImpl) HandleRequestCompleted(userJwtClaims *userDto.JwtClaimDto, jobId *string) {
+	err := jobService.validatorInstance.Var(jobId, "required,gte=1")
+	exception.ParseValidationError(err, jobService.engTranslator)
+	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		parsedJobId, err := strconv.ParseUint(*jobId, 10, 64)
+		var userModel model.User
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid job id")))
+		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		_, err = jobService.jobRepository.VerifyJobOwner(gormTransaction, &userModel.Email, &parsedJobId)
+		if err != nil {
+			_, err := jobService.jobRepository.VerifyJobWorker(gormTransaction, &userModel.Email, &parsedJobId)
+			helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		}
+		jobModel, err := jobService.jobRepository.FindById(gormTransaction, &parsedJobId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		jobModel.Status = "Done"
+		jobService.jobRepository.Update(jobModel, gormTransaction)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

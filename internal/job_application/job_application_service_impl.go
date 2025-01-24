@@ -50,7 +50,8 @@ func (jobApplicationService *ServiceImpl) FindAllApplication(userJwtClaims *user
 	var jobApplicationsResponse []*dto.JobApplicationResponseDto
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		jobApplicationService.jobRepository.VerifyJobOwner(gormTransaction, userJwtClaims.Email, &parsedJobId)
+		_, err := jobApplicationService.jobRepository.VerifyJobOwner(gormTransaction, userJwtClaims.Email, &parsedJobId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		jobApplications := jobApplicationService.jobApplicationRepository.FindAllApplication(gormTransaction, &parsedJobId)
 		jobApplicationsResponse = mapper.MapJobApplicationModelIntoJobApplicationResponse(jobApplications)
 		return nil
@@ -84,7 +85,9 @@ func (jobApplicationService *ServiceImpl) SelectApplication(userJwtClaims *userD
 	exception.ParseValidationError(err, jobApplicationService.engTranslator)
 	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		jobApplicationModel := jobApplicationService.jobApplicationRepository.FindById(gormTransaction, &selectApplicationDto.UserId, &selectApplicationDto.JobId)
-		jobModel := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, userJwtClaims.Email, &selectApplicationDto.JobId)
+		id, err := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, userJwtClaims.Email, &selectApplicationDto.JobId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		jobModel := id
 		jobModel.Status = "Process"
 		jobApplicationModel.Status = "Accepted"
 		jobApplicationService.jobApplicationRepository.BulkRejectUpdate(gormTransaction, &jobModel.ID)

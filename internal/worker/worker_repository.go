@@ -7,4 +7,5 @@ import (
 
 type Repository interface {
 	Store(gormTransaction *gorm.DB, workerModel *model.Worker)
+	FindById(transaction *gorm.DB, userId *uint64) (*model.Worker, error)
 }

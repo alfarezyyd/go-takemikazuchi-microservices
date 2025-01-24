@@ -45,26 +45,34 @@ func (jobRepository *RepositoryImpl) IsExists(jobId uint64, gormTransaction *gor
 	return isJobExists
 }
 
-func (jobRepository *RepositoryImpl) VerifyJobOwner(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) {
+func (jobRepository *RepositoryImpl) VerifyJobOwner(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) (bool, error) {
 	var isJobValid bool
 	err := gormTransaction.Model(&model.Job{}).
 		Joins("JOIN users ON users.id = jobs.user_id").
 		Select("COUNT(*) > 0").
 		Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
 		First(&isJobValid).Error
-	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return isJobValid, err
 
 }
 
-func (jobRepository *RepositoryImpl) FindVerifyById(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) *model.Job {
+func (jobRepository *RepositoryImpl) VerifyJobWorker(gormTransaction *gorm.DB, workerId *string, jobId *uint64) (bool, error) {
+	var isJobValid bool
+	err := gormTransaction.Model(&model.Job{}).
+		Select("COUNT(*) > 0").
+		Where("jobs.id = ? AND workers.id = ?", jobId, workerId).
+		First(&isJobValid).Error
+	return isJobValid, err
+}
+
+func (jobRepository *RepositoryImpl) FindVerifyById(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) (*model.Job, error) {
 	var jobModel model.Job
 	err := gormTransaction.Model(&model.Job{}).
 		Joins("JOIN users ON users.id = jobs.user_id").
 		Select("jobs.*").
 		Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
 		First(&jobModel).Error
-	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return &jobModel
+	return &jobModel, err
 }
 
 func (jobRepository *RepositoryImpl) FindWithRelationship(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) *model.Job {
