@@ -93,7 +93,7 @@ func (transactionService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto
 		if midtransError != nil && helper.CheckErrorOperation(midtransError.GetRawError(), exception.NewClientError(http.StatusBadRequest, exception.ErrInvalidRequestBody, errors.New("error when create midtrans transaction"))) {
 			return nil
 		}
-		transactionModel.SnapToken = midtransResponse.Token
+		transactionModel.SnapToken = &midtransResponse.Token
 		midtransSnapToken = midtransResponse.Token
 		transactionService.transactionRepository.Update(gormTransaction, &transactionModel)
 		return nil
@@ -113,6 +113,7 @@ func (transactionService *ServiceImpl) PostPayment(transactionNotificationDto *d
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("error when trying to hash")))
 		}
 		transactionService.paymentOperation(transactionNotificationDto, transactionModel)
+		transactionModel.PaymentMethod = &transactionNotificationDto.PaymentType
 		transactionService.transactionRepository.Update(gormTransaction, transactionModel)
 		transactionService.jobRepository.Update(transactionModel.Job, gormTransaction)
 		return nil
