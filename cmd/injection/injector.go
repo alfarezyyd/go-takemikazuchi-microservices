@@ -54,7 +54,7 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	transactionController transactionFeature.Controller,
 	reviewController reviewFeature.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController, reviewController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }

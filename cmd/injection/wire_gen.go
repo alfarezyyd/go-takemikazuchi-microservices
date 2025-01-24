@@ -18,6 +18,7 @@ import (
 	"go-takemikazuchi-api/internal/job"
 	"go-takemikazuchi-api/internal/job_application"
 	"go-takemikazuchi-api/internal/job_resource"
+	"go-takemikazuchi-api/internal/review"
 	"go-takemikazuchi-api/internal/routes"
 	"go-takemikazuchi-api/internal/storage"
 	"go-takemikazuchi-api/internal/transaction"
@@ -59,7 +60,10 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	worker_resourceRepositoryImpl := worker_resource.NewRepository()
 	workerServiceImpl := worker.NewService(workerRepositoryImpl, validatorInstance, engTranslator, dbConnection, userRepositoryImpl, worker_walletRepositoryImpl, worker_resourceRepositoryImpl, fileStorage)
 	workerHandler := worker.NewHandler(workerServiceImpl)
-	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, job_applicationHandler, workerHandler, handler, viperConfig)
+	reviewRepositoryImpl := review.NewRepository()
+	reviewServiceImpl := review.NewService(dbConnection, validatorInstance, reviewRepositoryImpl, engTranslator, repositoryImpl, userRepositoryImpl)
+	reviewHandler := review.NewHandler(reviewServiceImpl)
+	protectedRoutes := ProvideProtectedRoutes(ginRouterGroup, categoryHandler, jobHandler, job_applicationHandler, workerHandler, handler, reviewHandler, viperConfig)
 	applicationRoutes := &routes.ApplicationRoutes{
 		PublicRoutes:         publicRoutes,
 		AuthenticationRoutes: authenticationRoutes,
@@ -94,8 +98,9 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	jobApplicationController job_application.Controller,
 	workerController worker.Controller,
 	transactionController transaction.Controller,
+	reviewController review.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController, reviewController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -117,5 +122,7 @@ var workerWalletSet = wire.NewSet(worker_wallet.NewRepository, wire.Bind(new(wor
 var jobApplicationSet = wire.NewSet(job_application.NewRepository, wire.Bind(new(job_application.Repository), new(*job_application.RepositoryImpl)), job_application.NewService, wire.Bind(new(job_application.Service), new(*job_application.ServiceImpl)), job_application.NewHandler, wire.Bind(new(job_application.Controller), new(*job_application.Handler)))
 
 var transactionSet = wire.NewSet(transaction.NewRepository, wire.Bind(new(transaction.Repository), new(*transaction.RepositoryImpl)), transaction.NewService, wire.Bind(new(transaction.Service), new(*transaction.ServiceImpl)), transaction.NewHandler, wire.Bind(new(transaction.Controller), new(*transaction.Handler)))
+
+var reviewSet = wire.NewSet(review.NewRepository, wire.Bind(new(review.Repository), new(*review.RepositoryImpl)), review.NewService, wire.Bind(new(review.Service), new(*review.ServiceImpl)), review.NewHandler, wire.Bind(new(review.Controller), new(*review.Handler)))
 
 var jobResourceSet = wire.NewSet(job_resource.NewRepository, wire.Bind(new(job_resource.Repository), new(*job_resource.RepositoryImpl)))
