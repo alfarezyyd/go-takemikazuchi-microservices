@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"fmt"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
@@ -23,4 +24,9 @@ func (workerRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, userI
 	var workerModel model.Worker
 	err := gormTransaction.Where("user_id = ?", userId).First(&workerModel).Error
 	return &workerModel, err
+}
+
+func (workerRepository *RepositoryImpl) DynamicUpdate(gormTransaction *gorm.DB, whereClause interface{}, updatedValue interface{}, whereArgument ...interface{}) {
+	err := gormTransaction.Model(&model.Worker{}).Debug().Where(whereClause, whereArgument).Updates(updatedValue).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

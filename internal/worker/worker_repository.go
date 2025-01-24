@@ -7,5 +7,6 @@ import (
 
 type Repository interface {
 	Store(gormTransaction *gorm.DB, workerModel *model.Worker)
-	FindById(transaction *gorm.DB, userId *uint64) (*model.Worker, error)
+	FindById(gormTransaction *gorm.DB, userId *uint64) (*model.Worker, error)
+	DynamicUpdate(gormTransaction *gorm.DB, whereClause interface{}, updatedValue interface{}, whereArgument ...interface{})
 }

@@ -10,6 +10,7 @@ type Job struct {
 	UserId         uint64           `gorm:"column:user_id"`
 	AddressId      uint64           `gorm:"column:address_id"`
 	CategoryId     uint64           `gorm:"column:category_id" mapstructure:"CategoryId"`
+	WorkerId       uint64           `gorm:"column:worker_id" mapstructure:"WorkerId"`
 	Title          string           `gorm:"column:title" mapstructure:"Title"`
 	Description    string           `gorm:"column:description" mapstructure:"Description"`
 	Price          float64          `gorm:"column:price" mapstructure:"Price"`
@@ -21,6 +22,7 @@ type Job struct {
 	UserAddress    *UserAddress     `gorm:"foreignKey:address_id;references:id"`
 	Category       *Category        `gorm:"foreignKey:category_id;references:id"`
 	JobApplication []JobApplication `gorm:"foreignKey:job_id;references:id"`
+	Worker         *Worker          `gorm:"foreignKey:worker_id;references:id"`
 }
 
 func (jobModel *Job) BeforeUpdate(tx *gorm.DB) (err error) {

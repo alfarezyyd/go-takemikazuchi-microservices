@@ -63,7 +63,8 @@ func NewService(validatorInstance *validator.Validate,
 		jobResourceRepository: jobResourceRepository,
 		fileStorage:           fileStorage,
 		mapsClient:            mapsClient,
-		userAddressRepository: userAddressRepository}
+		userAddressRepository: userAddressRepository,
+		workerRepository:      workerRepository}
 }
 
 func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError {
@@ -155,6 +156,9 @@ func (jobService *ServiceImpl) HandleRequestCompleted(userJwtClaims *userDto.Jwt
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		jobModel.Status = "Done"
 		jobService.jobRepository.Update(jobModel, gormTransaction)
+		jobService.workerRepository.DynamicUpdate(gormTransaction, "id = ?", map[string]interface{}{
+			"revenue": jobModel.Price,
+		}, jobModel.WorkerId)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
