@@ -53,7 +53,7 @@ func (jobHandler *Handler) Delete(ginContext *gin.Context) {
 
 func (jobHandler *Handler) RequestCompleted(ginContext *gin.Context) {
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
-	jobId := ginContext.Param("id")
+	jobId := ginContext.Param("jobId")
 	jobHandler.jobService.HandleRequestCompleted(userJwtClaim, &jobId)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", nil))
 }

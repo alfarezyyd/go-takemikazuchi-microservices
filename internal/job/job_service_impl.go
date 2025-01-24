@@ -139,7 +139,7 @@ func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, 
 }
 
 func (jobService *ServiceImpl) HandleRequestCompleted(userJwtClaims *userDto.JwtClaimDto, jobId *string) {
-	err := jobService.validatorInstance.Var(jobId, "required,gte=1")
+	err := jobService.validatorInstance.Var(jobId, "required")
 	exception.ParseValidationError(err, jobService.engTranslator)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parsedJobId, err := strconv.ParseUint(*jobId, 10, 64)
