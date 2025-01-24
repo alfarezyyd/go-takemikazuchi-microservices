@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"go-takemikazuchi-api/internal/category"
 	jobDto "go-takemikazuchi-api/internal/job/dto"
-	jobApplicationFeature "go-takemikazuchi-api/internal/job_application"
 	jobResourceFeature "go-takemikazuchi-api/internal/job_resource"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/internal/storage"
@@ -28,18 +27,17 @@ import (
 )
 
 type ServiceImpl struct {
-	validatorInstance        *validator.Validate
-	jobRepository            Repository
-	userRepository           userFeature.Repository
-	categoryRepository       category.Repository
-	dbConnection             *gorm.DB
-	engTranslator            ut.Translator
-	jobResourceRepository    jobResourceFeature.Repository
-	fileStorage              storage.FileStorage
-	mapsClient               *maps.Client
-	userAddressRepository    userAddressFeature.Repository
-	jobApplicationRepository jobApplicationFeature.Repository
-	workerRepository         worker.Repository
+	validatorInstance     *validator.Validate
+	jobRepository         Repository
+	userRepository        userFeature.Repository
+	categoryRepository    category.Repository
+	dbConnection          *gorm.DB
+	engTranslator         ut.Translator
+	jobResourceRepository jobResourceFeature.Repository
+	fileStorage           storage.FileStorage
+	mapsClient            *maps.Client
+	userAddressRepository userAddressFeature.Repository
+	workerRepository      worker.Repository
 }
 
 func NewService(validatorInstance *validator.Validate,
