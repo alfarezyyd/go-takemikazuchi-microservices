@@ -5,10 +5,10 @@ import "time"
 type Review struct {
 	ID         uint64    `gorm:"column:id;primaryKey;autoIncrement"`
 	ReviewerId uint64    `gorm:"column:reviewer_id"`
-	ReviewedId uint64    `gorm:"column:reviewed_id"`
+	ReviewedId uint64    `gorm:"column:reviewed_id" mapstructure:Revie`
 	JobId      uint64    `gorm:"column:job_id"`
 	Role       string    `gorm:"column:role"`
-	Rating     uint64    `gorm:"column:rating"`
+	Rating     byte      `gorm:"column:rating"`
 	ReviewText string    `gorm:"column:review_text"`
 	CreatedAt  time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt  time.Time `gorm:"column:updated_at;autoCreateTime;autoUpdateTime"`

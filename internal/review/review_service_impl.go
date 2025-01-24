@@ -54,6 +54,7 @@ func (reviewService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto, cre
 		}
 		var reviewModel model.Review
 		mapper.MapCreateReviewDtoIntoReviewModel(createReviewDto, &reviewModel)
+		reviewModel.ReviewerId = userModel.ID
 		reviewService.reviewRepository.Create(gormTransaction, &reviewModel)
 		return nil
 	})
