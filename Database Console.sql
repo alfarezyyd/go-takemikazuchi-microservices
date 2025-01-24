@@ -16,3 +16,5 @@ DELETE FROM workers;
 DELETE FROM worker_resources;
 DELETE FROM worker_wallets;
 DELETE FROM transactions;
+
+DROP TABLE IF EXISTS reviews;
