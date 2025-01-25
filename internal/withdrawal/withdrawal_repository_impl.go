@@ -1,0 +1,30 @@
+package withdrawal
+
+import (
+	"go-takemikazuchi-api/internal/model"
+	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-api/pkg/helper"
+	"gorm.io/gorm"
+)
+
+type RepositoryImpl struct{}
+
+func NewRepository() *RepositoryImpl {
+	return &RepositoryImpl{}
+}
+func (withdrawalRepository *RepositoryImpl) FindAll(gormTransaction *gorm.DB) []model.Withdrawal {
+	var withdrawalsModel []model.Withdrawal
+	err := gormTransaction.Model(&model.Withdrawal{}).
+		Preload("Worker").
+		Preload("WorkerWallet").
+		Joins("JOIN worker_wallets ON worker_wallets.id = withdrawals.wallet_id").
+		Joins("JOIN workers ON workers.id = withdrawals.worker_id").
+		Select(`withdrawals.*, worker_wallets.wallet_type, worker_wallets.account_name, worker_wallets.account_number, worker_wallets.bank_name`).
+		Find(&withdrawalsModel).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return withdrawalsModel
+}
+func (withdrawalRepository *RepositoryImpl) Create(gormTransaction *gorm.DB, withdrawalModel *model.Withdrawal) {
+	err := gormTransaction.Create(withdrawalModel).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}

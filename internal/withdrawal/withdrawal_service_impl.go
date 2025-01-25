@@ -1,6 +1,7 @@
 package withdrawal
 
 import (
+	"errors"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/internal/model"
@@ -13,6 +14,7 @@ import (
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 type ServiceImpl struct {
@@ -42,6 +44,20 @@ func NewService(
 		workerRepository:     workerRepository,
 		walletRepository:     walletRepository,
 	}
+}
+func (withdrawalService *ServiceImpl) FindAll(userJwtClaims *userDto.JwtClaimDto) []model.Withdrawal {
+	var withdrawalsModel []model.Withdrawal
+	err := withdrawalService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var userModel model.User
+		withdrawalService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		if userModel.Role != "Admin" {
+			exception.ThrowClientError(exception.NewClientError(http.StatusUnauthorized, exception.ErrUnauthorized, errors.New("only admin can do the ops")))
+		}
+		withdrawalsModel = withdrawalService.withdrawalRepository.FindAll(gormTransaction)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return withdrawalsModel
 }
 
 func (withdrawalService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto, createWithdrawalDto *dto.CreateWithdrawalDto) {

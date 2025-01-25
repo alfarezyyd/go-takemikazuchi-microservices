@@ -76,4 +76,5 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 
 	withdrawalRouterGroup := protectedRoutes.routerGroup.Group("withdrawals")
 	withdrawalRouterGroup.POST("", protectedRoutes.withdrawalController.Create)
+	withdrawalRouterGroup.GET("", protectedRoutes.withdrawalController.FindAll)
 }
