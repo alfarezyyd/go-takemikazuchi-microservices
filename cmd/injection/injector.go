@@ -21,6 +21,7 @@ import (
 	transactionFeature "go-takemikazuchi-api/internal/transaction"
 	userFeature "go-takemikazuchi-api/internal/user"
 	userAddressFeature "go-takemikazuchi-api/internal/user_address"
+	withdrawalFeature "go-takemikazuchi-api/internal/withdrawal"
 	workerFeature "go-takemikazuchi-api/internal/worker"
 	workerResourceFeature "go-takemikazuchi-api/internal/worker_resource"
 	workerWalletFeature "go-takemikazuchi-api/internal/worker_wallet"
@@ -53,8 +54,9 @@ func ProvideProtectedRoutes(routerGroup *gin.RouterGroup,
 	workerController workerFeature.Controller,
 	transactionController transactionFeature.Controller,
 	reviewController reviewFeature.Controller,
+	withdrawalController withdrawalFeature.Controller,
 	viperConfig *viper.Viper) *routes.ProtectedRoutes {
-	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController, reviewController)
+	protectedRoutes := routes.NewProtectedRoutes(routerGroup, categoryController, jobController, viperConfig, workerController, transactionController, jobApplicationController, reviewController, withdrawalController)
 	protectedRoutes.Setup()
 	return protectedRoutes
 }
@@ -137,6 +139,15 @@ var reviewSet = wire.NewSet(
 	wire.Bind(new(reviewFeature.Controller), new(*reviewFeature.Handler)),
 )
 
+var withdrawalSet = wire.NewSet(
+	withdrawalFeature.NewRepository,
+	wire.Bind(new(withdrawalFeature.Repository), new(*withdrawalFeature.RepositoryImpl)),
+	withdrawalFeature.NewService,
+	wire.Bind(new(withdrawalFeature.Service), new(*withdrawalFeature.ServiceImpl)),
+	withdrawalFeature.NewHandler,
+	wire.Bind(new(withdrawalFeature.Controller), new(*withdrawalFeature.Handler)),
+)
+
 var jobResourceSet = wire.NewSet(
 	jobResourceFeature.NewRepository,
 	wire.Bind(new(jobResourceFeature.Repository), new(*jobResourceFeature.RepositoryImpl)),
@@ -168,6 +179,7 @@ func InitializeRoutes(
 		transactionSet,
 		workerResourceSet,
 		reviewSet,
+		withdrawalSet,
 		storage.ProvideFileStorage, // Fungsi untuk memilih implementasi yang sesuai
 	)
 	return nil, nil
