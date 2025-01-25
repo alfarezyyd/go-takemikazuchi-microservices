@@ -20,6 +20,7 @@ func MapCategoryModelIntoCategoryResponse(categoriesModel []model.Category) []dt
 	for _, categoryModel := range categoriesModel {
 		var categoryResponseDto dto.CategoryResponseDto
 		err = mapstructure.Decode(categoryModel, &categoryResponseDto)
+		categoriesResponseDto = append(categoriesResponseDto, categoryResponseDto)
 	}
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return categoriesResponseDto

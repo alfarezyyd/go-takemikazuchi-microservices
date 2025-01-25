@@ -2,6 +2,7 @@ package category
 
 import (
 	"errors"
+	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/internal/category/dto"
@@ -37,6 +38,7 @@ func NewService(
 func (categoryService *ServiceImpl) FindAll() []dto.CategoryResponseDto {
 	categoriesModel := categoryService.categoryRepository.FindAll(categoryService.dbConnection)
 	categoriesResponseDto := mapper.MapCategoryModelIntoCategoryResponse(categoriesModel)
+	fmt.Println(categoriesModel, categoriesResponseDto)
 	return categoriesResponseDto
 }
 
