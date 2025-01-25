@@ -13,3 +13,14 @@ func MapCategoryDtoIntoCategoryModel[T *dto.CreateCategoryDto | *dto.UpdateCateg
 	err := mapstructure.Decode(categoryDto, &categoryModel)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 }
+
+func MapCategoryModelIntoCategoryResponse(categoriesModel []model.Category) []dto.CategoryResponseDto {
+	var err error
+	var categoriesResponseDto []dto.CategoryResponseDto
+	for _, categoryModel := range categoriesModel {
+		var categoryResponseDto dto.CategoryResponseDto
+		err = mapstructure.Decode(categoryModel, &categoryResponseDto)
+	}
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return categoriesResponseDto
+}

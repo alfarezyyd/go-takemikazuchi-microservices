@@ -2,6 +2,8 @@ package category
 
 import (
 	"go-takemikazuchi-api/internal/model"
+	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-api/pkg/helper"
 	"gorm.io/gorm"
 )
 
@@ -12,7 +14,17 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (repositoryImpl *RepositoryImpl) IsCategoryExists(categoryId uint64, gormTransaction *gorm.DB) bool {
+func (categoryRepository *RepositoryImpl) FindAll(gormTransaction *gorm.DB) []model.Category {
+	var categoriesModel []model.Category
+	err := gormTransaction.
+		Preload("Jobs").
+		Joins("JOIN jobs ON category_jobs.category_id = jobs.category_id").
+		Find(&categoriesModel).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return categoriesModel
+}
+
+func (categoryRepository *RepositoryImpl) IsCategoryExists(categoryId uint64, gormTransaction *gorm.DB) bool {
 	var isCategoryExists bool
 	gormTransaction.Model(&model.Category{}).
 		Select("COUNT(*) > 0").

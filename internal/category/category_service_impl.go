@@ -34,10 +34,16 @@ func NewService(
 	}
 }
 
-func (serviceImpl *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError {
-	err := serviceImpl.validationInstance.Struct(categoryCreateDto)
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+func (categoryService *ServiceImpl) FindAll() []dto.CategoryResponseDto {
+	categoriesModel := categoryService.categoryRepository.FindAll(categoryService.dbConnection)
+	categoriesResponseDto := mapper.MapCategoryModelIntoCategoryResponse(categoriesModel)
+	return categoriesResponseDto
+}
+
+func (categoryService *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError {
+	err := categoryService.validationInstance.Struct(categoryCreateDto)
+	exception.ParseValidationError(err, categoryService.engTranslator)
+	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		var categoryModel model.Category
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
@@ -54,12 +60,12 @@ func (serviceImpl *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, 
 	return nil
 }
 
-func (serviceImpl *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError {
-	err := serviceImpl.validationInstance.Struct(updateCategoryDto)
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
-	err = serviceImpl.validationInstance.Var(categoryId, "required,gte=1")
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+func (categoryService *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError {
+	err := categoryService.validationInstance.Struct(updateCategoryDto)
+	exception.ParseValidationError(err, categoryService.engTranslator)
+	err = categoryService.validationInstance.Var(categoryId, "required,gte=1")
+	exception.ParseValidationError(err, categoryService.engTranslator)
+	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var categoryModel model.Category
 		var userModel model.User
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
@@ -81,10 +87,10 @@ func (serviceImpl *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *us
 	return nil
 }
 
-func (serviceImpl *ServiceImpl) HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception.ClientError {
-	err := serviceImpl.validationInstance.Var(categoryId, "required,number,gte=1")
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+func (categoryService *ServiceImpl) HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception.ClientError {
+	err := categoryService.validationInstance.Var(categoryId, "required,number,gte=1")
+	exception.ParseValidationError(err, categoryService.engTranslator)
+	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var categoryModel model.Category
 		var userModel model.User
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error

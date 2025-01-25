@@ -8,4 +8,5 @@ type Category struct {
 	Description string    `gorm:"column:description" mapstructure:"description"`
 	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"column:updated_at;autoCreateTime;autoUpdateTime"`
+	Jobs        []Job     `gorm:"foreignKey:category_id;references:id"`
 }

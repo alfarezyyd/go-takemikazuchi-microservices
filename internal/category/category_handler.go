@@ -19,6 +19,11 @@ func NewHandler(categoryService Service) *Handler {
 	}
 }
 
+func (categoryHandler *Handler) FindAll(ginContext *gin.Context) {
+	categoriesResponseDto := categoryHandler.categoryService.FindAll()
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", categoriesResponseDto))
+}
+
 func (categoryHandler *Handler) Create(ginContext *gin.Context) {
 	var categoryCreateDto dto.CreateCategoryDto
 	err := ginContext.ShouldBindBodyWithJSON(&categoryCreateDto)
