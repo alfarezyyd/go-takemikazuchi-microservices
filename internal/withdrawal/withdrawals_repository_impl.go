@@ -15,5 +15,5 @@ func NewRepositoryImpl() *RepositoryImpl {
 
 func (withdrawalRepository *RepositoryImpl) Create(gormTransaction *gorm.DB, withdrawalModel *model.Withdrawal) {
 	err := gormTransaction.Create(withdrawalModel).Error
-	helper.CheckErrorOperation(err, exception.ParseGormError(er))
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
