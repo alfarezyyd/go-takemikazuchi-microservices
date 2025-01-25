@@ -2,7 +2,6 @@ package review
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"go-takemikazuchi-api/internal/review/dto"
 	userDto "go-takemikazuchi-api/internal/user/dto"
