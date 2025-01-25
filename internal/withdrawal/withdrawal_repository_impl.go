@@ -37,7 +37,7 @@ func (withdrawalRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, w
 		Joins("JOIN worker_wallets ON worker_wallets.id = withdrawals.wallet_id").
 		Joins("JOIN workers ON workers.id = withdrawals.worker_id").
 		Select(`withdrawals.*, worker_wallets.wallet_type, worker_wallets.account_name, worker_wallets.account_number, worker_wallets.bank_name`).
-		Where("id = ?", withdrawalId).Find(&withdrawalsModel).
+		Where("withdrawals.id = ?", withdrawalId).Find(&withdrawalsModel).
 		First(&withdrawalsModel).Error
 	return &withdrawalsModel, err
 }
