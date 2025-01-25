@@ -111,20 +111,23 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 	return nil
 }
 
-func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, jobId string, updateJobDto *jobDto.UpdateJobDto) *exception.ClientError {
+func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, jobId string, updateJobDto *jobDto.UpdateJobDto, uploadedFiles []*multipart.FileHeader) {
 	err := jobService.validatorInstance.Struct(updateJobDto)
 	exception.ParseValidationError(err, jobService.engTranslator)
+	err = jobService.validatorInstance.Var(jobId, "required|gt=1")
+	exception.ParseValidationError(err, jobService.engTranslator)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var jobModel model.Job
 		var userModel model.User
+		parsedJobId, err := strconv.ParseUint(jobId, 10, 64)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid job id")))
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
-		mapper.MapJobDtoIntoJobModel(updateJobDto, &jobModel)
-		jobModel.UserId = userModel.ID
-		jobService.jobRepository.Update(&jobModel, gormTransaction)
+		jobModel, err := jobService.jobRepository.FindVerifyById(gormTransaction, &userModel.Email, &parsedJobId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		mapper.MapJobDtoIntoJobModel(updateJobDto, jobModel)
+		jobService.jobRepository.Update(jobModel, gormTransaction)
 		return nil
 	})
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
-	return nil
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
 func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, jobId string) *exception.ClientError {

@@ -1,11 +1,13 @@
 package job
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	jobDto "go-takemikazuchi-api/internal/job/dto"
 	userDto "go-takemikazuchi-api/internal/user/dto"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
+	"mime/multipart"
 	"net/http"
 )
 
@@ -23,9 +25,14 @@ func (jobHandler *Handler) Create(ginContext *gin.Context) {
 	var createJobDto jobDto.CreateJobDto
 	err := ginContext.ShouldBind(&createJobDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	multipartForm, err := ginContext.MultipartForm()
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	uploadedFiles := multipartForm.File["images[]"]
+	var uploadedFiles []*multipart.FileHeader
+	if ginContext.ContentType() == "multipart/form-data" {
+		multipartForm, err := ginContext.MultipartForm()
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+
+		// Ambil file jika ada
+		uploadedFiles = multipartForm.File["images[]"]
+	}
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	operationResult := jobHandler.jobService.HandleCreate(userJwtClaim, &createJobDto, uploadedFiles)
 	helper.CheckErrorOperation(operationResult.GetRawError(), operationResult)
@@ -34,13 +41,19 @@ func (jobHandler *Handler) Create(ginContext *gin.Context) {
 
 func (jobHandler *Handler) Update(ginContext *gin.Context) {
 	var updateJobDto jobDto.UpdateJobDto
-	err := ginContext.ShouldBindBodyWithJSON(&updateJobDto)
+	err := ginContext.ShouldBind(&updateJobDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	fmt.Printf("%+v", updateJobDto)
+	var uploadedFiles []*multipart.FileHeader
+	if ginContext.ContentType() == "multipart/form-data" {
+		multipartForm, err := ginContext.MultipartForm()
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+		uploadedFiles = multipartForm.File["images[]"]
+	}
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
-	jobId := ginContext.Param("id")
-	operationResult := jobHandler.jobService.HandleUpdate(userJwtClaim, jobId, &updateJobDto)
-	helper.CheckErrorOperation(operationResult, operationResult)
-	ginContext.JSON(http.StatusOK, operationResult)
+	jobId := ginContext.Param("jobId")
+	jobHandler.jobService.HandleUpdate(userJwtClaim, jobId, &updateJobDto, uploadedFiles)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", nil))
 }
 
 func (jobHandler *Handler) Delete(ginContext *gin.Context) {

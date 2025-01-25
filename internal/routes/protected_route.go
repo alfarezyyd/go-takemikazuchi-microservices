@@ -58,6 +58,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 
 	jobRouterGroup := protectedRoutes.routerGroup.Group("jobs")
 	jobRouterGroup.POST("", protectedRoutes.jobController.Create)
+	jobRouterGroup.PUT("/:jobId", protectedRoutes.jobController.Update)
 	jobRouterGroup.POST("/completed/:jobId", protectedRoutes.jobController.RequestCompleted)
 
 	workerRouterGroup := protectedRoutes.routerGroup.Group("workers")
