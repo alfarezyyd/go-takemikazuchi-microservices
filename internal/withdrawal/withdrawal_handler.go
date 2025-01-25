@@ -34,3 +34,10 @@ func (withdrawalHandler *Handler) Create(ginContext *gin.Context) {
 	withdrawalHandler.withdrawalService.Create(userJwtClaim, &createWithdrawalDto)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
 }
+
+func (withdrawalHandler *Handler) Update(ginContext *gin.Context) {
+	withdrawalId := ginContext.Param("withdrawalId")
+	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
+	withdrawalHandler.withdrawalService.Update(userJwtClaim, &withdrawalId)
+	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", nil))
+}

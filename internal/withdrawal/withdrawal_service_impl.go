@@ -15,6 +15,7 @@ import (
 	"go-takemikazuchi-api/pkg/mapper"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 type ServiceImpl struct {
@@ -73,6 +74,22 @@ func (withdrawalService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto,
 		mapper.MapCreateWithdrawalDtoIntoWithdrawalModel(createWithdrawalDto, &withdrawalModel)
 		withdrawalModel.WorkerId = workerModel.ID
 		withdrawalService.withdrawalRepository.Create(gormTransaction, &withdrawalModel)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}
+
+func (withdrawalService *ServiceImpl) Update(userJwtClaims *userDto.JwtClaimDto, withdrawalId *string) {
+	err := withdrawalService.validationService.Var(withdrawalId, "required|gt=0")
+	exception.ParseValidationError(err, withdrawalService.engTranslator)
+	err = withdrawalService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		var userModel model.User
+		parsedWithdrawalId, err := strconv.ParseUint(*withdrawalId, 10, 64)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("withdrawal id not valid")))
+		withdrawalService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		withdrawalModel, err := withdrawalService.withdrawalRepository.FindById(gormTransaction, &parsedWithdrawalId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		withdrawalService.withdrawalRepository.Update(gormTransaction, withdrawalModel)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

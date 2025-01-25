@@ -9,4 +9,5 @@ import (
 type Service interface {
 	Create(userJwtClaims *userDto.JwtClaimDto, createWithdrawalDto *dto.CreateWithdrawalDto)
 	FindAll(userJwtClaims *userDto.JwtClaimDto) []model.Withdrawal
+	Update(claim *userDto.JwtClaimDto, withdrawalId *string)
 }
