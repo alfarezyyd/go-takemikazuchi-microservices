@@ -25,14 +25,22 @@ type ServiceImpl struct {
 	walletRepository     workerWalletFeature.Repository
 }
 
-func NewServiceImpl(
+func NewService(
 	validationService *validator.Validate,
 	engTranslator ut.Translator,
-	withdrawalRepository Repository) *ServiceImpl {
+	withdrawalRepository Repository,
+	dbConnection *gorm.DB,
+	userRepository user.Repository,
+	workerRepository worker.Repository,
+	walletRepository workerWalletFeature.Repository) *ServiceImpl {
 	return &ServiceImpl{
 		validationService:    validationService,
 		engTranslator:        engTranslator,
 		withdrawalRepository: withdrawalRepository,
+		dbConnection:         dbConnection,
+		userRepository:       userRepository,
+		workerRepository:     workerRepository,
+		walletRepository:     walletRepository,
 	}
 }
 

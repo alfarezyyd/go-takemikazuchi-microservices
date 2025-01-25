@@ -9,6 +9,7 @@ import (
 	"go-takemikazuchi-api/internal/middleware"
 	reviewFeature "go-takemikazuchi-api/internal/review"
 	"go-takemikazuchi-api/internal/transaction"
+	withdrawalFeature "go-takemikazuchi-api/internal/withdrawal"
 	"go-takemikazuchi-api/internal/worker"
 )
 
@@ -20,6 +21,7 @@ type ProtectedRoutes struct {
 	transactionController    transaction.Controller
 	jobApplicationController jobApplication.Controller
 	reviewController         reviewFeature.Controller
+	withdrawalController     withdrawalFeature.Controller
 	viperConfig              *viper.Viper
 }
 
@@ -31,6 +33,7 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 	transactionController transaction.Controller,
 	jobApplicationController jobApplication.Controller,
 	reviewController reviewFeature.Controller,
+	withdrawalController withdrawalFeature.Controller,
 ) *ProtectedRoutes {
 	routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	return &ProtectedRoutes{
@@ -41,6 +44,7 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 		viperConfig:              viperConfig,
 		transactionController:    transactionController,
 		reviewController:         reviewController,
+		withdrawalController:     withdrawalController,
 		jobApplicationController: jobApplicationController,
 	}
 }
@@ -69,4 +73,7 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 
 	reviewRouterGroup := protectedRoutes.routerGroup.Group("reviews")
 	reviewRouterGroup.POST("", protectedRoutes.reviewController.Create)
+
+	withdrawalRouterGroup := protectedRoutes.routerGroup.Group("withdrawals")
+	withdrawalRouterGroup.POST("", protectedRoutes.withdrawalController.Create)
 }

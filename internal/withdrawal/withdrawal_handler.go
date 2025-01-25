@@ -2,6 +2,7 @@ package withdrawal
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	userDto "go-takemikazuchi-api/internal/user/dto"
 	"go-takemikazuchi-api/internal/withdrawal/dto"
@@ -22,7 +23,8 @@ func NewHandler(withdrawalService Service) *Handler {
 
 func (withdrawalHandler *Handler) Create(ginContext *gin.Context) {
 	var createWithdrawalDto dto.CreateWithdrawalDto
-	err := ginContext.ShouldBindBodyWithJSON(createWithdrawalDto)
+	err := ginContext.ShouldBindBodyWithJSON(&createWithdrawalDto)
+	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("error parsing body")))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	withdrawalHandler.withdrawalService.Create(userJwtClaim, &createWithdrawalDto)
