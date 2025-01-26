@@ -122,11 +122,41 @@ func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, 
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid job id")))
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
 		jobModel, err := jobService.jobRepository.FindVerifyById(gormTransaction, &userModel.Email, &parsedJobId)
+		if jobModel.CategoryId != updateJobDto.CategoryId {
+			isCategoryExists := jobService.categoryRepository.IsCategoryExists(updateJobDto.CategoryId, gormTransaction)
+			if !isCategoryExists {
+				exception.ThrowClientError(exception.NewClientError(http.StatusNotFound, exception.ErrNotFound, errors.New("category not found")))
+			}
+		}
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		mapper.MapJobDtoIntoJobModel(updateJobDto, jobModel)
 		jobService.jobRepository.Update(jobModel, gormTransaction)
+		uuidString := uuid.New().String()
+		if len(uploadedFiles) != 0 {
+			var allFileName []string
+			for _, uploadedFile := range uploadedFiles {
+				openedFile, _ := uploadedFile.Open()
+				_, err := jobService.fileStorage.UploadFile(openedFile, fmt.Sprintf("%s-%s", uuidString, uploadedFile.Filename))
+				helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("upload file failed")))
+				allFileName = append(allFileName, fmt.Sprintf("%s-%s", uuidString, uploadedFile.Filename))
+			}
+			resourceModel := mapper.MapStringIntoJobResourceModel(jobModel.ID, allFileName)
+			jobService.jobResourceRepository.BulkCreate(gormTransaction, resourceModel)
+		}
+		if len(updateJobDto.DeletedFilesName) != 0 {
+			countFile := jobService.jobResourceRepository.CountBulkByName(gormTransaction, jobModel.ID, updateJobDto.DeletedFilesName)
+			fmt.Println(countFile)
+			if countFile != len(updateJobDto.DeletedFilesName) {
+				exception.ThrowClientError(exception.NewClientError(http.StatusNotFound, "Some files not found", errors.New("count file not equal")))
+			}
+			for _, deletedFileName := range updateJobDto.DeletedFilesName {
+				_ = jobService.fileStorage.DeleteFile(deletedFileName)
+			}
+			jobService.jobResourceRepository.DeleteBulkByName(gormTransaction, jobModel.ID, updateJobDto.DeletedFilesName)
+		}
 		return nil
 	})
+	fmt.Print(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 

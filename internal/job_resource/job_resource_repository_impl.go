@@ -1,6 +1,7 @@
 package job_resource
 
 import (
+	"fmt"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
@@ -21,5 +22,17 @@ func (jobResourceRepository *RepositoryImpl) Create(gormTransaction *gorm.DB, jo
 
 func (jobResourceRepository *RepositoryImpl) BulkCreate(gormTransaction *gorm.DB, jobResourceModels []*model.JobResource) {
 	err := gormTransaction.Create(&jobResourceModels).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}
+
+func (jobResourceRepository *RepositoryImpl) CountBulkByName(gormTransaction *gorm.DB, jobId uint64, deletedFilesName []string) int {
+	var countFile int
+	err := gormTransaction.Model(&model.JobResource{}).Select("COUNT(*)").Where("job_id = ? AND image_path IN (?)", jobId, deletedFilesName).First(&countFile).Error
+	fmt.Println(err)
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return countFile
+}
+func (jobResourceRepository *RepositoryImpl) DeleteBulkByName(gormTransaction *gorm.DB, jobId uint64, deletedFilesName []string) {
+	err := gormTransaction.Model(&model.JobResource{}).Where("job_id = ? AND image_path IN (?)", jobId, deletedFilesName).Delete(&model.JobResource{}).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

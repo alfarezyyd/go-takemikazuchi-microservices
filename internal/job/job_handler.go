@@ -45,11 +45,9 @@ func (jobHandler *Handler) Update(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	fmt.Printf("%+v", updateJobDto)
 	var uploadedFiles []*multipart.FileHeader
-	if ginContext.ContentType() == "multipart/form-data" {
-		multipartForm, err := ginContext.MultipartForm()
-		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-		uploadedFiles = multipartForm.File["images[]"]
-	}
+	multipartForm, err := ginContext.MultipartForm()
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	uploadedFiles = multipartForm.File["images[]"]
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	jobId := ginContext.Param("jobId")
 	jobHandler.jobService.HandleUpdate(userJwtClaim, jobId, &updateJobDto, uploadedFiles)
