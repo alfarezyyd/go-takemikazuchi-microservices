@@ -147,7 +147,14 @@ func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, 
 	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
+		parsedJobId, err := strconv.ParseUint(jobId, 10, 64)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid job id")))
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		_, err = jobService.jobRepository.VerifyJobOwner(gormTransaction, userJwtClaims.Email, &parsedJobId)
+		if err != nil {
+			exception.ThrowClientError(exception.NewClientError(http.StatusUnauthorized, exception.ErrUnauthorized, errors.New("job not belong to user")))
+		}
+		jobService.jobResourceRepository.DeleteBulkByJobId(gormTransaction, &parsedJobId)
 		jobService.jobRepository.Delete(jobId, userModel.ID, gormTransaction)
 		return nil
 	})

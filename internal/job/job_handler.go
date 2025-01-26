@@ -1,7 +1,6 @@
 package job
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	jobDto "go-takemikazuchi-api/internal/job/dto"
 	userDto "go-takemikazuchi-api/internal/user/dto"
@@ -43,7 +42,6 @@ func (jobHandler *Handler) Update(ginContext *gin.Context) {
 	var updateJobDto jobDto.UpdateJobDto
 	err := ginContext.ShouldBind(&updateJobDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	fmt.Printf("%+v", updateJobDto)
 	var uploadedFiles []*multipart.FileHeader
 	multipartForm, err := ginContext.MultipartForm()
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))

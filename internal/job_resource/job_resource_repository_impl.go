@@ -36,3 +36,10 @@ func (jobResourceRepository *RepositoryImpl) DeleteBulkByName(gormTransaction *g
 	err := gormTransaction.Model(&model.JobResource{}).Where("job_id = ? AND image_path IN (?)", jobId, deletedFilesName).Delete(&model.JobResource{}).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
+
+func (jobResourceRepository *RepositoryImpl) DeleteBulkByJobId(gormTransaction *gorm.DB, jobId *uint64) {
+	err := gormTransaction.Model(&model.JobResource{}).
+		Where("job_id = ?", jobId).
+		Delete(&model.JobResource{}).Error
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}
