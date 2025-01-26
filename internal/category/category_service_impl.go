@@ -3,11 +3,10 @@ package category
 import (
 	"errors"
 	"fmt"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/internal/category/dto"
 	"go-takemikazuchi-api/internal/model"
 	userDto "go-takemikazuchi-api/internal/user/dto"
+	validatorFeature "go-takemikazuchi-api/internal/validator"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
@@ -18,20 +17,18 @@ import (
 type ServiceImpl struct {
 	categoryRepository Repository
 	dbConnection       *gorm.DB
-	validationInstance *validator.Validate
-	engTranslator      ut.Translator
+	validatorService   validatorFeature.Service
 }
 
 func NewService(
 	categoryRepository Repository,
 	dbConnection *gorm.DB,
-	validatorInstance *validator.Validate,
-	engTranslator ut.Translator) *ServiceImpl {
+	validatorService validatorFeature.Service,
+) *ServiceImpl {
 	return &ServiceImpl{
 		categoryRepository: categoryRepository,
 		dbConnection:       dbConnection,
-		validationInstance: validatorInstance,
-		engTranslator:      engTranslator,
+		validatorService:   validatorService,
 	}
 }
 
@@ -43,8 +40,8 @@ func (categoryService *ServiceImpl) FindAll() []dto.CategoryResponseDto {
 }
 
 func (categoryService *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError {
-	err := categoryService.validationInstance.Struct(categoryCreateDto)
-	exception.ParseValidationError(err, categoryService.engTranslator)
+	err := categoryService.validatorService.ValidateStruct(categoryCreateDto)
+	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		var categoryModel model.Category
@@ -63,10 +60,10 @@ func (categoryService *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimD
 }
 
 func (categoryService *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError {
-	err := categoryService.validationInstance.Struct(updateCategoryDto)
-	exception.ParseValidationError(err, categoryService.engTranslator)
-	err = categoryService.validationInstance.Var(categoryId, "required,gte=1")
-	exception.ParseValidationError(err, categoryService.engTranslator)
+	err := categoryService.validatorService.ValidateStruct(updateCategoryDto)
+	categoryService.validatorService.ParseValidationError(err)
+	err = categoryService.validatorService.ValidateVar(categoryId, "required,gte=1")
+	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var categoryModel model.Category
 		var userModel model.User
@@ -90,8 +87,8 @@ func (categoryService *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim
 }
 
 func (categoryService *ServiceImpl) HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception.ClientError {
-	err := categoryService.validationInstance.Var(categoryId, "required,number,gte=1")
-	exception.ParseValidationError(err, categoryService.engTranslator)
+	err := categoryService.validatorService.ValidateVar(categoryId, "required,number,gte=1")
+	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var categoryModel model.Category
 		var userModel model.User

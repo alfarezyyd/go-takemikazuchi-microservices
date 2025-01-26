@@ -24,6 +24,7 @@ import (
 	"go-takemikazuchi-api/internal/transaction"
 	"go-takemikazuchi-api/internal/user"
 	"go-takemikazuchi-api/internal/user_address"
+	validator2 "go-takemikazuchi-api/internal/validator"
 	"go-takemikazuchi-api/internal/withdrawal"
 	"go-takemikazuchi-api/internal/worker"
 	"go-takemikazuchi-api/internal/worker_resource"
@@ -47,7 +48,8 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	userHandler := user.NewHandler(userServiceImpl, validatorInstance)
 	authenticationRoutes := ProvideAuthenticationRoutes(ginRouterGroup, userHandler)
 	categoryRepositoryImpl := category.NewRepository()
-	categoryServiceImpl := category.NewService(categoryRepositoryImpl, dbConnection, validatorInstance, engTranslator)
+	validatorServiceImpl := validator2.NewService(validatorInstance, engTranslator)
+	categoryServiceImpl := category.NewService(categoryRepositoryImpl, dbConnection, validatorServiceImpl)
 	categoryHandler := category.NewHandler(categoryServiceImpl)
 	job_resourceRepositoryImpl := job_resource.NewRepository()
 	fileStorage := storage.ProvideFileStorage(viperConfig)
@@ -133,3 +135,5 @@ var reviewSet = wire.NewSet(review.NewRepository, wire.Bind(new(review.Repositor
 var withdrawalSet = wire.NewSet(withdrawal.NewRepository, wire.Bind(new(withdrawal.Repository), new(*withdrawal.RepositoryImpl)), withdrawal.NewService, wire.Bind(new(withdrawal.Service), new(*withdrawal.ServiceImpl)), withdrawal.NewHandler, wire.Bind(new(withdrawal.Controller), new(*withdrawal.Handler)))
 
 var jobResourceSet = wire.NewSet(job_resource.NewRepository, wire.Bind(new(job_resource.Repository), new(*job_resource.RepositoryImpl)))
+
+var validatorServiceSet = wire.NewSet(validator2.NewService, wire.Bind(new(validator2.Service), new(*validator2.ServiceImpl)))

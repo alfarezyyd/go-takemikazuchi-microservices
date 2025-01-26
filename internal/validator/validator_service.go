@@ -1,6 +1,7 @@
 package validator
 
 type Service interface {
-	ValidateStruct(targetValidatorStruct interface{})
-	ValidateVar(targetValidatorStruct interface{}, validatorTag string)
+	ValidateStruct(targetValidatorStruct interface{}) error
+	ValidateVar(targetValidatorStruct interface{}, validatorTags string) error
+	ParseValidationError(validationError error)
 }

@@ -4,6 +4,7 @@ import (
 	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/pkg/exception"
+	"net/http"
 )
 
 type ServiceImpl struct {
@@ -19,12 +20,23 @@ func NewService(
 		engTranslator:     engTranslator}
 }
 
-func (validatorService *ServiceImpl) ValidateStruct(targetValidatorStruct interface{}) {
-	err := validatorService.validatorInstance.Struct(targetValidatorStruct)
-	exception.ParseValidationError(err, validatorService.engTranslator)
+// ValidateStruct - Validasi struct dengan opsi return error atau panic
+func (validatorService *ServiceImpl) ValidateStruct(target interface{}) error {
+	return validatorService.validatorInstance.Struct(target)
 }
 
-func (validatorService *ServiceImpl) ValidateVar(targetValidatorStruct interface{}, validatorTag string) {
-	err := validatorService.validatorInstance.Var(targetValidatorStruct, validatorTag)
-	exception.ParseValidationError(err, validatorService.engTranslator)
+// ValidateVar - Validasi single variable dengan opsi return error atau panic
+func (validatorService *ServiceImpl) ValidateVar(target interface{}, validatorTags string) error {
+	return validatorService.validatorInstance.Var(target, validatorTags)
+}
+
+// ParseValidationError - Parsing error validasi ke dalam format yang lebih mudah dibaca
+func (validatorService *ServiceImpl) ParseValidationError(validationError error) {
+	if validationError != nil {
+		parsedMap := make(map[string]interface{})
+		for _, fieldError := range validationError.(validator.ValidationErrors) {
+			parsedMap[fieldError.Field()] = fieldError.Translate(validatorService.engTranslator)
+		}
+		panic(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, validationError, parsedMap))
+	}
 }
