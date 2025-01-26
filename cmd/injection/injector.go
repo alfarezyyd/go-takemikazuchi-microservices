@@ -21,6 +21,7 @@ import (
 	transactionFeature "go-takemikazuchi-api/internal/transaction"
 	userFeature "go-takemikazuchi-api/internal/user"
 	userAddressFeature "go-takemikazuchi-api/internal/user_address"
+	validatorFeature "go-takemikazuchi-api/internal/validator"
 	withdrawalFeature "go-takemikazuchi-api/internal/withdrawal"
 	workerFeature "go-takemikazuchi-api/internal/worker"
 	workerResourceFeature "go-takemikazuchi-api/internal/worker_resource"
@@ -153,6 +154,11 @@ var jobResourceSet = wire.NewSet(
 	wire.Bind(new(jobResourceFeature.Repository), new(*jobResourceFeature.RepositoryImpl)),
 )
 
+var validatorServiceSet = wire.NewSet(
+	validatorFeature.NewService,
+	wire.Bind(new(validatorFeature.Service), new(*validatorFeature.ServiceImpl)),
+)
+
 // wire.go
 func InitializeRoutes(
 	ginRouterGroup *gin.RouterGroup,
@@ -180,6 +186,7 @@ func InitializeRoutes(
 		workerResourceSet,
 		reviewSet,
 		withdrawalSet,
+		validatorServiceSet,
 		storage.ProvideFileStorage, // Fungsi untuk memilih implementasi yang sesuai
 	)
 	return nil, nil
