@@ -131,27 +131,13 @@ func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, 
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		mapper.MapJobDtoIntoJobModel(updateJobDto, jobModel)
 		jobService.jobRepository.Update(jobModel, gormTransaction)
-		uuidString := uuid.New().String()
-		if len(uploadedFiles) != 0 {
-			var allFileName []string
-			for _, uploadedFile := range uploadedFiles {
-				openedFile, _ := uploadedFile.Open()
-				_, err := jobService.fileStorage.UploadFile(openedFile, fmt.Sprintf("%s-%s", uuidString, uploadedFile.Filename))
-				helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("upload file failed")))
-				allFileName = append(allFileName, fmt.Sprintf("%s-%s", uuidString, uploadedFile.Filename))
-			}
-			resourceModel := mapper.MapStringIntoJobResourceModel(jobModel.ID, allFileName)
+		resourceModel := jobService.UpdateUploadedFiles(uploadedFiles, jobModel.ID)
+		if resourceModel != nil {
 			jobService.jobResourceRepository.BulkCreate(gormTransaction, resourceModel)
 		}
 		if len(updateJobDto.DeletedFilesName) != 0 {
 			countFile := jobService.jobResourceRepository.CountBulkByName(gormTransaction, jobModel.ID, updateJobDto.DeletedFilesName)
-			fmt.Println(countFile)
-			if countFile != len(updateJobDto.DeletedFilesName) {
-				exception.ThrowClientError(exception.NewClientError(http.StatusNotFound, "Some files not found", errors.New("count file not equal")))
-			}
-			for _, deletedFileName := range updateJobDto.DeletedFilesName {
-				_ = jobService.fileStorage.DeleteFile(deletedFileName)
-			}
+			jobService.DeleteRequestedFile(updateJobDto.DeletedFilesName, countFile)
 			jobService.jobResourceRepository.DeleteBulkByName(gormTransaction, jobModel.ID, updateJobDto.DeletedFilesName)
 		}
 		return nil
@@ -195,4 +181,29 @@ func (jobService *ServiceImpl) HandleRequestCompleted(userJwtClaims *userDto.Jwt
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+}
+
+func (jobService *ServiceImpl) UpdateUploadedFiles(uploadedFiles []*multipart.FileHeader, jobId uint64) []*model.JobResource {
+	var resourceModel []*model.JobResource
+	uuidString := uuid.New().String()
+	if len(uploadedFiles) != 0 {
+		var allFileName []string
+		for _, uploadedFile := range uploadedFiles {
+			openedFile, _ := uploadedFile.Open()
+			_, err := jobService.fileStorage.UploadFile(openedFile, fmt.Sprintf("%s-%s", uuidString, uploadedFile.Filename))
+			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("upload file failed")))
+			allFileName = append(allFileName, fmt.Sprintf("%s-%s", uuidString, uploadedFile.Filename))
+		}
+		resourceModel = mapper.MapStringIntoJobResourceModel(jobId, allFileName)
+	}
+	return resourceModel
+}
+
+func (jobService *ServiceImpl) DeleteRequestedFile(deletedFilesName []string, countFile int) {
+	if countFile != len(deletedFilesName) {
+		exception.ThrowClientError(exception.NewClientError(http.StatusNotFound, "Some files not found", errors.New("count file not equal")))
+	}
+	for _, deletedFileName := range deletedFilesName {
+		_ = jobService.fileStorage.DeleteFile(deletedFileName)
+	}
 }
