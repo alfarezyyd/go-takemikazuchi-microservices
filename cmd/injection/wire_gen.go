@@ -55,7 +55,7 @@ func InitializeRoutes(ginRouterGroup *gin.RouterGroup, dbConnection *gorm.DB, va
 	fileStorage := storage.ProvideFileStorage(viperConfig)
 	user_addressRepositoryImpl := user_address.NewUserAddressRepository()
 	workerRepositoryImpl := worker.NewRepository()
-	jobServiceImpl := job.NewService(validatorInstance, repositoryImpl, userRepositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, engTranslator, fileStorage, googleMapsClient, user_addressRepositoryImpl, workerRepositoryImpl)
+	jobServiceImpl := job.NewService(validatorInstance, repositoryImpl, userRepositoryImpl, categoryRepositoryImpl, job_resourceRepositoryImpl, dbConnection, fileStorage, googleMapsClient, user_addressRepositoryImpl, workerRepositoryImpl)
 	jobHandler := job.NewHandler(jobServiceImpl)
 	job_applicationServiceImpl := job_application.NewService(validatorInstance, engTranslator, job_applicationRepositoryImpl, dbConnection, repositoryImpl, userRepositoryImpl)
 	job_applicationHandler := job_application.NewHandler(job_applicationServiceImpl)
