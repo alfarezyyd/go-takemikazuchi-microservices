@@ -50,8 +50,12 @@ func NewService(
 func (userService *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto) {
 	err := userService.validatorService.ValidateStruct(createUserDto)
 	userService.validatorService.ParseValidationError(err)
-
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, nil, &createUserDto.Email)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		if isUserExists {
+			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "Email has been registered", errors.New("duplicate email")))
+		}
 		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
 		err = gormTransaction.Create(userModel).Error
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
