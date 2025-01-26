@@ -5,12 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-api/configs"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/internal/user/dto"
+	validatorFeature "go-takemikazuchi-api/internal/validator"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
@@ -23,39 +22,36 @@ import (
 )
 
 type ServiceImpl struct {
-	userRepository    Repository
-	dbConnection      *gorm.DB
-	validatorInstance *validator.Validate
-	engTranslator     ut.Translator
-	mailerService     *configs.MailerService
-	identityProvider  *configs.IdentityProvider
-	viperConfig       *viper.Viper
+	userRepository   Repository
+	dbConnection     *gorm.DB
+	mailerService    *configs.MailerService
+	identityProvider *configs.IdentityProvider
+	viperConfig      *viper.Viper
+	validatorService validatorFeature.Service
 }
 
 func NewService(
+	validatorService validatorFeature.Service,
 	userRepository Repository,
 	dbConnection *gorm.DB,
-	validatorInstance *validator.Validate,
-	engTranslator ut.Translator,
 	mailerService *configs.MailerService,
 	identityProvider *configs.IdentityProvider,
 	viperConfig *viper.Viper) *ServiceImpl {
 	return &ServiceImpl{
-		userRepository:    userRepository,
-		dbConnection:      dbConnection,
-		validatorInstance: validatorInstance,
-		engTranslator:     engTranslator,
-		mailerService:     mailerService,
-		identityProvider:  identityProvider,
-		viperConfig:       viperConfig,
+		userRepository:   userRepository,
+		dbConnection:     dbConnection,
+		mailerService:    mailerService,
+		identityProvider: identityProvider,
+		viperConfig:      viperConfig,
+		validatorService: validatorService,
 	}
 }
 
-func (serviceImpl *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto) {
-	err := serviceImpl.validatorInstance.Struct(createUserDto)
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
+func (userService *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto) {
+	err := userService.validatorService.ValidateStruct(createUserDto)
+	userService.validatorService.ParseValidationError(err)
 
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
 		err = gormTransaction.Create(userModel).Error
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
@@ -64,10 +60,10 @@ func (serviceImpl *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto) {
-	err := serviceImpl.validatorInstance.Struct(generateOneTimePassDto)
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto) {
+	err := userService.validatorService.ValidateStruct(generateOneTimePassDto)
+	userService.validatorService.ParseValidationError(err)
+	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		var oneTimePasswordToken model.OneTimePasswordToken
 		err = gormTransaction.Where("email = ?", generateOneTimePassDto.Email).First(&userModel).Error
@@ -83,12 +79,12 @@ func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePas
 			Title:     "One Time Verification Token",
 			Recipient: generateOneTimePassDto.Email,
 			Body:      fmt.Sprintf("One Time Password %s", generatedOneTimePasswordToken),
-			Sender:    serviceImpl.mailerService.ViperConfig.GetString(""),
+			Sender:    userService.mailerService.ViperConfig.GetString(""),
 		}
 
 		projectRoot, _ := os.Getwd() // Mendapatkan root path proyek
 		templateFile := fmt.Sprintf("%s/public/static/email_template.html", projectRoot)
-		err = serviceImpl.mailerService.SendEmail(
+		err = userService.mailerService.SendEmail(
 			generateOneTimePassDto.Email,
 			"One Time Verification Token",
 			templateFile,
@@ -98,10 +94,10 @@ func (serviceImpl *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePas
 	})
 }
 
-func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.VerifyOtpDto) {
-	err := serviceImpl.validatorInstance.Struct(verifyOtpDto)
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+func (userService *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.VerifyOtpDto) {
+	err := userService.validatorService.ValidateStruct(verifyOtpDto)
+	userService.validatorService.ParseValidationError(err)
+	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		var oneTimePasswordToken model.OneTimePasswordToken
 		err = gormTransaction.Where("email = ?", verifyOtpDto.Email).First(&userModel).Error
@@ -115,16 +111,16 @@ func (serviceImpl *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.Ve
 	})
 }
 
-func (serviceImpl *ServiceImpl) HandleGoogleAuthentication() string {
-	return serviceImpl.identityProvider.GoogleProviderConfig.AuthCodeURL("randomstate")
+func (userService *ServiceImpl) HandleGoogleAuthentication() string {
+	return userService.identityProvider.GoogleProviderConfig.AuthCodeURL("randomstate")
 }
 
-func (serviceImpl *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
+func (userService *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
 	if tokenState != "randomstate" {
 		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid token state"))
 	}
 
-	googleProviderConfig := serviceImpl.identityProvider.GoogleProviderConfig
+	googleProviderConfig := userService.identityProvider.GoogleProviderConfig
 
 	token, err := googleProviderConfig.Exchange(context.Background(), queryCode)
 	if err != nil {
@@ -143,11 +139,11 @@ func (serviceImpl *ServiceImpl) HandleGoogleCallback(tokenState string, queryCod
 	return nil
 }
 
-func (serviceImpl *ServiceImpl) HandleLogin(loginUserDto *dto.LoginUserDto) string {
-	err := serviceImpl.validatorInstance.Struct(loginUserDto)
-	exception.ParseValidationError(err, serviceImpl.engTranslator)
+func (userService *ServiceImpl) HandleLogin(loginUserDto *dto.LoginUserDto) string {
+	err := userService.validatorService.ValidateStruct(loginUserDto)
+	userService.validatorService.ParseValidationError(err)
 	var tokenString string
-	err = serviceImpl.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		err = gormTransaction.Where("email = ?", loginUserDto.UserIdentifier).Or("phone_number = ?", loginUserDto.UserIdentifier).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -158,7 +154,7 @@ func (serviceImpl *ServiceImpl) HandleLogin(loginUserDto *dto.LoginUserDto) stri
 			"phone_number": helper.ParseNullableValue(userModel.PhoneNumber),
 			"exp":          time.Now().Add(time.Hour * 72).Unix(),
 		})
-		tokenString, err = tokenInstance.SignedString([]byte(serviceImpl.viperConfig.GetString("JWT_SECRET")))
+		tokenString, err = tokenInstance.SignedString([]byte(userService.viperConfig.GetString("JWT_SECRET")))
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		return nil
 	})

@@ -1,13 +1,12 @@
 package review
 
 import (
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/internal/job"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/internal/review/dto"
 	"go-takemikazuchi-api/internal/user"
 	userDto "go-takemikazuchi-api/internal/user/dto"
+	validatorFeature "go-takemikazuchi-api/internal/validator"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
 	"go-takemikazuchi-api/pkg/mapper"
@@ -15,35 +14,32 @@ import (
 )
 
 type ServiceImpl struct {
-	dbConnection      *gorm.DB
-	validatorInstance *validator.Validate
-	reviewRepository  Repository
-	engTranslator     ut.Translator
-	jobRepository     job.Repository
-	userRepository    user.Repository
+	dbConnection     *gorm.DB
+	validatorService validatorFeature.Service
+	reviewRepository Repository
+	jobRepository    job.Repository
+	userRepository   user.Repository
 }
 
 func NewService(
 	dbConnection *gorm.DB,
-	validatorInstance *validator.Validate,
+	validatorService validatorFeature.Service,
 	reviewRepository Repository,
-	engTranslator ut.Translator,
 	jobRepository job.Repository,
 	userRepository user.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
-		validatorInstance: validatorInstance,
-		dbConnection:      dbConnection,
-		reviewRepository:  reviewRepository,
-		engTranslator:     engTranslator,
-		jobRepository:     jobRepository,
-		userRepository:    userRepository,
+		dbConnection:     dbConnection,
+		reviewRepository: reviewRepository,
+		jobRepository:    jobRepository,
+		userRepository:   userRepository,
+		validatorService: validatorService,
 	}
 }
 
 func (reviewService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto, createReviewDto *dto.CreateReviewDto) {
-	err := reviewService.validatorInstance.Struct(createReviewDto)
-	exception.ParseValidationError(err, reviewService.engTranslator)
+	err := reviewService.validatorService.ValidateStruct(createReviewDto)
+	reviewService.validatorService.ParseValidationError(err)
 	err = reviewService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		reviewService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)

@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"go-takemikazuchi-api/internal/category"
 	jobDto "go-takemikazuchi-api/internal/job/dto"
@@ -15,6 +13,7 @@ import (
 	userFeature "go-takemikazuchi-api/internal/user"
 	userDto "go-takemikazuchi-api/internal/user/dto"
 	userAddressFeature "go-takemikazuchi-api/internal/user_address"
+	validatorFeature "go-takemikazuchi-api/internal/validator"
 	"go-takemikazuchi-api/internal/worker"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
@@ -27,12 +26,11 @@ import (
 )
 
 type ServiceImpl struct {
-	validatorInstance     *validator.Validate
+	validatorService      validatorFeature.Service
 	jobRepository         Repository
 	userRepository        userFeature.Repository
 	categoryRepository    category.Repository
 	dbConnection          *gorm.DB
-	engTranslator         ut.Translator
 	jobResourceRepository jobResourceFeature.Repository
 	fileStorage           storage.FileStorage
 	mapsClient            *maps.Client
@@ -40,36 +38,34 @@ type ServiceImpl struct {
 	workerRepository      worker.Repository
 }
 
-func NewService(validatorInstance *validator.Validate,
+func NewService(
 	jobRepository Repository,
 	userRepository userFeature.Repository,
 	categoryRepository category.Repository,
 	jobResourceRepository jobResourceFeature.Repository,
 	dbConnection *gorm.DB,
-	engTranslator ut.Translator,
 	fileStorage storage.FileStorage,
 	mapsClient *maps.Client,
 	userAddressRepository userAddressFeature.Repository,
 	workerRepository worker.Repository,
+	validatorService validatorFeature.Service,
 ) *ServiceImpl {
-
 	return &ServiceImpl{
-		validatorInstance:     validatorInstance,
 		jobRepository:         jobRepository,
 		userRepository:        userRepository,
 		categoryRepository:    categoryRepository,
 		dbConnection:          dbConnection,
-		engTranslator:         engTranslator,
 		jobResourceRepository: jobResourceRepository,
 		fileStorage:           fileStorage,
 		mapsClient:            mapsClient,
 		userAddressRepository: userAddressRepository,
+		validatorService:      validatorService,
 		workerRepository:      workerRepository}
 }
 
 func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError {
-	err := jobService.validatorInstance.Struct(createJobDto)
-	exception.ParseValidationError(err, jobService.engTranslator)
+	err := jobService.validatorService.ValidateStruct(createJobDto)
+	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var jobModel model.Job
 		var userModel model.User
@@ -112,10 +108,10 @@ func (jobService *ServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, 
 }
 
 func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, jobId string, updateJobDto *jobDto.UpdateJobDto, uploadedFiles []*multipart.FileHeader) {
-	err := jobService.validatorInstance.Struct(updateJobDto)
-	exception.ParseValidationError(err, jobService.engTranslator)
-	err = jobService.validatorInstance.Var(jobId, "required|gt=1")
-	exception.ParseValidationError(err, jobService.engTranslator)
+	err := jobService.validatorService.ValidateStruct(updateJobDto)
+	jobService.validatorService.ParseValidationError(err)
+	err = jobService.validatorService.ValidateVar(jobId, "required|gt=1")
+	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		parsedJobId, err := strconv.ParseUint(jobId, 10, 64)
@@ -147,8 +143,8 @@ func (jobService *ServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, 
 }
 
 func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, jobId string) *exception.ClientError {
-	err := jobService.validatorInstance.Var(jobId, "required|gte=1")
-	exception.ParseValidationError(err, jobService.engTranslator)
+	err := jobService.validatorService.ValidateVar(jobId, "required|gte=1")
+	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
@@ -159,8 +155,8 @@ func (jobService *ServiceImpl) HandleDelete(userJwtClaims *userDto.JwtClaimDto, 
 }
 
 func (jobService *ServiceImpl) HandleRequestCompleted(userJwtClaims *userDto.JwtClaimDto, jobId *string) {
-	err := jobService.validatorInstance.Var(jobId, "required")
-	exception.ParseValidationError(err, jobService.engTranslator)
+	err := jobService.validatorService.ValidateVar(jobId, "required")
+	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		parsedJobId, err := strconv.ParseUint(*jobId, 10, 64)
 		var userModel model.User

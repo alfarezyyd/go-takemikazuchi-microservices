@@ -2,13 +2,12 @@ package worker
 
 import (
 	"fmt"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/internal/storage"
 	"go-takemikazuchi-api/internal/user"
 	userDto "go-takemikazuchi-api/internal/user/dto"
+	validatorFeature "go-takemikazuchi-api/internal/validator"
 	"go-takemikazuchi-api/internal/worker/dto"
 	workerResource "go-takemikazuchi-api/internal/worker_resource"
 	workerResourceDto "go-takemikazuchi-api/internal/worker_resource/dto"
@@ -22,8 +21,7 @@ import (
 type ServiceImpl struct {
 	workerRepository         Repository
 	userRepository           user.Repository
-	validatorInstance        *validator.Validate
-	engTranslator            ut.Translator
+	validatorService         validatorFeature.Service
 	dbConnection             *gorm.DB
 	workerWalletRepository   workerWallet.Repository
 	workerResourceRepository workerResource.Repository
@@ -32,8 +30,7 @@ type ServiceImpl struct {
 
 func NewService(
 	workerRepository Repository,
-	validatorInstance *validator.Validate,
-	engTranslator ut.Translator,
+	validatorService validatorFeature.Service,
 	dbConnection *gorm.DB,
 	userRepository user.Repository,
 	workerWalletRepository workerWallet.Repository,
@@ -42,8 +39,7 @@ func NewService(
 ) *ServiceImpl {
 	return &ServiceImpl{
 		workerRepository:         workerRepository,
-		validatorInstance:        validatorInstance,
-		engTranslator:            engTranslator,
+		validatorService:         validatorService,
 		dbConnection:             dbConnection,
 		workerWalletRepository:   workerWalletRepository,
 		workerResourceRepository: workerResourceRepository,
@@ -53,10 +49,10 @@ func NewService(
 }
 
 func (workerService *ServiceImpl) Create(userJwtClaim *userDto.JwtClaimDto, createWorkerDto *dto.CreateWorkerDto, createWorkerWalletDocumentDto *workerResourceDto.CreateWorkerWalletDocumentDto) {
-	err := workerService.validatorInstance.Struct(createWorkerDto)
-	exception.ParseValidationError(err, workerService.engTranslator)
-	err = workerService.validatorInstance.Struct(createWorkerWalletDocumentDto)
-	exception.ParseValidationError(err, workerService.engTranslator)
+	err := workerService.validatorService.ValidateStruct(createWorkerDto)
+	workerService.validatorService.ParseValidationError(err)
+	err = workerService.validatorService.ValidateStruct(createWorkerWalletDocumentDto)
+	workerService.validatorService.ParseValidationError(err)
 	err = workerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var workerModel model.Worker
 		var workerWalletModel model.WorkerWallet

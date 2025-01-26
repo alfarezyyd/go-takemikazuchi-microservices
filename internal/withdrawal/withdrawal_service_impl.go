@@ -2,11 +2,10 @@ package withdrawal
 
 import (
 	"errors"
-	ut "github.com/go-playground/universal-translator"
-	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/internal/user"
 	userDto "go-takemikazuchi-api/internal/user/dto"
+	validatorFeature "go-takemikazuchi-api/internal/validator"
 	"go-takemikazuchi-api/internal/withdrawal/dto"
 	"go-takemikazuchi-api/internal/worker"
 	workerWalletFeature "go-takemikazuchi-api/internal/worker_wallet"
@@ -19,8 +18,7 @@ import (
 )
 
 type ServiceImpl struct {
-	validationService    *validator.Validate
-	engTranslator        ut.Translator
+	validatorService     validatorFeature.Service
 	dbConnection         *gorm.DB
 	withdrawalRepository Repository
 	userRepository       user.Repository
@@ -29,16 +27,14 @@ type ServiceImpl struct {
 }
 
 func NewService(
-	validationService *validator.Validate,
-	engTranslator ut.Translator,
+	validatorService validatorFeature.Service,
 	withdrawalRepository Repository,
 	dbConnection *gorm.DB,
 	userRepository user.Repository,
 	workerRepository worker.Repository,
 	walletRepository workerWalletFeature.Repository) *ServiceImpl {
 	return &ServiceImpl{
-		validationService:    validationService,
-		engTranslator:        engTranslator,
+		validatorService:     validatorService,
 		withdrawalRepository: withdrawalRepository,
 		dbConnection:         dbConnection,
 		userRepository:       userRepository,
@@ -62,8 +58,8 @@ func (withdrawalService *ServiceImpl) FindAll(userJwtClaims *userDto.JwtClaimDto
 }
 
 func (withdrawalService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto, createWithdrawalDto *dto.CreateWithdrawalDto) {
-	err := withdrawalService.validationService.Struct(userJwtClaims)
-	exception.ParseValidationError(err, withdrawalService.engTranslator)
+	err := withdrawalService.validatorService.ValidateStruct(userJwtClaims)
+	withdrawalService.validatorService.ParseValidationError(err)
 	err = withdrawalService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var withdrawalModel model.Withdrawal
 		var userModel model.User
@@ -80,8 +76,8 @@ func (withdrawalService *ServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto,
 }
 
 func (withdrawalService *ServiceImpl) Update(userJwtClaims *userDto.JwtClaimDto, withdrawalId *string) {
-	err := withdrawalService.validationService.Var(withdrawalId, "required|gt=0")
-	exception.ParseValidationError(err, withdrawalService.engTranslator)
+	err := withdrawalService.validatorService.ValidateVar(withdrawalId, "required|gt=0")
+	withdrawalService.validatorService.ParseValidationError(err)
 	err = withdrawalService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
 		parsedWithdrawalId, err := strconv.ParseUint(*withdrawalId, 10, 64)
