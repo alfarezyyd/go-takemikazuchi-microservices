@@ -6,6 +6,6 @@ import (
 )
 
 type Repository interface {
-	IsUserExists(gormTransaction *gorm.DB, userId *uint64, userEmail *string) (bool, error)
+	IsUserExists(gormTransaction *gorm.DB, queryClause string, argumentClause ...interface{}) (bool, error)
 	FindUserByEmail(userEmail *string, userModel *model.User, gormConnection *gorm.DB)
 }

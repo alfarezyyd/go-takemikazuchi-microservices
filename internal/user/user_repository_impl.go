@@ -14,11 +14,11 @@ func NewRepository() *RepositoryImpl {
 	return &RepositoryImpl{}
 }
 
-func (userRepository *RepositoryImpl) IsUserExists(gormTransaction *gorm.DB, userId *uint64, userEmail *string) (bool, error) {
+func (userRepository *RepositoryImpl) IsUserExists(gormTransaction *gorm.DB, queryClause string, argumentClause ...interface{}) (bool, error) {
 	var isUserExists bool
 	err := gormTransaction.Model(model.User{}).
 		Select("COUNT(*) > 0").
-		Where("id = ? OR email = ?", userId, userEmail).
+		Where(queryClause, argumentClause).
 		First(&isUserExists).Error
 	return isUserExists, err
 }
