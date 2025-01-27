@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"go-takemikazuchi-api/internal/model"
 	"go-takemikazuchi-api/pkg/exception"
 	"go-takemikazuchi-api/pkg/helper"
@@ -16,9 +17,10 @@ func NewRepository() *RepositoryImpl {
 
 func (userRepository *RepositoryImpl) IsUserExists(gormTransaction *gorm.DB, queryClause string, argumentClause ...interface{}) (bool, error) {
 	var isUserExists bool
+	fmt.Println(queryClause, argumentClause)
 	err := gormTransaction.Model(model.User{}).
 		Select("COUNT(*) > 0").
-		Where(queryClause, argumentClause).
+		Where(queryClause, argumentClause...).
 		First(&isUserExists).Error
 	return isUserExists, err
 }

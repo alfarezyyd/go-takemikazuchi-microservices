@@ -33,7 +33,7 @@ func (userHandler *Handler) GenerateOneTimePassword(ginContext *gin.Context) {
 	var generateOneTimePassDto userDto.GenerateOtpDto
 	err := ginContext.ShouldBindBodyWithJSON(&generateOneTimePassDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	userHandler.userService.HandleGenerateOneTimePassword(&generateOneTimePassDto)
+	userHandler.userService.HandleGenerateOneTimePassword(&generateOneTimePassDto, nil)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("OTP generated successfully", nil))
 }
 

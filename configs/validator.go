@@ -86,7 +86,7 @@ func InitializeValidator() (*validator.Validate, universalTranslator.Translator)
 			return ut.Add("conditionalRequired", "One of the field must be filled", true)
 		},
 		func(ut universalTranslator.Translator, fe validator.FieldError) string {
-			return fmt.Sprintf("You must fill %s if %s blank", fe.Param(), fe.Field())
+			return fmt.Sprintf("You must fill %s if %s blank", fe.Field(), fe.Param())
 		})
 
 	validatorInstance.RegisterTranslation("conditionalRequired", engTranslator,
@@ -94,7 +94,7 @@ func InitializeValidator() (*validator.Validate, universalTranslator.Translator)
 			return ut.Add("conditionalRequired", "One of the field must be filled", true)
 		},
 		func(ut universalTranslator.Translator, fe validator.FieldError) string {
-			return fmt.Sprintf("You must fill %s if %s blank", fe.Param(), fe.Field())
+			return fmt.Sprintf("You must fill %s if %s blank", fe.Field(), fe.Param())
 		})
 
 	// Register Translation

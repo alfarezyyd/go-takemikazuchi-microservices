@@ -51,7 +51,7 @@ func (userService *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto)
 	err := userService.validatorService.ValidateStruct(createUserDto)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", &createUserDto.PhoneNumber, &createUserDto.Email)
+		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", createUserDto.PhoneNumber, createUserDto.Email)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if isUserExists {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "Email or phone number has been registered", errors.New("duplicate email")))
@@ -59,18 +59,28 @@ func (userService *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto)
 		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
 		err = gormTransaction.Create(userModel).Error
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+		if createUserDto.Email != "" {
+			userService.HandleGenerateOneTimePassword(&dto.GenerateOtpDto{
+				Email:  createUserDto.Email,
+				UserId: userModel.ID,
+			}, gormTransaction)
+		}
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto) {
+func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto, externalGormTransaction *gorm.DB) {
 	err := userService.validatorService.ValidateStruct(generateOneTimePassDto)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		if externalGormTransaction != nil {
+			gormTransaction = externalGormTransaction
+		}
 		var userModel model.User
 		var oneTimePasswordToken model.OneTimePasswordToken
 		err = gormTransaction.Where("email = ?", generateOneTimePassDto.Email).First(&userModel).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		generatedOneTimePasswordToken := helper.GenerateOneTimePasswordToken()
 		hashedGeneratedOneTimePasswordToken, err := bcrypt.GenerateFromPassword([]byte(generatedOneTimePasswordToken), 10)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
