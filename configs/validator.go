@@ -7,10 +7,16 @@ import (
 	"github.com/go-playground/validator/v10"
 	engTranslation "github.com/go-playground/validator/v10/translations/en"
 	"mime/multipart"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
+
+func isValidIndonesianPhoneNumber(phone string) bool {
+	phoneNumberRegex := regexp.MustCompile(`^(\+62|62|0)8[1-9][0-9]{6,9}$`)
+	return phoneNumberRegex.MatchString(phone)
+}
 
 func InitializeValidator() (*validator.Validate, universalTranslator.Translator) {
 	var validatorInstance = validator.New()
@@ -34,6 +40,8 @@ func InitializeValidator() (*validator.Validate, universalTranslator.Translator)
 	validatorInstance.RegisterValidation("maxSize", maxFileSizeValidation)
 	validatorInstance.RegisterValidation("extensionFile", validateFileExtensionValidation)
 	validatorInstance.RegisterValidation("obligatoryFile", requiredFileValidationValidation)
+	validatorInstance.RegisterValidation("phoneNumber", phoneNumberValidation)
+	validatorInstance.RegisterValidation("conditionalRequired", conditionalRequired)
 
 	englishLang := en.New()
 	universalTranslatorInstance := universalTranslator.New(englishLang, englishLang)
@@ -63,7 +71,31 @@ func InitializeValidator() (*validator.Validate, universalTranslator.Translator)
 		func(ut universalTranslator.Translator, fe validator.FieldError) string {
 			return fmt.Sprintf("File extension must be one of %s", fe.Param())
 		})
+
+	validatorInstance.RegisterTranslation("phoneNumber", engTranslator,
+		func(ut universalTranslator.Translator) error {
+			return ut.Add("phoneNumber", "Format phone number not valid", true)
+		},
+		func(ut universalTranslator.Translator, fe validator.FieldError) string {
+			return "Format phone number not valid"
+		})
+
+	validatorInstance.RegisterTranslation("conditionalRequired", engTranslator,
+		func(ut universalTranslator.Translator) error {
+			return ut.Add("conditionalRequired", "One of the field must be filled", true)
+		},
+		func(ut universalTranslator.Translator, fe validator.FieldError) string {
+			return fmt.Sprintf("You must fill %s if %s blank", fe.Param(), fe.Field())
+		})
 	return validatorInstance, engTranslator
+}
+
+func phoneNumberValidation(fieldLevel validator.FieldLevel) bool {
+	stringValue, isValid := fieldLevel.Field().Interface().(string)
+	if !isValid {
+		return false
+	}
+	return isValidIndonesianPhoneNumber(stringValue)
 }
 
 func requiredFileValidationValidation(fieldLevel validator.FieldLevel) bool {
@@ -112,4 +144,22 @@ func validateFileExtensionValidation(fieldLevel validator.FieldLevel) bool {
 		}
 	}
 	return false
+}
+
+func conditionalRequired(fieldLevel validator.FieldLevel) bool {
+	fieldName := fieldLevel.Param()                    // Nama field yang terkait, misalnya "PhoneNumber"
+	structValue := fieldLevel.Parent()                 // Struct yang sedang divalidasi
+	relatedField := structValue.FieldByName(fieldName) // Ambil field berdasarkan nama
+
+	// Pastikan field terkait ada dalam struct
+	if !relatedField.IsValid() {
+		return false
+	}
+
+	// Ambil nilai dari field yang sedang divalidasi dan field terkait
+	currentValue := fieldLevel.Field().String()
+	relatedValue := relatedField.String()
+
+	// Jika field terkait kosong, maka field ini wajib diisi
+	return relatedValue != "" || currentValue != ""
 }
