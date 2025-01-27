@@ -42,6 +42,7 @@ func InitializeValidator() (*validator.Validate, universalTranslator.Translator)
 	validatorInstance.RegisterValidation("obligatoryFile", requiredFileValidationValidation)
 	validatorInstance.RegisterValidation("phoneNumber", phoneNumberValidation)
 	validatorInstance.RegisterValidation("conditionalRequired", conditionalRequired)
+	validatorInstance.RegisterValidation("weakPassword", weakPassword)
 
 	englishLang := en.New()
 	universalTranslatorInstance := universalTranslator.New(englishLang, englishLang)
@@ -87,6 +88,24 @@ func InitializeValidator() (*validator.Validate, universalTranslator.Translator)
 		func(ut universalTranslator.Translator, fe validator.FieldError) string {
 			return fmt.Sprintf("You must fill %s if %s blank", fe.Param(), fe.Field())
 		})
+
+	validatorInstance.RegisterTranslation("conditionalRequired", engTranslator,
+		func(ut universalTranslator.Translator) error {
+			return ut.Add("conditionalRequired", "One of the field must be filled", true)
+		},
+		func(ut universalTranslator.Translator, fe validator.FieldError) string {
+			return fmt.Sprintf("You must fill %s if %s blank", fe.Param(), fe.Field())
+		})
+
+	// Register Translation
+	validatorInstance.RegisterTranslation("weakPassword", engTranslator,
+		func(ut universalTranslator.Translator) error {
+			return ut.Add("weak_password", "Password is weak", true)
+		},
+		func(ut universalTranslator.Translator, fe validator.FieldError) string {
+			return "Password is weak, please add upper case, lower case, and digit"
+		},
+	)
 	return validatorInstance, engTranslator
 }
 
@@ -162,4 +181,42 @@ func conditionalRequired(fieldLevel validator.FieldLevel) bool {
 
 	// Jika field terkait kosong, maka field ini wajib diisi
 	return relatedValue != "" || currentValue != ""
+}
+
+// WeakPasswordValidator untuk mengecek kelemahan password
+func weakPassword(fl validator.FieldLevel) bool {
+	password := fl.Field().String()
+	errors := []string{}
+
+	// Minimal panjang 8 karakter
+	if len(password) < 8 {
+		errors = append(errors, "must be at least 8 characters long")
+	}
+
+	// Harus ada huruf besar
+	if !regexp.MustCompile(`[A-Z]`).MatchString(password) {
+		errors = append(errors, "must contain at least one uppercase letter")
+	}
+
+	// Harus ada huruf kecil
+	if !regexp.MustCompile(`[a-z]`).MatchString(password) {
+		errors = append(errors, "must contain at least one lowercase letter")
+	}
+
+	// Harus ada angka
+	if !regexp.MustCompile(`\d`).MatchString(password) {
+		errors = append(errors, "must contain at least one digit")
+	}
+
+	// Harus ada karakter spesial
+	if !regexp.MustCompile(`[^a-zA-Z0-9]`).MatchString(password) {
+		errors = append(errors, "must contain at least one special character")
+	}
+
+	// Jika ada error, simpan dalam `fl.Param()` untuk translasi
+	if len(errors) > 0 {
+		return false
+	}
+
+	return true
 }
