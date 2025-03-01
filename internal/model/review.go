@@ -5,7 +5,7 @@ import "time"
 type Review struct {
 	ID         uint64    `gorm:"column:id;primaryKey;autoIncrement"`
 	ReviewerId uint64    `gorm:"column:reviewer_id"`
-	ReviewedId uint64    `gorm:"column:reviewed_id" mapstructure:Revie`
+	ReviewedId uint64    `gorm:"column:reviewed_id"`
 	JobId      uint64    `gorm:"column:job_id"`
 	Role       string    `gorm:"column:role"`
 	Rating     byte      `gorm:"column:rating"`

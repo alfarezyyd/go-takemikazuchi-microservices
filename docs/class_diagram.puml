@@ -1,0 +1,95 @@
+@startuml
+skinparam linetype ortho
+left to right direction
+
+package "User Management" {
+    class User {
+        +ID: uint64
+        +Name: string
+        +Email: string
+        +Password: string
+    }
+
+    class Worker {
+        +ID: uint64
+        +UserId: uint64
+        +Rating: float32
+    }
+
+    class WorkerWallet {
+        +ID: uint64
+        +WorkerId: uint64
+        +WalletType: string
+    }
+
+    class OneTimePasswordToken {
+        +ID: uint64
+        +UserId: uint64
+        +HashedToken: string
+    }
+}
+
+package "Job Management" {
+    class Job {
+        +ID: uint64
+        +UserId: uint64
+        +CategoryId: uint64
+        +Title: string
+    }
+
+    class Category {
+        +ID: uint64
+        +Name: string
+    }
+
+    class JobApplication {
+        +ID: uint64
+        +JobID: uint64
+        +ApplicantId: uint64
+    }
+
+    class JobResource {
+        +ID: uint64
+        +JobId: uint64
+        +ImagePath: string
+    }
+}
+
+package "Transaction & Payment" {
+    class Transaction {
+        +ID: string
+        +JobID: string
+        +PayerId: uint64
+        +Amount: float64
+    }
+
+    class Withdrawal {
+        +ID: uint64
+        +WorkerId: uint64
+        +WalletId: uint64
+        +Amount: float64
+    }
+}
+
+package "Review System" {
+    class Review {
+        +ID: uint64
+        +ReviewerId: uint64
+        +ReviewedId: uint64
+        +JobId: uint64
+        +Rating: byte
+    }
+}
+
+User "1" --* "Has many" Job
+User "1" --* "Has many" JobApplication
+User "1" --* "Has many" Review : "Reviewer"
+User "1" --* "Has many" Review : "Reviewed"
+Worker "1" --* "Has many" WorkerWallet
+Category "1" --* "Has many" Job
+Job "1" --* "Has many" JobResource
+Job "1" --* "Has many" JobApplication
+Job "1" -- "1" Transaction
+Worker "1" --* "Has many" Withdrawal
+
+@enduml
