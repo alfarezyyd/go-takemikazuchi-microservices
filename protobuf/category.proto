@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices-common/category";
+
+message CreateCategoryRequest{
+  string Name = 1;
+  string Description = 2;
+}
+
+message UpdateCategoryRequest{
+  string Name = 1;
+  string Description = 2;
+}
+
+message CommandCategoryResponse{
+  bool IsSuccess = 1;
+}
+
+message QueryCategoryResponse{
+  uint64 ID = 1;
+  string Name = 2;
+  string Description = 3;
+}
+
+message GetQueryCategoryResponses{
+  repeated QueryCategoryResponse QueryCategoryResponses = 1; 
+}
+
+service CategoryService {
+  rpc CreateCategory(CreateCategoryRequest) returns (CommandCategoryResponse) {}
+  rpc UpdateCategory(CreateCategoryRequest) returns (CommandCategoryResponse) {}
+}
+
