@@ -1,6 +1,6 @@
 package dto
 
-import jobDto "go-takemikazuchi-api/internal/job/dto"
+import jobDto "go-takemikazuchi-microservices/internal/job/dto"
 
 type CategoryResponseDto struct {
 	ID          uint64                  `json:"id,omitempty"`

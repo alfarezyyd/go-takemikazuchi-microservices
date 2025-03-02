@@ -7,7 +7,7 @@ MIGRATE_COMMAND := migrate
 RUN_CMD := $(GO) run cmd/server/main.go
 table = $(table)
 name = $(name)
-url=mysql://root@tcp(localhost:3306)/go_takemikazuchi_api
+url=mysql://root@tcp(localhost:3306)/go_takemikazuchi_microservices
 version=$(version)
 
 # Command utama

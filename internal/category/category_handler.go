@@ -2,10 +2,10 @@ package category
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-api/internal/category/dto"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	"go-takemikazuchi-microservices/internal/category/dto"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 

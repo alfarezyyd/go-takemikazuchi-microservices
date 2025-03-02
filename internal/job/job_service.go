@@ -1,9 +1,9 @@
 package job
 
 import (
-	"go-takemikazuchi-api/internal/job/dto"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-microservices/internal/job/dto"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
 	"mime/multipart"
 )
 

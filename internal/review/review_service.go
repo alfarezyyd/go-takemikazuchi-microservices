@@ -1,8 +1,8 @@
 package review
 
 import (
-	"go-takemikazuchi-api/internal/review/dto"
-	userDto "go-takemikazuchi-api/internal/user/dto"
+	"go-takemikazuchi-microservices/internal/review/dto"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
 )
 
 type Service interface {

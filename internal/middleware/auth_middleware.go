@@ -4,9 +4,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
-	"go-takemikazuchi-api/pkg/mapper"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
+	"go-takemikazuchi-microservices/pkg/mapper"
 	"net/http"
 	"strings"
 )

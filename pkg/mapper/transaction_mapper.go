@@ -1,6 +1,6 @@
 package mapper
 
-import "go-takemikazuchi-api/internal/model"
+import "go-takemikazuchi-microservices/internal/model"
 
 func ConstructTransactionModel(jobApplicationModel *model.JobApplication, jobModel *model.Job, transactionModel *model.Transaction) {
 	transactionModel.JobID = jobModel.ID

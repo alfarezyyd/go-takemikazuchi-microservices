@@ -1,15 +1,15 @@
 package review
 
 import (
-	"go-takemikazuchi-api/internal/job"
-	"go-takemikazuchi-api/internal/model"
-	"go-takemikazuchi-api/internal/review/dto"
-	"go-takemikazuchi-api/internal/user"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	validatorFeature "go-takemikazuchi-api/internal/validator"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
-	"go-takemikazuchi-api/pkg/mapper"
+	"go-takemikazuchi-microservices/internal/job"
+	"go-takemikazuchi-microservices/internal/model"
+	"go-takemikazuchi-microservices/internal/review/dto"
+	"go-takemikazuchi-microservices/internal/user"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	validatorFeature "go-takemikazuchi-microservices/internal/validator"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
+	"go-takemikazuchi-microservices/pkg/mapper"
 	"gorm.io/gorm"
 )
 

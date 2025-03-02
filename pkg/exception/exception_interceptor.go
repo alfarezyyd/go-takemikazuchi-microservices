@@ -3,7 +3,7 @@ package exception
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-api/web"
+	"go-takemikazuchi-microservices/web"
 	"net/http"
 )
 

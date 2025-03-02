@@ -1,8 +1,8 @@
 package job_application
 
 import (
-	"go-takemikazuchi-api/internal/job_application/dto"
-	userDto "go-takemikazuchi-api/internal/user/dto"
+	"go-takemikazuchi-microservices/internal/job_application/dto"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
 )
 
 type Service interface {

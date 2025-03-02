@@ -3,9 +3,9 @@ package user
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 

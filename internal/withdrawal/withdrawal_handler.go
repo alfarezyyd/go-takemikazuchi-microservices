@@ -3,10 +3,10 @@ package withdrawal
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/internal/withdrawal/dto"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/internal/withdrawal/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 

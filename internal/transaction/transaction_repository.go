@@ -1,7 +1,7 @@
 package transaction
 
 import (
-	"go-takemikazuchi-api/internal/model"
+	"go-takemikazuchi-microservices/internal/model"
 	"gorm.io/gorm"
 )
 

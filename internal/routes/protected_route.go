@@ -3,14 +3,14 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"go-takemikazuchi-api/internal/category"
-	"go-takemikazuchi-api/internal/job"
-	jobApplication "go-takemikazuchi-api/internal/job_application"
-	"go-takemikazuchi-api/internal/middleware"
-	reviewFeature "go-takemikazuchi-api/internal/review"
-	"go-takemikazuchi-api/internal/transaction"
-	withdrawalFeature "go-takemikazuchi-api/internal/withdrawal"
-	"go-takemikazuchi-api/internal/worker"
+	"go-takemikazuchi-microservices/internal/category"
+	"go-takemikazuchi-microservices/internal/job"
+	jobApplication "go-takemikazuchi-microservices/internal/job_application"
+	"go-takemikazuchi-microservices/internal/middleware"
+	reviewFeature "go-takemikazuchi-microservices/internal/review"
+	"go-takemikazuchi-microservices/internal/transaction"
+	withdrawalFeature "go-takemikazuchi-microservices/internal/withdrawal"
+	"go-takemikazuchi-microservices/internal/worker"
 )
 
 type ProtectedRoutes struct {

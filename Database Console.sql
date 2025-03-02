@@ -1,6 +1,6 @@
-DROP DATABASE IF EXISTS go_takemikazuchi_api;
-CREATE DATABASE go_takemikazuchi_api;
-USE go_takemikazuchi_api;
+DROP DATABASE IF EXISTS go_takemikazuchi_microservices;
+CREATE DATABASE go_takemikazuchi_microservices;
+USE go_takemikazuchi_microservices;
 
 SELECT * FROM workers;
 SELECT * FROM jobs;

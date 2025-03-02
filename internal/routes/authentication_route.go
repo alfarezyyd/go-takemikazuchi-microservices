@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-api/internal/user"
+	"go-takemikazuchi-microservices/internal/user"
 )
 
 type AuthenticationRoutes struct {

@@ -2,11 +2,11 @@ package mapper
 
 import (
 	"github.com/go-viper/mapstructure/v2"
-	"go-takemikazuchi-api/internal/job/dto"
-	jobApplicationDto "go-takemikazuchi-api/internal/job_application/dto"
-	"go-takemikazuchi-api/internal/model"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	"go-takemikazuchi-microservices/internal/job/dto"
+	jobApplicationDto "go-takemikazuchi-microservices/internal/job_application/dto"
+	"go-takemikazuchi-microservices/internal/model"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 	"strconv"
 	"time"

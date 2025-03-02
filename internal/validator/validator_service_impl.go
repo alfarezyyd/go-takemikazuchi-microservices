@@ -3,7 +3,7 @@ package validator
 import (
 	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
-	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/exception"
 	"net/http"
 )
 

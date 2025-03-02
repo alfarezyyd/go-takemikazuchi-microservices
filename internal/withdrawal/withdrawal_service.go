@@ -1,9 +1,9 @@
 package withdrawal
 
 import (
-	"go-takemikazuchi-api/internal/model"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/internal/withdrawal/dto"
+	"go-takemikazuchi-microservices/internal/model"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/internal/withdrawal/dto"
 )
 
 type Service interface {

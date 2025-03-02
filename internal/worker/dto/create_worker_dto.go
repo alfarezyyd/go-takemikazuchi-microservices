@@ -1,7 +1,7 @@
 package dto
 
 import (
-	workerWalletDto "go-takemikazuchi-api/internal/worker_wallet/dto"
+	workerWalletDto "go-takemikazuchi-microservices/internal/worker_wallet/dto"
 )
 
 type CreateWorkerDto struct {

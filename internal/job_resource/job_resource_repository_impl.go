@@ -2,9 +2,9 @@ package job_resource
 
 import (
 	"fmt"
-	"go-takemikazuchi-api/internal/model"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	"go-takemikazuchi-microservices/internal/model"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"gorm.io/gorm"
 )
 

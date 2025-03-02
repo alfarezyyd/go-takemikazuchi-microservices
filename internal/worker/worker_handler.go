@@ -3,11 +3,11 @@ package worker
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/internal/worker/dto"
-	workerResourceDto "go-takemikazuchi-api/internal/worker_resource/dto"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/internal/worker/dto"
+	workerResourceDto "go-takemikazuchi-microservices/internal/worker_resource/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 

@@ -1,4 +1,4 @@
-module go-takemikazuchi-api
+module go-takemikazuchi-microservices
 
 go 1.23
 

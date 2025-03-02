@@ -1,6 +1,6 @@
 package helper
 
-import "go-takemikazuchi-api/web"
+import "go-takemikazuchi-microservices/web"
 
 func WriteSuccess(message string, data interface{}) web.ResponseContract {
 	return web.ResponseContract{

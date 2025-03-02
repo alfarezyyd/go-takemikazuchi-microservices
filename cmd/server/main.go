@@ -4,9 +4,9 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"go-takemikazuchi-api/cmd/injection"
-	"go-takemikazuchi-api/configs"
-	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-microservices/cmd/injection"
+	"go-takemikazuchi-microservices/configs"
+	"go-takemikazuchi-microservices/pkg/exception"
 	"time"
 )
 

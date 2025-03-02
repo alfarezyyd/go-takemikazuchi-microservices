@@ -24,8 +24,8 @@ func (identityProvider *IdentityProvider) InitializeGoogleProviderConfig() oauth
 		ClientID:     identityProvider.viperConfig.GetString("GOOGLE_CLIENT_ID"),
 		ClientSecret: identityProvider.viperConfig.GetString("GOOGLE_CLIENT_SECRET"),
 		Scopes: []string{
-			"https://www.googleapis.com/auth/userinfo.email",
-			"https://www.googleapis.com/auth/userinfo.profile",
+			"https://www.googlemicroservicess.com/auth/userinfo.email",
+			"https://www.googlemicroservicess.com/auth/userinfo.profile",
 		},
 		Endpoint: google.Endpoint,
 	}

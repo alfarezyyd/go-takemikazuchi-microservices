@@ -1,8 +1,8 @@
 package user
 
 import (
-	"go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/pkg/exception"
+	"go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
 	"gorm.io/gorm"
 )
 

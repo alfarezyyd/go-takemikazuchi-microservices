@@ -3,10 +3,10 @@ package transaction
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-api/internal/transaction/dto"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	"go-takemikazuchi-microservices/internal/transaction/dto"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 

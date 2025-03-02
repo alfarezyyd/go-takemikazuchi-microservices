@@ -2,10 +2,10 @@ package job
 
 import (
 	"github.com/gin-gonic/gin"
-	jobDto "go-takemikazuchi-api/internal/job/dto"
-	userDto "go-takemikazuchi-api/internal/user/dto"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
+	jobDto "go-takemikazuchi-microservices/internal/job/dto"
+	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
 	"mime/multipart"
 	"net/http"
 )

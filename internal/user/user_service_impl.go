@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
-	"go-takemikazuchi-api/configs"
-	"go-takemikazuchi-api/internal/model"
-	"go-takemikazuchi-api/internal/user/dto"
-	validatorFeature "go-takemikazuchi-api/internal/validator"
-	"go-takemikazuchi-api/pkg/exception"
-	"go-takemikazuchi-api/pkg/helper"
-	"go-takemikazuchi-api/pkg/mapper"
+	"go-takemikazuchi-microservices/configs"
+	"go-takemikazuchi-microservices/internal/model"
+	"go-takemikazuchi-microservices/internal/user/dto"
+	validatorFeature "go-takemikazuchi-microservices/internal/validator"
+	"go-takemikazuchi-microservices/pkg/exception"
+	"go-takemikazuchi-microservices/pkg/helper"
+	"go-takemikazuchi-microservices/pkg/mapper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"io"
@@ -141,7 +141,7 @@ func (userService *ServiceImpl) HandleGoogleCallback(tokenState string, queryCod
 		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
 
-	resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	resp, err := http.Get("https://www.googlemicroservicess.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 	if err != nil {
 		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err)
 	}
