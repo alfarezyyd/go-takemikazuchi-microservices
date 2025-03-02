@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
 	"go-takemikazuchi-microservices/configs"
 	"go-takemikazuchi-microservices/internal/model"
