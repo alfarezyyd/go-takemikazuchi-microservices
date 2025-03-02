@@ -5,13 +5,14 @@ SHELL := /bin/bash
 GO := go
 MIGRATE_COMMAND := migrate
 RUN_CMD := $(GO) run cmd/server/main.go
-table = $(table)
-name = $(name)
-url=mysql://root@tcp(localhost:3306)/go_takemikazuchi_microservices
-version=$(version)
+TABLE = $(TABLE)
+NAME = $(NAME)
+URL=mysql://root@tcp(localhost:3306)/go_takemikazuchi_microservices
+VERSION=$(VERSION)
+PROTO_NAME=$(proto)
 
 # Command utama
-.PHONY: run build clean test fmt vet lint wire gen inject migrate migration-up
+.PHONY: run build clean test fmt vet lint wire gen inject migrate migration-up gen
 
 
 # Menjalankan aplikasi
@@ -52,13 +53,19 @@ inject:
 	wire gen ./cmd/injection/injector.go
 
 migration-up:
-	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations up
+	$(MIGRATE_COMMAND) -database "$(URL)" -path ./migrations up
 
 migration-down:
-	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations down
+	$(MIGRATE_COMMAND) -database "$(URL)" -path ./migrations down
 
 migration-create:
-	$(MIGRATE_COMMAND) create -ext sql -dir ./migrations $(name)
+	$(MIGRATE_COMMAND) create -ext sql -dir ./migrations $(NAME)
 
 migration-force:
-	$(MIGRATE_COMMAND) -database "$(url)" -path ./migrations force $(version)
+	$(MIGRATE_COMMAND) -database "$(URL)" -path ./migrations force $(VERSION)
+
+gen:
+	@protoc \
+	--proto_path=protobuf "protobuf/$(PROTO_NAME).proto" \
+	--go_out=common/genproto/category --go_opt=paths=source_relative \
+  	--go-grpc_out=common/genproto/category --go-grpc_opt=paths=source_relative
