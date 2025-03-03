@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices-common/user";
+
+message CreateUserRequest {
+  string Name = 1;
+  string Email = 2;
+  string PhoneNumber = 3;
+  string Password = 4;
+  string ConfirmPassword = 5;
+}
+
+message GenerateOtpRequest {
+  uint64 UserId = 1;
+  string Email = 2;
+}
+
+message JwtClaimResponse {
+  string Email = 1;
+  string PhoneNumber = 2;
+}
+
+message LoginUserRequest {
+  string UserIdentifier = 1;
+  string Password = 2;
+}
+
+message VerifyOtpRequest {
+  string Email = 1;
+  string OneTimePasswordToken = 2;
+}
+
+message CommandCategoryResponse{
+  bool IsSuccess = 1;
+}
+
+message LoginResponse {
+  string Payload = 1;
+}
+
+service UserService{
+  rpc Register(CreateUserRequest) returns (CommandCategoryResponse);
+  rpc HandleGenerateOneTimePassword(GenerateOtpRequest) returns (CommandCategoryResponse);
+  rpc HandleVerifyOneTimePassword(VerifyOtpRequest) returns (CommandCategoryResponse);
+  rpc HandleLogin (LoginUserRequest) returns (LoginResponse);
+}

@@ -67,5 +67,5 @@ migration-force:
 gen:
 	@protoc \
 	--proto_path=protobuf "protobuf/$(PROTO_NAME).proto" \
-	--go_out=common/genproto/category --go_opt=paths=source_relative \
-  	--go-grpc_out=common/genproto/category --go-grpc_opt=paths=source_relative
+	--go_out=common/genproto/$(PROTO_NAME) --go_opt=paths=source_relative \
+  	--go-grpc_out=common/genproto/$(PROTO_NAME) --go-grpc_opt=paths=source_relative
