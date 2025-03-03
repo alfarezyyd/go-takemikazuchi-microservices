@@ -5,10 +5,18 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"log"
 	"time"
 )
 
 func main() {
+	grpcConnection, err := grpc.NewClient("localhost:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("Failed to create gRPC connection: %v", err)
+	}
+	defer grpcConnection.Close()
 	viperConfig := viper.New()
 	viperConfig.SetConfigFile(".env")
 	viperConfig.AddConfigPath(".")
