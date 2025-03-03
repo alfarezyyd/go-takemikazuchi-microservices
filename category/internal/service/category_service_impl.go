@@ -1,45 +1,45 @@
-package category
+package service
 
 import (
 	"errors"
 	"fmt"
-	"go-takemikazuchi-microservices/internal/category/dto"
-	"go-takemikazuchi-microservices/internal/model"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	validatorFeature "go-takemikazuchi-microservices/internal/validator"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
-	"go-takemikazuchi-microservices/pkg/mapper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/repository"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/mapper"
+	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
 	"gorm.io/gorm"
 	"net/http"
 )
 
-type ServiceImpl struct {
-	categoryRepository Repository
+type CategoryServiceImpl struct {
+	categoryRepository repository.Repository
 	dbConnection       *gorm.DB
 	validatorService   validatorFeature.Service
 }
 
 func NewService(
-	categoryRepository Repository,
+	categoryRepository repository.Repository,
 	dbConnection *gorm.DB,
 	validatorService validatorFeature.Service,
-) *ServiceImpl {
-	return &ServiceImpl{
+) *CategoryServiceImpl {
+	return &CategoryServiceImpl{
 		categoryRepository: categoryRepository,
 		dbConnection:       dbConnection,
 		validatorService:   validatorService,
 	}
 }
 
-func (categoryService *ServiceImpl) FindAll() []dto.CategoryResponseDto {
+func (categoryService *CategoryServiceImpl) FindAll() []dto.CategoryResponseDto {
 	categoriesModel := categoryService.categoryRepository.FindAll(categoryService.dbConnection)
 	categoriesResponseDto := mapper.MapCategoryModelIntoCategoryResponse(categoriesModel)
 	fmt.Println(categoriesModel, categoriesResponseDto)
 	return categoriesResponseDto
 }
 
-func (categoryService *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError {
+func (categoryService *CategoryServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError {
 	err := categoryService.validatorService.ValidateStruct(categoryCreateDto)
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -59,7 +59,7 @@ func (categoryService *ServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimD
 	return nil
 }
 
-func (categoryService *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError {
+func (categoryService *CategoryServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError {
 	err := categoryService.validatorService.ValidateStruct(updateCategoryDto)
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.validatorService.ValidateVar(categoryId, "required,gte=1")
@@ -86,7 +86,7 @@ func (categoryService *ServiceImpl) HandleUpdate(categoryId string, userJwtClaim
 	return nil
 }
 
-func (categoryService *ServiceImpl) HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception.ClientError {
+func (categoryService *CategoryServiceImpl) HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception.ClientError {
 	err := categoryService.validatorService.ValidateVar(categoryId, "required,number,gte=1")
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {

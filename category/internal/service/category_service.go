@@ -1,4 +1,4 @@
-package category
+package service
 
 import (
 	"go-takemikazuchi-microservices/internal/category/dto"

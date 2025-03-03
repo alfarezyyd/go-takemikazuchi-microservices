@@ -1,19 +1,19 @@
-package category
+package handler
 
 import (
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-microservices/internal/category/dto"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 
 type Handler struct {
-	categoryService Service
+	categoryService service.Service
 }
 
-func NewHandler(categoryService Service) *Handler {
+func NewHandler(categoryService service.Service) *Handler {
 	return &Handler{
 		categoryService: categoryService,
 	}
