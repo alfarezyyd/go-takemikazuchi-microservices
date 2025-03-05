@@ -1,7 +1,6 @@
 package model
 
 import (
-	model2 "github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/model"
 	"gorm.io/gorm"
 	"time"
 )
@@ -18,7 +17,7 @@ type Withdrawal struct {
 	ProcessedAt     *time.Time    `gorm:"column:processed_at"`
 	Worker          *Worker       `gorm:"foreignKey:worker_id;references:id"`
 	WorkerWallet    *WorkerWallet `gorm:"foreignKey:wallet_id;references:id"`
-	Admin           *model2.User  `gorm:"foreignKey:admin_id;references:id"`
+	Admin           *User         `gorm:"foreignKey:admin_id;references:id"`
 }
 
 func (withdrawalModel *Withdrawal) BeforeCreate(gormTransaction *gorm.DB) (err error) {
