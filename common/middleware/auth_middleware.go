@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"github.com/dgrijalva/jwt-go"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/mapper"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
-	"go-takemikazuchi-microservices/pkg/mapper"
 	"net/http"
 	"strings"
 )

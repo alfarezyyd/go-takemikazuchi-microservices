@@ -2,8 +2,8 @@ package exception
 
 import (
 	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/web"
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-microservices/web"
 	"net/http"
 )
 
