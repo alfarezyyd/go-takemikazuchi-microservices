@@ -1,9 +1,9 @@
 package main
 
 import (
-	categoryHandler "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/handler"
-	categoryRepository "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/repository"
-	categoryService "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/service"
+	categoryHandler "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/handler"
+	categoryRepository "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/repository"
+	categoryService "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/configs"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
 	"github.com/spf13/viper"

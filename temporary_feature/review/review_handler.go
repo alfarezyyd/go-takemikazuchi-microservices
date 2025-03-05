@@ -2,11 +2,11 @@ package review
 
 import (
 	"errors"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/review/dto"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-microservices/internal/review/dto"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 

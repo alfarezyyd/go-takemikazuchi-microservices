@@ -1,15 +1,14 @@
 package review
 
 import (
-	"go-takemikazuchi-microservices/internal/job"
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/internal/review/dto"
-	"go-takemikazuchi-microservices/internal/user"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	validatorFeature "go-takemikazuchi-microservices/internal/validator"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
-	"go-takemikazuchi-microservices/pkg/mapper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/mapper"
+	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/review/dto"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
+	userRepository "github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/repository"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +17,7 @@ type ServiceImpl struct {
 	validatorService validatorFeature.Service
 	reviewRepository Repository
 	jobRepository    job.Repository
-	userRepository   user.Repository
+	userRepository   userRepository.Repository
 }
 
 func NewService(
@@ -26,7 +25,7 @@ func NewService(
 	validatorService validatorFeature.Service,
 	reviewRepository Repository,
 	jobRepository job.Repository,
-	userRepository user.Repository,
+	userRepository userRepository.Repository,
 ) *ServiceImpl {
 	return &ServiceImpl{
 		dbConnection:     dbConnection,

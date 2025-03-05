@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/dto"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/service"
+	dto2 "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
 	"github.com/gin-gonic/gin"
@@ -25,7 +25,7 @@ func (categoryHandler *Handler) FindAll(ginContext *gin.Context) {
 }
 
 func (categoryHandler *Handler) Create(ginContext *gin.Context) {
-	var categoryCreateDto dto.CreateCategoryDto
+	var categoryCreateDto dto2.CreateCategoryDto
 	err := ginContext.ShouldBindBodyWithJSON(&categoryCreateDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
@@ -35,7 +35,7 @@ func (categoryHandler *Handler) Create(ginContext *gin.Context) {
 }
 
 func (categoryHandler *Handler) Update(ginContext *gin.Context) {
-	var updateCategoryDto dto.UpdateCategoryDto
+	var updateCategoryDto dto2.UpdateCategoryDto
 	err := ginContext.ShouldBindBodyWithJSON(&updateCategoryDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)

@@ -2,7 +2,7 @@ package handler
 
 import (
 	"context"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/service"
 	grpcCategory "github.com/alfarezyyd/go-takemikazuchi-microservices-common/genproto/category"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
