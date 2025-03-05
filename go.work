@@ -2,7 +2,6 @@ go 1.23.6
 
 use (
 	./category
-	./temporary_feature/job
 	./user
 	./common
 	./gateway
