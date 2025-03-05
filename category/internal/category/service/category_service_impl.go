@@ -3,13 +3,14 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/dto"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/repository"
+	dto2 "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/repository"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/mapper"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
+	model2 "github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/model"
 	"gorm.io/gorm"
 	"net/http"
 )
@@ -32,18 +33,18 @@ func NewService(
 	}
 }
 
-func (categoryService *CategoryServiceImpl) FindAll() []dto.CategoryResponseDto {
+func (categoryService *CategoryServiceImpl) FindAll() []dto2.CategoryResponseDto {
 	categoriesModel := categoryService.categoryRepository.FindAll(categoryService.dbConnection)
 	categoriesResponseDto := mapper.MapCategoryModelIntoCategoryResponse(categoriesModel)
 	fmt.Println(categoriesModel, categoriesResponseDto)
 	return categoriesResponseDto
 }
 
-func (categoryService *CategoryServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError {
+func (categoryService *CategoryServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto2.CreateCategoryDto) *exception.ClientError {
 	err := categoryService.validatorService.ValidateStruct(categoryCreateDto)
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userModel model.User
+		var userModel model2.User
 		var categoryModel model.Category
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
@@ -59,14 +60,14 @@ func (categoryService *CategoryServiceImpl) HandleCreate(userJwtClaim *userDto.J
 	return nil
 }
 
-func (categoryService *CategoryServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError {
+func (categoryService *CategoryServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto2.UpdateCategoryDto) *exception.ClientError {
 	err := categoryService.validatorService.ValidateStruct(updateCategoryDto)
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.validatorService.ValidateVar(categoryId, "required,gte=1")
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var categoryModel model.Category
-		var userModel model.User
+		var userModel model2.User
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
@@ -91,7 +92,7 @@ func (categoryService *CategoryServiceImpl) HandleDelete(categoryId string, user
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var categoryModel model.Category
-		var userModel model.User
+		var userModel model2.User
 		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
