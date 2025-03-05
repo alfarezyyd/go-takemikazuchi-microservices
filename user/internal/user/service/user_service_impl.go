@@ -1,17 +1,19 @@
-package user
+package service
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/configs"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/mapper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/repository"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
-	"go-takemikazuchi-microservices/configs"
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/internal/user/dto"
-	validatorFeature "go-takemikazuchi-microservices/internal/validator"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
-	"go-takemikazuchi-microservices/pkg/mapper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"io"
@@ -21,7 +23,7 @@ import (
 )
 
 type ServiceImpl struct {
-	userRepository   Repository
+	userRepository   repository.Repository
 	dbConnection     *gorm.DB
 	mailerService    *configs.MailerService
 	identityProvider *configs.IdentityProvider
@@ -31,7 +33,7 @@ type ServiceImpl struct {
 
 func NewService(
 	validatorService validatorFeature.Service,
-	userRepository Repository,
+	userRepository repository.Repository,
 	dbConnection *gorm.DB,
 	mailerService *configs.MailerService,
 	identityProvider *configs.IdentityProvider,

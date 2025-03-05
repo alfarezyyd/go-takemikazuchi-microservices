@@ -1,20 +1,21 @@
-package user
+package handler
 
 import (
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/service"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 
 type Handler struct {
-	userService       Service
+	userService       service.Service
 	validatorInstance *validator.Validate
 }
 
-func NewHandler(userService Service, validatorInstance *validator.Validate) *Handler {
+func NewHandler(userService service.Service, validatorInstance *validator.Validate) *Handler {
 	return &Handler{
 		userService:       userService,
 		validatorInstance: validatorInstance,

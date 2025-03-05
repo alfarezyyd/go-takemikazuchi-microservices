@@ -2,12 +2,12 @@ package mapper
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/go-viper/mapstructure/v2"
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/bcrypt"
 	"googlemaps.github.io/maps"
 	"net/http"

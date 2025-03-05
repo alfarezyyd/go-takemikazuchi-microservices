@@ -1,7 +1,7 @@
-package user
+package repository
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
 	"gorm.io/gorm"
 )
 
