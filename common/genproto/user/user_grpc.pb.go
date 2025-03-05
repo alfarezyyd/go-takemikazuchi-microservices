@@ -29,9 +29,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	Register(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
-	HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
-	HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
+	Register(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
+	HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
+	HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
 	HandleLogin(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 }
 
@@ -43,9 +43,9 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) Register(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error) {
+func (c *userServiceClient) Register(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandCategoryResponse)
+	out := new(CommandUserResponse)
 	err := c.cc.Invoke(ctx, UserService_Register_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -53,9 +53,9 @@ func (c *userServiceClient) Register(ctx context.Context, in *CreateUserRequest,
 	return out, nil
 }
 
-func (c *userServiceClient) HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error) {
+func (c *userServiceClient) HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandCategoryResponse)
+	out := new(CommandUserResponse)
 	err := c.cc.Invoke(ctx, UserService_HandleGenerateOneTimePassword_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -63,9 +63,9 @@ func (c *userServiceClient) HandleGenerateOneTimePassword(ctx context.Context, i
 	return out, nil
 }
 
-func (c *userServiceClient) HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error) {
+func (c *userServiceClient) HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandCategoryResponse)
+	out := new(CommandUserResponse)
 	err := c.cc.Invoke(ctx, UserService_HandleVerifyOneTimePassword_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -87,9 +87,9 @@ func (c *userServiceClient) HandleLogin(ctx context.Context, in *LoginUserReques
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
-	Register(context.Context, *CreateUserRequest) (*CommandCategoryResponse, error)
-	HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*CommandCategoryResponse, error)
-	HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*CommandCategoryResponse, error)
+	Register(context.Context, *CreateUserRequest) (*CommandUserResponse, error)
+	HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*CommandUserResponse, error)
+	HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*CommandUserResponse, error)
 	HandleLogin(context.Context, *LoginUserRequest) (*LoginResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -101,13 +101,13 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) Register(context.Context, *CreateUserRequest) (*CommandCategoryResponse, error) {
+func (UnimplementedUserServiceServer) Register(context.Context, *CreateUserRequest) (*CommandUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedUserServiceServer) HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*CommandCategoryResponse, error) {
+func (UnimplementedUserServiceServer) HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*CommandUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleGenerateOneTimePassword not implemented")
 }
-func (UnimplementedUserServiceServer) HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*CommandCategoryResponse, error) {
+func (UnimplementedUserServiceServer) HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*CommandUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleVerifyOneTimePassword not implemented")
 }
 func (UnimplementedUserServiceServer) HandleLogin(context.Context, *LoginUserRequest) (*LoginResponse, error) {

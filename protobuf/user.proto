@@ -30,7 +30,7 @@ message VerifyOtpRequest {
   string OneTimePasswordToken = 2;
 }
 
-message CommandCategoryResponse{
+message CommandUserResponse{
   bool IsSuccess = 1;
 }
 
@@ -39,8 +39,8 @@ message LoginResponse {
 }
 
 service UserService{
-  rpc Register(CreateUserRequest) returns (CommandCategoryResponse);
-  rpc HandleGenerateOneTimePassword(GenerateOtpRequest) returns (CommandCategoryResponse);
-  rpc HandleVerifyOneTimePassword(VerifyOtpRequest) returns (CommandCategoryResponse);
+  rpc Register(CreateUserRequest) returns (CommandUserResponse);
+  rpc HandleGenerateOneTimePassword(GenerateOtpRequest) returns (CommandUserResponse);
+  rpc HandleVerifyOneTimePassword(VerifyOtpRequest) returns (CommandUserResponse);
   rpc HandleLogin (LoginUserRequest) returns (LoginResponse);
 }
