@@ -1,4 +1,4 @@
 .env
-public/static
+user/public/static
 
-public/images
+user/public/images

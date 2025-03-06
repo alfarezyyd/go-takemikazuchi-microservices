@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/middleware"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/handler"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/repository"
@@ -78,7 +79,10 @@ func main() {
 	databaseConnection := databaseInstance.GetDatabaseConnection()
 
 	tcpListener, err := net.Listen("tcp", ":9000")
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(middleware.RecoveryInterceptor),
+	)
+
 	userRepository := repository.NewRepository()
 	validatorInstance, engTranslator := configs.InitializeValidator()
 	mailerService := configs.NewMailerService(viperConfig)

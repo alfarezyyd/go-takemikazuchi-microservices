@@ -117,7 +117,7 @@ func ParseGrpcError(ginContext *gin.Context, err error) {
 }
 
 // Map HTTP status codes to gRPC error codes
-func httpStatusToGrpcCode(httpStatus int) codes.Code {
+func HttpStatusIntoGrpcCode(httpStatus int) codes.Code {
 	switch httpStatus {
 	case 400:
 		return codes.InvalidArgument
@@ -148,6 +148,6 @@ func ParseIntoGrpcError(clientError *ClientError) error {
 		return nil
 	}
 
-	grpcCode := httpStatusToGrpcCode(clientError.StatusCode)
+	grpcCode := HttpStatusIntoGrpcCode(clientError.StatusCode)
 	return status.Error(grpcCode, clientError.Message)
 }

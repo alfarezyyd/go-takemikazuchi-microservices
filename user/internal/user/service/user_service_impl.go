@@ -16,6 +16,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
@@ -50,9 +52,7 @@ func NewUserService(
 }
 
 func (userService *UserServiceImpl) HandleRegister(ctx context.Context, createUserRequest *user.CreateUserRequest) (*user.CommandUserResponse, error) {
-	err := userService.validatorService.ValidateStruct(createUserRequest)
-	userService.validatorService.ParseValidationError(err)
-	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", createUserRequest.PhoneNumber, createUserRequest.Email)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if isUserExists {
@@ -60,6 +60,7 @@ func (userService *UserServiceImpl) HandleRegister(ctx context.Context, createUs
 		}
 		userModel := mapper.MapUserDtoIntoUserModel(createUserRequest)
 		err = gormTransaction.Create(userModel).Error
+		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		if createUserRequest.Email != "" {
 			userService.HandleGenerateOneTimePassword(&userDto.GenerateOtpDto{
@@ -75,19 +76,19 @@ func (userService *UserServiceImpl) HandleRegister(ctx context.Context, createUs
 	}
 	return &user.CommandUserResponse{
 		IsSuccess: true,
-	}, nil
+	}, status.Errorf(codes.Aborted, "awdwa")
 }
 
 func (userService *UserServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *userDto.GenerateOtpDto, externalGormTransaction *gorm.DB) {
-	err := userService.validatorService.ValidateStruct(generateOneTimePassDto)
-	userService.validatorService.ParseValidationError(err)
-	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		if externalGormTransaction != nil {
+			fmt.Println("External Gorm Transaction")
 			gormTransaction = externalGormTransaction
 		}
 		var userModel model.User
 		var oneTimePasswordToken model.OneTimePasswordToken
-		err = gormTransaction.Where("email = ?", generateOneTimePassDto.Email).First(&userModel).Error
+		fmt.Println(generateOneTimePassDto)
+		err := gormTransaction.Where("email = ?", generateOneTimePassDto.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		generatedOneTimePasswordToken := helper.GenerateOneTimePasswordToken()
 		hashedGeneratedOneTimePasswordToken, err := bcrypt.GenerateFromPassword([]byte(generatedOneTimePasswordToken), 10)
@@ -111,9 +112,11 @@ func (userService *UserServiceImpl) HandleGenerateOneTimePassword(generateOneTim
 			"One Time Verification Token",
 			templateFile,
 			emailPayload)
+		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
 func (userService *UserServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *userDto.VerifyOtpDto) {

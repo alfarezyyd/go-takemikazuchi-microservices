@@ -6,6 +6,7 @@ import (
 	categoryRepository "github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/repository"
 	categoryService "github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/middleware"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
@@ -17,7 +18,9 @@ import (
 func main() {
 	grpcConnection, err := grpc.NewClient("localhost:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	tcpListener, err := net.Listen("tcp", ":9000")
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(middleware.RecoveryInterceptor),
+	)
 
 	if err != nil {
 		log.Fatalf("Failed to create gRPC connection: %v", err)

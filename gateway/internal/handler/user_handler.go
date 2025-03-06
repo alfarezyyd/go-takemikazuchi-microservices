@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
@@ -41,6 +42,7 @@ func (userHandler *UserHandler) Register(ginContext *gin.Context) {
 		ConfirmPassword: createUserDto.ConfirmPassword,
 	}
 	_, err = userClient.HandleRegister(timeoutCtx, &createUserRequest)
+	fmt.Println(err)
 	if err != nil {
 		exception.ParseGrpcError(ginContext, err)
 		return
