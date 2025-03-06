@@ -12,6 +12,7 @@ import (
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/repository"
 	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
