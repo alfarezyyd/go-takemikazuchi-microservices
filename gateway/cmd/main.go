@@ -5,7 +5,6 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/handler"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/routes"
 	"github.com/gin-contrib/cors"
@@ -19,7 +18,7 @@ import (
 
 var (
 	serviceName = "gatewayService"
-	httpAddr    = ":8080"
+	httpAddr    = ":7000"
 	consulAddr  = ":8500"
 )
 
@@ -70,8 +69,7 @@ func main() {
 
 	rootRouterGroup := ginEngine.Group("/")
 	validatorInstance, _ := configs.InitializeValidator()
-	userGrpcService := user.NewUserServiceClient(grpcConnection)
-	userHandler := handler.NewUserHandler(userGrpcService, validatorInstance)
+	userHandler := handler.NewUserHandler(validatorInstance, grpcConnection)
 	authenticationRoutes := routes.NewAuthenticationRoutes(rootRouterGroup, userHandler)
 	authenticationRoutes.Setup()
 	ginError := ginEngine.Run(":8080")

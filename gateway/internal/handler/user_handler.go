@@ -9,23 +9,25 @@ import (
 	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"google.golang.org/grpc"
 	"net/http"
 	"time"
 )
 
 type UserHandler struct {
-	userService       user.UserServiceClient
 	validatorInstance *validator.Validate
+	grpcConnection    *grpc.ClientConn
 }
 
-func NewUserHandler(userService user.UserServiceClient, validatorInstance *validator.Validate) *UserHandler {
+func NewUserHandler(validatorInstance *validator.Validate, grpcConnection *grpc.ClientConn) *UserHandler {
 	return &UserHandler{
-		userService:       userService,
 		validatorInstance: validatorInstance,
+		grpcConnection:    grpcConnection,
 	}
 }
 
 func (userHandler *UserHandler) Register(ginContext *gin.Context) {
+	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
 	var createUserDto userDto.CreateUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&createUserDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
@@ -38,7 +40,7 @@ func (userHandler *UserHandler) Register(ginContext *gin.Context) {
 		Password:        createUserDto.Password,
 		ConfirmPassword: createUserDto.ConfirmPassword,
 	}
-	userHandler.userService.HandleRegister(timeoutCtx, &createUserRequest)
+	userClient.HandleRegister(timeoutCtx, &createUserRequest)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
 }
 
@@ -59,12 +61,13 @@ func (userHandler *UserHandler) VerifyOneTimePassword(ginContext *gin.Context) {
 }
 
 func (userHandler *UserHandler) Login(ginContext *gin.Context) {
+	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
 	var loginUserDto userDto.LoginUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancelFunc()
-	_, err = userHandler.userService.HandleLogin(timeoutCtx, &user.LoginUserRequest{
+	_, err = userClient.HandleLogin(timeoutCtx, &user.LoginUserRequest{
 		UserIdentifier: loginUserDto.UserIdentifier,
 		Password:       loginUserDto.Password,
 	})

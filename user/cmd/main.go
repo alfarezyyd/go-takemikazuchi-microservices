@@ -14,12 +14,13 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
+	"net/http"
 	"time"
 )
 
 var (
 	serviceName = "userService"
-	httpAddr    = ":8080"
+	httpAddr    = ":7001"
 	consulAddr  = ":8500"
 )
 
@@ -37,6 +38,7 @@ func main() {
 	serviceId := discovery.GenerateInstanceID(serviceName)
 	ctx := context.Background()
 	if err := consulServiceRegistry.Register(ctx, serviceId, serviceName, httpAddr); err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 	go func() {
@@ -49,12 +51,20 @@ func main() {
 	}()
 	defer consulServiceRegistry.Deregister(ctx, serviceId, serviceName)
 
+	mux := http.NewServeMux()
+
+	go func() {
+		log.Printf("Starting HTTP server at %s", httpAddr)
+		if err := http.ListenAndServe(httpAddr, mux); err != nil {
+			log.Fatal("failed to start http server")
+		}
+	}()
+
 	viperConfig := viper.New()
 	viperConfig.SetConfigFile(".env")
 	viperConfig.AddConfigPath(".")
 	viperConfig.AutomaticEnv()
 	viperConfig.ReadInConfig()
-
 	// Database Initialization
 	databaseCredentials := &configs.DatabaseCredentials{
 		DatabaseHost:     viperConfig.GetString("DATABASE_HOST"),
@@ -83,7 +93,9 @@ func main() {
 
 	userService := service.NewUserService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
 	handler.NewUserHandler(grpcServer, userService)
+	fmt.Println("Serving gRPC server at " + httpAddr)
 	err = grpcServer.Serve(tcpListener)
+
 	if err != nil {
 		log.Fatalf("Failed to serve gRPC connection: %v", err)
 	}
