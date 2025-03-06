@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices-common/user";
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/user";
 
 message CreateUserRequest {
   string Name = 1;

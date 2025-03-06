@@ -1,6 +1,6 @@
 package helper
 
-import "github.com/alfarezyyd/go-takemikazuchi-microservices-common/web"
+import "github.com/alfarezyyd/go-takemikazuchi-microservices/common/web"
 
 func WriteSuccess(message string, data interface{}) web.ResponseContract {
 	return web.ResponseContract{

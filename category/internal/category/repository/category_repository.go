@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 

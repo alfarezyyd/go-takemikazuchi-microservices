@@ -1,10 +1,10 @@
 package mapper
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/pkg/dto"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/mitchellh/mapstructure"
 	"net/http"
 )

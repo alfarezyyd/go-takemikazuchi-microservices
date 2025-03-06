@@ -1,8 +1,7 @@
 package main
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
-	"github.com/gin-contrib/cors"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/configs"
-	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/handler"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/repository"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
+	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/handler"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/repository"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/service"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

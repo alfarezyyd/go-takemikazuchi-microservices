@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	categoryHandler "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/handler"
-	categoryRepository "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/repository"
-	categoryService "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/service"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/configs"
-	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
+	categoryHandler "github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/handler"
+	categoryRepository "github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/repository"
+	categoryService "github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
+	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -37,6 +37,7 @@ func main() {
 		DatabasePassword: viperConfig.GetString("DATABASE_PASSWORD"),
 		DatabaseUsername: viperConfig.GetString("DATABASE_USERNAME"),
 	}
+	fmt.Println(databaseCredentials)
 	databaseInstance := configs.NewDatabaseConnection(databaseCredentials)
 	databaseConnection := databaseInstance.GetDatabaseConnection()
 	categoryServiceImpl := categoryRepository.NewRepository()

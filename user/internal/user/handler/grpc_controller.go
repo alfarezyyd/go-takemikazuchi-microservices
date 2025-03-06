@@ -2,8 +2,8 @@ package handler
 
 import (
 	"context"
-	grpcUser "github.com/alfarezyyd/go-takemikazuchi-microservices-common/genproto/user"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/service"
+	grpcUser "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/service"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

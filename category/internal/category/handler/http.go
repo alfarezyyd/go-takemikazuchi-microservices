@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/service"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/pkg/dto"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices-user/pkg/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

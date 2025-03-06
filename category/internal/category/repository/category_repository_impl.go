@@ -1,9 +1,9 @@
 package repository
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 

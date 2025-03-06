@@ -2,7 +2,7 @@ package exception
 
 import (
 	"fmt"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/web"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
