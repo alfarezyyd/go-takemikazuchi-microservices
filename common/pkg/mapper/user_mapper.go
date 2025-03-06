@@ -5,7 +5,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/pkg/dto"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/mitchellh/mapstructure"
 	"golang.org/x/crypto/bcrypt"

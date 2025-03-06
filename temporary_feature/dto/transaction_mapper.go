@@ -1,4 +1,4 @@
-package mapper
+package dto
 
 import "go-takemikazuchi-microservices/internal/model"
 

@@ -1,4 +1,4 @@
-package mapper
+package dto
 
 import (
 	"github.com/go-viper/mapstructure/v2"

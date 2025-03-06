@@ -1,11 +1,11 @@
 package mapper
 
 import (
-	"github.com/go-viper/mapstructure/v2"
-	"go-takemikazuchi-microservices/internal/category/dto"
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/pkg/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/mitchellh/mapstructure"
 	"net/http"
 )
 
