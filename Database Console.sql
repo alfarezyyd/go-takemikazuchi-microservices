@@ -22,4 +22,10 @@ DELETE FROM transactions;
 
 DROP TABLE IF EXISTS reviews;
 
-CREATE DATABASE go_takemikazuchi_microservices_user;
+CREATE DATABASE go_takemikazuchi_microservices_users;
+DROP DATABASE go_takemikazuchi_microservices_users;
+
+SELECT * FROM users;
+
+DELETE FROM one_time_password_tokens;
+DELETE FROM users;

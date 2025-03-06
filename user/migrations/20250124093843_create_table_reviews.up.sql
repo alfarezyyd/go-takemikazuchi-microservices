@@ -12,6 +12,5 @@ CREATE TABLE reviews
 
     -- Relasi
     FOREIGN KEY (reviewer_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (reviewed_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (job_id) REFERENCES jobs (id) ON DELETE CASCADE
+    FOREIGN KEY (reviewed_id) REFERENCES users (id) ON DELETE CASCADE
 );
