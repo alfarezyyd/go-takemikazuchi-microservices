@@ -24,7 +24,7 @@ import (
 )
 
 type UserServiceImpl struct {
-	userRepository   repository.Repository
+	userRepository   repository.UserRepository
 	dbConnection     *gorm.DB
 	mailerService    *configs.MailerService
 	identityProvider *configs.IdentityProvider
@@ -34,7 +34,7 @@ type UserServiceImpl struct {
 
 func NewUserService(
 	validatorService validatorFeature.Service,
-	userRepository repository.Repository,
+	userRepository repository.UserRepository,
 	dbConnection *gorm.DB,
 	mailerService *configs.MailerService,
 	identityProvider *configs.IdentityProvider,
@@ -69,7 +69,10 @@ func (userService *UserServiceImpl) HandleRegister(ctx context.Context, createUs
 		}
 		return nil
 	})
-	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	gormError := exception.ParseGormError(err)
+	if gormError != nil {
+		return nil, exception.ParseIntoGrpcError(gormError)
+	}
 	return &user.CommandUserResponse{
 		IsSuccess: true,
 	}, nil
@@ -158,7 +161,7 @@ func (userService *UserServiceImpl) HandleGoogleCallback(tokenState string, quer
 	return nil
 }
 
-func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDto *user.LoginUserRequest) (*user.LoginResponse, error) {
+func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDto *user.LoginUserRequest) (*user.PayloadResponse, error) {
 	err := userService.validatorService.ValidateStruct(loginUserDto)
 	userService.validatorService.ParseValidationError(err)
 	var tokenString string
@@ -177,7 +180,7 @@ func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDt
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		return nil
 	})
-	return &user.LoginResponse{
+	return &user.PayloadResponse{
 		Payload: tokenString,
 	}, nil
 }

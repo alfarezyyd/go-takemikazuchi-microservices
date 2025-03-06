@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
@@ -10,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"net/http"
 	"time"
 )
@@ -40,7 +40,11 @@ func (userHandler *UserHandler) Register(ginContext *gin.Context) {
 		Password:        createUserDto.Password,
 		ConfirmPassword: createUserDto.ConfirmPassword,
 	}
-	userClient.HandleRegister(timeoutCtx, &createUserRequest)
+	_, err = userClient.HandleRegister(timeoutCtx, &createUserRequest)
+	if err != nil {
+		exception.ParseGrpcError(ginContext, err)
+		return
+	}
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
 }
 
@@ -71,8 +75,29 @@ func (userHandler *UserHandler) Login(ginContext *gin.Context) {
 		UserIdentifier: loginUserDto.UserIdentifier,
 		Password:       loginUserDto.Password,
 	})
-	fmt.Println(err)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User logged successfully", gin.H{
 		"token": "ON TESTING",
 	}))
+}
+
+func (userHandler *UserHandler) LoginWithGoogle(ginContext *gin.Context) {
+	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
+	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancelFunc()
+	authEndpoint, _ := userClient.HandleGoogleAuthentication(timeout, &emptypb.Empty{})
+	ginContext.Redirect(http.StatusSeeOther, authEndpoint.Payload)
+	ginContext.JSON(http.StatusOK, authEndpoint)
+}
+
+func (userHandler *UserHandler) GoogleProviderCallback(ginContext *gin.Context) {
+	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
+	tokenState := ginContext.Query("state")
+	queryCode := ginContext.Query("code")
+	ctxTimeout, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancelFunc()
+	_, err := userClient.HandleGoogleCallback(ctxTimeout, &user.GoogleCallbackRequest{
+		TokenState: tokenState,
+		QueryCode:  queryCode,
+	})
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 }

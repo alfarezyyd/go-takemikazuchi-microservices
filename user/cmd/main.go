@@ -11,7 +11,6 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/service"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"net"
 	"net/http"
@@ -65,6 +64,7 @@ func main() {
 	viperConfig.AddConfigPath(".")
 	viperConfig.AutomaticEnv()
 	viperConfig.ReadInConfig()
+
 	// Database Initialization
 	databaseCredentials := &configs.DatabaseCredentials{
 		DatabaseHost:     viperConfig.GetString("DATABASE_HOST"),
@@ -77,12 +77,6 @@ func main() {
 	databaseInstance := configs.NewDatabaseConnection(databaseCredentials)
 	databaseConnection := databaseInstance.GetDatabaseConnection()
 
-	grpcConnection, err := grpc.NewClient(":3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	defer grpcConnection.Close()
-
-	if err != nil {
-		log.Fatalf("Failed to create gRPC connection: %v", err)
-	}
 	tcpListener, err := net.Listen("tcp", ":9000")
 	grpcServer := grpc.NewServer()
 	userRepository := repository.NewRepository()

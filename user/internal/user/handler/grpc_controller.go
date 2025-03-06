@@ -19,6 +19,10 @@ func NewUserHandler(grpcServer *grpc.Server, userService service.Service) {
 	grpcUser.RegisterUserServiceServer(grpcServer, userHandler)
 }
 
-func (h *UserHandler) HandleLogin(ctx context.Context, req *grpcUser.LoginUserRequest) (*grpcUser.LoginResponse, error) {
-	return h.userService.HandleLogin(ctx, req)
+func (userHandler *UserHandler) HandleLogin(ctx context.Context, req *grpcUser.LoginUserRequest) (*grpcUser.PayloadResponse, error) {
+	return userHandler.userService.HandleLogin(ctx, req)
+}
+
+func (userHandler *UserHandler) HandleRegister(ctx context.Context, req *grpcUser.CreateUserRequest) (*grpcUser.CommandUserResponse, error) {
+	return userHandler.userService.HandleRegister(ctx, req)
 }

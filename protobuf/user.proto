@@ -1,4 +1,5 @@
 syntax = "proto3";
+import "google/protobuf/empty.proto";
 
 option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/user";
 
@@ -30,15 +31,31 @@ message VerifyOtpRequest {
   string OneTimePasswordToken = 2;
 }
 
+message GoogleCallbackRequest {
+  string tokenState = 1;
+  string queryCode = 2;
+}
+
+
 message CommandUserResponse{
   bool IsSuccess = 1;
 }
 
-message LoginResponse {
+message QueryUserResponse{
+  bool IsSuccess = 1;
+}
+
+message PayloadResponse {
   string Payload = 1;
 }
 
+
+
 service UserService{
   rpc HandleRegister(CreateUserRequest) returns (CommandUserResponse);
-  rpc HandleLogin (LoginUserRequest) returns (LoginResponse);
+  rpc HandleGenerateOneTimePassword(GenerateOtpRequest) returns (google.protobuf.Empty);
+  rpc HandleLogin (LoginUserRequest) returns (PayloadResponse);
+  rpc HandleVerifyOneTimePassword(VerifyOtpRequest) returns (QueryUserResponse);
+  rpc HandleGoogleAuthentication(google.protobuf.Empty) returns (PayloadResponse);
+  rpc HandleGoogleCallback(GoogleCallbackRequest) returns (google.protobuf.Empty);
 }

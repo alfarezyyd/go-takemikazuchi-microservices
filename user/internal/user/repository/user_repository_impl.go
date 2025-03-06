@@ -8,14 +8,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type RepositoryImpl struct {
+type UserRepositoryImpl struct {
 }
 
-func NewRepository() *RepositoryImpl {
-	return &RepositoryImpl{}
+func NewRepository() *UserRepositoryImpl {
+	return &UserRepositoryImpl{}
 }
 
-func (userRepository *RepositoryImpl) IsUserExists(gormTransaction *gorm.DB, queryClause string, argumentClause ...interface{}) (bool, error) {
+func (userRepository *UserRepositoryImpl) IsUserExists(gormTransaction *gorm.DB, queryClause string, argumentClause ...interface{}) (bool, error) {
 	var isUserExists bool
 	fmt.Println(queryClause, argumentClause)
 	err := gormTransaction.Model(model.User{}).
@@ -25,7 +25,7 @@ func (userRepository *RepositoryImpl) IsUserExists(gormTransaction *gorm.DB, que
 	return isUserExists, err
 }
 
-func (userRepository *RepositoryImpl) FindUserByEmail(userEmail *string, userModel *model.User, gormConnection *gorm.DB) {
+func (userRepository *UserRepositoryImpl) FindUserByEmail(userEmail *string, userModel *model.User, gormConnection *gorm.DB) {
 	err := gormConnection.Where("email = ?", userEmail).First(userModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

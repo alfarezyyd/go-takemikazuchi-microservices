@@ -14,5 +14,5 @@ type Service interface {
 	HandleVerifyOneTimePassword(verifyOtpDto *userDto.VerifyOtpDto)
 	HandleGoogleAuthentication() string
 	HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError
-	HandleLogin(context.Context, *user.LoginUserRequest) (*user.LoginResponse, error)
+	HandleLogin(context.Context, *user.LoginUserRequest) (*user.PayloadResponse, error)
 }

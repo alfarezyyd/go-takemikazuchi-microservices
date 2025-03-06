@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,8 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_HandleRegister_FullMethodName = "/UserService/HandleRegister"
-	UserService_HandleLogin_FullMethodName    = "/UserService/HandleLogin"
+	UserService_HandleRegister_FullMethodName                = "/UserService/HandleRegister"
+	UserService_HandleGenerateOneTimePassword_FullMethodName = "/UserService/HandleGenerateOneTimePassword"
+	UserService_HandleLogin_FullMethodName                   = "/UserService/HandleLogin"
+	UserService_HandleVerifyOneTimePassword_FullMethodName   = "/UserService/HandleVerifyOneTimePassword"
+	UserService_HandleGoogleAuthentication_FullMethodName    = "/UserService/HandleGoogleAuthentication"
+	UserService_HandleGoogleCallback_FullMethodName          = "/UserService/HandleGoogleCallback"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -28,7 +33,11 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	HandleRegister(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
-	HandleLogin(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	HandleLogin(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*PayloadResponse, error)
+	HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*QueryUserResponse, error)
+	HandleGoogleAuthentication(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PayloadResponse, error)
+	HandleGoogleCallback(ctx context.Context, in *GoogleCallbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type userServiceClient struct {
@@ -49,10 +58,50 @@ func (c *userServiceClient) HandleRegister(ctx context.Context, in *CreateUserRe
 	return out, nil
 }
 
-func (c *userServiceClient) HandleLogin(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+func (c *userServiceClient) HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(LoginResponse)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, UserService_HandleGenerateOneTimePassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) HandleLogin(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*PayloadResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PayloadResponse)
 	err := c.cc.Invoke(ctx, UserService_HandleLogin_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*QueryUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(QueryUserResponse)
+	err := c.cc.Invoke(ctx, UserService_HandleVerifyOneTimePassword_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) HandleGoogleAuthentication(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PayloadResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PayloadResponse)
+	err := c.cc.Invoke(ctx, UserService_HandleGoogleAuthentication_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) HandleGoogleCallback(ctx context.Context, in *GoogleCallbackRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, UserService_HandleGoogleCallback_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +113,11 @@ func (c *userServiceClient) HandleLogin(ctx context.Context, in *LoginUserReques
 // for forward compatibility.
 type UserServiceServer interface {
 	HandleRegister(context.Context, *CreateUserRequest) (*CommandUserResponse, error)
-	HandleLogin(context.Context, *LoginUserRequest) (*LoginResponse, error)
+	HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*emptypb.Empty, error)
+	HandleLogin(context.Context, *LoginUserRequest) (*PayloadResponse, error)
+	HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*QueryUserResponse, error)
+	HandleGoogleAuthentication(context.Context, *emptypb.Empty) (*PayloadResponse, error)
+	HandleGoogleCallback(context.Context, *GoogleCallbackRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -78,8 +131,20 @@ type UnimplementedUserServiceServer struct{}
 func (UnimplementedUserServiceServer) HandleRegister(context.Context, *CreateUserRequest) (*CommandUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleRegister not implemented")
 }
-func (UnimplementedUserServiceServer) HandleLogin(context.Context, *LoginUserRequest) (*LoginResponse, error) {
+func (UnimplementedUserServiceServer) HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleGenerateOneTimePassword not implemented")
+}
+func (UnimplementedUserServiceServer) HandleLogin(context.Context, *LoginUserRequest) (*PayloadResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleLogin not implemented")
+}
+func (UnimplementedUserServiceServer) HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*QueryUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleVerifyOneTimePassword not implemented")
+}
+func (UnimplementedUserServiceServer) HandleGoogleAuthentication(context.Context, *emptypb.Empty) (*PayloadResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleGoogleAuthentication not implemented")
+}
+func (UnimplementedUserServiceServer) HandleGoogleCallback(context.Context, *GoogleCallbackRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleGoogleCallback not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -120,6 +185,24 @@ func _UserService_HandleRegister_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_HandleGenerateOneTimePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GenerateOtpRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).HandleGenerateOneTimePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_HandleGenerateOneTimePassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).HandleGenerateOneTimePassword(ctx, req.(*GenerateOtpRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_HandleLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LoginUserRequest)
 	if err := dec(in); err != nil {
@@ -138,6 +221,60 @@ func _UserService_HandleLogin_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_HandleVerifyOneTimePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyOtpRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).HandleVerifyOneTimePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_HandleVerifyOneTimePassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).HandleVerifyOneTimePassword(ctx, req.(*VerifyOtpRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_HandleGoogleAuthentication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).HandleGoogleAuthentication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_HandleGoogleAuthentication_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).HandleGoogleAuthentication(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_HandleGoogleCallback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GoogleCallbackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).HandleGoogleCallback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_HandleGoogleCallback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).HandleGoogleCallback(ctx, req.(*GoogleCallbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -150,8 +287,24 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_HandleRegister_Handler,
 		},
 		{
+			MethodName: "HandleGenerateOneTimePassword",
+			Handler:    _UserService_HandleGenerateOneTimePassword_Handler,
+		},
+		{
 			MethodName: "HandleLogin",
 			Handler:    _UserService_HandleLogin_Handler,
+		},
+		{
+			MethodName: "HandleVerifyOneTimePassword",
+			Handler:    _UserService_HandleVerifyOneTimePassword_Handler,
+		},
+		{
+			MethodName: "HandleGoogleAuthentication",
+			Handler:    _UserService_HandleGoogleAuthentication_Handler,
+		},
+		{
+			MethodName: "HandleGoogleCallback",
+			Handler:    _UserService_HandleGoogleCallback_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
