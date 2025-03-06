@@ -39,8 +39,6 @@ message LoginResponse {
 }
 
 service UserService{
-  rpc Register(CreateUserRequest) returns (CommandUserResponse);
-  rpc HandleGenerateOneTimePassword(GenerateOtpRequest) returns (CommandUserResponse);
-  rpc HandleVerifyOneTimePassword(VerifyOtpRequest) returns (CommandUserResponse);
+  rpc HandleRegister(CreateUserRequest) returns (CommandUserResponse);
   rpc HandleLogin (LoginUserRequest) returns (LoginResponse);
 }

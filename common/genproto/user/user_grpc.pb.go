@@ -19,19 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_Register_FullMethodName                      = "/UserService/Register"
-	UserService_HandleGenerateOneTimePassword_FullMethodName = "/UserService/HandleGenerateOneTimePassword"
-	UserService_HandleVerifyOneTimePassword_FullMethodName   = "/UserService/HandleVerifyOneTimePassword"
-	UserService_HandleLogin_FullMethodName                   = "/UserService/HandleLogin"
+	UserService_HandleRegister_FullMethodName = "/UserService/HandleRegister"
+	UserService_HandleLogin_FullMethodName    = "/UserService/HandleLogin"
 )
 
 // UserServiceClient is the client API for UserService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	Register(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
-	HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
-	HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
+	HandleRegister(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandUserResponse, error)
 	HandleLogin(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 }
 
@@ -43,30 +39,10 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) Register(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandUserResponse, error) {
+func (c *userServiceClient) HandleRegister(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CommandUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CommandUserResponse)
-	err := c.cc.Invoke(ctx, UserService_Register_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) HandleGenerateOneTimePassword(ctx context.Context, in *GenerateOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandUserResponse)
-	err := c.cc.Invoke(ctx, UserService_HandleGenerateOneTimePassword_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) HandleVerifyOneTimePassword(ctx context.Context, in *VerifyOtpRequest, opts ...grpc.CallOption) (*CommandUserResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CommandUserResponse)
-	err := c.cc.Invoke(ctx, UserService_HandleVerifyOneTimePassword_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, UserService_HandleRegister_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -87,9 +63,7 @@ func (c *userServiceClient) HandleLogin(ctx context.Context, in *LoginUserReques
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
-	Register(context.Context, *CreateUserRequest) (*CommandUserResponse, error)
-	HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*CommandUserResponse, error)
-	HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*CommandUserResponse, error)
+	HandleRegister(context.Context, *CreateUserRequest) (*CommandUserResponse, error)
 	HandleLogin(context.Context, *LoginUserRequest) (*LoginResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -101,14 +75,8 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) Register(context.Context, *CreateUserRequest) (*CommandUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
-}
-func (UnimplementedUserServiceServer) HandleGenerateOneTimePassword(context.Context, *GenerateOtpRequest) (*CommandUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HandleGenerateOneTimePassword not implemented")
-}
-func (UnimplementedUserServiceServer) HandleVerifyOneTimePassword(context.Context, *VerifyOtpRequest) (*CommandUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HandleVerifyOneTimePassword not implemented")
+func (UnimplementedUserServiceServer) HandleRegister(context.Context, *CreateUserRequest) (*CommandUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleRegister not implemented")
 }
 func (UnimplementedUserServiceServer) HandleLogin(context.Context, *LoginUserRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleLogin not implemented")
@@ -134,56 +102,20 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserService_HandleRegister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).Register(ctx, in)
+		return srv.(UserServiceServer).HandleRegister(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_Register_FullMethodName,
+		FullMethod: UserService_HandleRegister_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).Register(ctx, req.(*CreateUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserService_HandleGenerateOneTimePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GenerateOtpRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).HandleGenerateOneTimePassword(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_HandleGenerateOneTimePassword_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).HandleGenerateOneTimePassword(ctx, req.(*GenerateOtpRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserService_HandleVerifyOneTimePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(VerifyOtpRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).HandleVerifyOneTimePassword(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_HandleVerifyOneTimePassword_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).HandleVerifyOneTimePassword(ctx, req.(*VerifyOtpRequest))
+		return srv.(UserServiceServer).HandleRegister(ctx, req.(*CreateUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -214,16 +146,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Register",
-			Handler:    _UserService_Register_Handler,
-		},
-		{
-			MethodName: "HandleGenerateOneTimePassword",
-			Handler:    _UserService_HandleGenerateOneTimePassword_Handler,
-		},
-		{
-			MethodName: "HandleVerifyOneTimePassword",
-			Handler:    _UserService_HandleVerifyOneTimePassword_Handler,
+			MethodName: "HandleRegister",
+			Handler:    _UserService_HandleRegister_Handler,
 		},
 		{
 			MethodName: "HandleLogin",

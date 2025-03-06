@@ -44,7 +44,7 @@ func main() {
 	}()
 	defer consulServiceRegistry.Deregister(ctx, serviceId, serviceName)
 
-	grpcConnection, err := grpc.NewClient("localhost:3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConnection, err := grpc.NewClient(":9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to create gRPC connection: %v", err)
 	}

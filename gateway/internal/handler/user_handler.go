@@ -38,7 +38,7 @@ func (userHandler *UserHandler) Register(ginContext *gin.Context) {
 		Password:        createUserDto.Password,
 		ConfirmPassword: createUserDto.ConfirmPassword,
 	}
-	userHandler.userService.Register(timeoutCtx, &createUserRequest)
+	userHandler.userService.HandleRegister(timeoutCtx, &createUserRequest)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
 }
 

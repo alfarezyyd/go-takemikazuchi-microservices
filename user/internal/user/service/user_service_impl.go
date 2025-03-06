@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -22,7 +23,7 @@ import (
 	"time"
 )
 
-type ServiceImpl struct {
+type UserServiceImpl struct {
 	userRepository   repository.Repository
 	dbConnection     *gorm.DB
 	mailerService    *configs.MailerService
@@ -31,14 +32,14 @@ type ServiceImpl struct {
 	validatorService validatorFeature.Service
 }
 
-func NewService(
+func NewUserService(
 	validatorService validatorFeature.Service,
 	userRepository repository.Repository,
 	dbConnection *gorm.DB,
 	mailerService *configs.MailerService,
 	identityProvider *configs.IdentityProvider,
-	viperConfig *viper.Viper) *ServiceImpl {
-	return &ServiceImpl{
+	viperConfig *viper.Viper) *UserServiceImpl {
+	return &UserServiceImpl{
 		userRepository:   userRepository,
 		dbConnection:     dbConnection,
 		mailerService:    mailerService,
@@ -48,30 +49,33 @@ func NewService(
 	}
 }
 
-func (userService *ServiceImpl) HandleRegister(createUserDto *userDto.CreateUserDto) {
-	err := userService.validatorService.ValidateStruct(createUserDto)
+func (userService *UserServiceImpl) HandleRegister(ctx context.Context, createUserRequest *user.CreateUserRequest) (*user.CommandUserResponse, error) {
+	err := userService.validatorService.ValidateStruct(createUserRequest)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", createUserDto.PhoneNumber, createUserDto.Email)
+		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", createUserRequest.PhoneNumber, createUserRequest.Email)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if isUserExists {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "Email or phone number has been registered", errors.New("duplicate email")))
 		}
-		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
+		userModel := mapper.MapUserDtoIntoUserModel(createUserRequest)
 		err = gormTransaction.Create(userModel).Error
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-		if createUserDto.Email != "" {
+		if createUserRequest.Email != "" {
 			userService.HandleGenerateOneTimePassword(&userDto.GenerateOtpDto{
-				Email:  createUserDto.Email,
+				Email:  createUserRequest.Email,
 				UserId: userModel.ID,
 			}, gormTransaction)
 		}
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return &user.CommandUserResponse{
+		IsSuccess: true,
+	}, nil
 }
 
-func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *userDto.GenerateOtpDto, externalGormTransaction *gorm.DB) {
+func (userService *UserServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *userDto.GenerateOtpDto, externalGormTransaction *gorm.DB) {
 	err := userService.validatorService.ValidateStruct(generateOneTimePassDto)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -109,7 +113,7 @@ func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePas
 	})
 }
 
-func (userService *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *userDto.VerifyOtpDto) {
+func (userService *UserServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *userDto.VerifyOtpDto) {
 	err := userService.validatorService.ValidateStruct(verifyOtpDto)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -126,11 +130,11 @@ func (userService *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *userDt
 	})
 }
 
-func (userService *ServiceImpl) HandleGoogleAuthentication() string {
+func (userService *UserServiceImpl) HandleGoogleAuthentication() string {
 	return userService.identityProvider.GoogleProviderConfig.AuthCodeURL("randomstate")
 }
 
-func (userService *ServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
+func (userService *UserServiceImpl) HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError {
 	if tokenState != "randomstate" {
 		return exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("invalid token state"))
 	}
@@ -154,7 +158,7 @@ func (userService *ServiceImpl) HandleGoogleCallback(tokenState string, queryCod
 	return nil
 }
 
-func (userService *ServiceImpl) HandleLogin(loginUserDto *userDto.LoginUserDto) string {
+func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDto *user.LoginUserRequest) (*user.LoginResponse, error) {
 	err := userService.validatorService.ValidateStruct(loginUserDto)
 	userService.validatorService.ParseValidationError(err)
 	var tokenString string
@@ -173,5 +177,7 @@ func (userService *ServiceImpl) HandleLogin(loginUserDto *userDto.LoginUserDto) 
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		return nil
 	})
-	return tokenString
+	return &user.LoginResponse{
+		Payload: tokenString,
+	}, nil
 }

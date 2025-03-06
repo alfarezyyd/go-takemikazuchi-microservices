@@ -3,6 +3,7 @@ package mapper
 import (
 	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
@@ -13,7 +14,7 @@ import (
 	"net/http"
 )
 
-func MapUserDtoIntoUserModel[T *dto.CreateUserDto](userTransferObject T) *model.User {
+func MapUserDtoIntoUserModel[T *user.CreateUserRequest](userTransferObject T) *model.User {
 	var userModel model.User
 	err := mapstructure.Decode(userTransferObject, &userModel)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userModel.Password), 14)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
@@ -29,6 +30,7 @@ func main() {
 
 	consulServiceRegistry, err := discovery.NewRegistry(consulAddr, serviceName)
 	if err != nil {
+		fmt.Println(err)
 		panic(err)
 	}
 
@@ -73,15 +75,14 @@ func main() {
 	}
 	tcpListener, err := net.Listen("tcp", ":9000")
 	grpcServer := grpc.NewServer()
-	err = grpcServer.Serve(tcpListener)
 	userRepository := repository.NewRepository()
 	validatorInstance, engTranslator := configs.InitializeValidator()
 	mailerService := configs.NewMailerService(viperConfig)
 	identityProvider := configs.NewIdentityProvider(viperConfig)
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
 
-	newService := service.NewService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
-	handler.NewUserHandler(grpcServer, newService)
+	userService := service.NewUserService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
+	handler.NewUserHandler(grpcServer, userService)
 	err = grpcServer.Serve(tcpListener)
 	if err != nil {
 		log.Fatalf("Failed to serve gRPC connection: %v", err)
