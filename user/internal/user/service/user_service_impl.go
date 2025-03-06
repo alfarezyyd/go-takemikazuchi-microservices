@@ -16,8 +16,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"io"
 	"net/http"
@@ -51,20 +49,22 @@ func NewUserService(
 	}
 }
 
-func (userService *UserServiceImpl) HandleRegister(ctx context.Context, createUserRequest *user.CreateUserRequest) (*user.CommandUserResponse, error) {
-	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", createUserRequest.PhoneNumber, createUserRequest.Email)
+func (userService *UserServiceImpl) HandleRegister(createUserDto *userDto.CreateUserDto) error {
+	err := userService.validatorService.ValidateStruct(createUserDto)
+	userService.validatorService.ParseValidationError(err)
+	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", createUserDto.PhoneNumber, createUserDto.Email)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if isUserExists {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, "Email or phone number has been registered", errors.New("duplicate email")))
 		}
-		userModel := mapper.MapUserDtoIntoUserModel(createUserRequest)
+		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
 		err = gormTransaction.Create(userModel).Error
 		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-		if createUserRequest.Email != "" {
+		if createUserDto.Email != "" {
 			userService.HandleGenerateOneTimePassword(&userDto.GenerateOtpDto{
-				Email:  createUserRequest.Email,
+				Email:  createUserDto.Email,
 				UserId: userModel.ID,
 			}, gormTransaction)
 		}
@@ -72,11 +72,9 @@ func (userService *UserServiceImpl) HandleRegister(ctx context.Context, createUs
 	})
 	gormError := exception.ParseGormError(err)
 	if gormError != nil {
-		return nil, exception.ParseIntoGrpcError(gormError)
+		return exception.ParseIntoGrpcError(gormError)
 	}
-	return &user.CommandUserResponse{
-		IsSuccess: true,
-	}, status.Errorf(codes.Aborted, "awdwa")
+	return nil
 }
 
 func (userService *UserServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *userDto.GenerateOtpDto, externalGormTransaction *gorm.DB) {
@@ -164,7 +162,7 @@ func (userService *UserServiceImpl) HandleGoogleCallback(tokenState string, quer
 	return nil
 }
 
-func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDto *user.LoginUserRequest) (*user.PayloadResponse, error) {
+func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequest) (*user.PayloadResponse, error) {
 	err := userService.validatorService.ValidateStruct(loginUserDto)
 	userService.validatorService.ParseValidationError(err)
 	var tokenString string

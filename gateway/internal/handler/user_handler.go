@@ -73,12 +73,16 @@ func (userHandler *UserHandler) Login(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancelFunc()
-	_, err = userClient.HandleLogin(timeoutCtx, &user.LoginUserRequest{
+	payloadResponse, err := userClient.HandleLogin(timeoutCtx, &user.LoginUserRequest{
 		UserIdentifier: loginUserDto.UserIdentifier,
 		Password:       loginUserDto.Password,
 	})
+	if err != nil {
+		exception.ParseGrpcError(ginContext, err)
+		return
+	}
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User logged successfully", gin.H{
-		"token": "ON TESTING",
+		"token": payloadResponse.Payload,
 	}))
 }
 
