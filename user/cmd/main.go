@@ -2,7 +2,15 @@ package main
 
 import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/configs"
+	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/handler"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/repository"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/service"
 	"github.com/spf13/viper"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"log"
+	"net"
 )
 
 //TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
@@ -25,6 +33,26 @@ func main() {
 	}
 
 	databaseInstance := configs.NewDatabaseConnection(databaseCredentials)
-	databaseInstance.GetDatabaseConnection()
+	databaseConnection := databaseInstance.GetDatabaseConnection()
 
+	grpcConnection, err := grpc.NewClient(":3000", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	defer grpcConnection.Close()
+	if err != nil {
+		log.Fatalf("Failed to create gRPC connection: %v", err)
+	}
+	tcpListener, err := net.Listen("tcp", ":9000")
+	grpcServer := grpc.NewServer()
+	err = grpcServer.Serve(tcpListener)
+	userRepository := repository.NewRepository()
+	validatorInstance, engTranslator := configs.InitializeValidator()
+	mailerService := configs.NewMailerService(viperConfig)
+	identityProvider := configs.NewIdentityProvider(viperConfig)
+	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
+
+	newService := service.NewService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
+	handler.NewUserHandler(grpcServer, newService)
+	err = grpcServer.Serve(tcpListener)
+	if err != nil {
+		log.Fatalf("Failed to serve gRPC connection: %v", err)
+	}
 }

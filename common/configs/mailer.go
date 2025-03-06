@@ -3,6 +3,7 @@ package configs
 import (
 	"bytes"
 	"github.com/spf13/viper"
+	"github.com/wneessen/go-mail"
 	"html/template"
 )
 

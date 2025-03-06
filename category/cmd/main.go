@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	categoryHandler "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/handler"
 	categoryRepository "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/repository"
 	categoryService "github.com/alfarezyyd/go-takemikazuchi-microservices-category/internal/category/service"
@@ -44,6 +45,7 @@ func main() {
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
 	categoryServiceInstance := categoryService.NewService(categoryServiceImpl, databaseConnection, validatorService)
 	categoryHandler.NewCategoryHandler(grpcServer, categoryServiceInstance)
+	fmt.Println("gRPC server listening on " + tcpListener.Addr().String())
 	err = grpcServer.Serve(tcpListener)
 	if err != nil {
 		log.Fatalf("Failed to serve gRPC connection: %v", err)

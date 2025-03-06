@@ -3,8 +3,8 @@ package handler
 import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/pkg/dto"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"net/http"
@@ -23,7 +23,7 @@ func NewHandler(userService service.Service, validatorInstance *validator.Valida
 }
 
 func (userHandler *Handler) Register(ginContext *gin.Context) {
-	var createUserDto userDto.CreateUserDto
+	var createUserDto dto.CreateUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&createUserDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.HandleRegister(&createUserDto)
@@ -31,7 +31,7 @@ func (userHandler *Handler) Register(ginContext *gin.Context) {
 }
 
 func (userHandler *Handler) GenerateOneTimePassword(ginContext *gin.Context) {
-	var generateOneTimePassDto userDto.GenerateOtpDto
+	var generateOneTimePassDto dto.GenerateOtpDto
 	err := ginContext.ShouldBindBodyWithJSON(&generateOneTimePassDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.HandleGenerateOneTimePassword(&generateOneTimePassDto, nil)
@@ -39,7 +39,7 @@ func (userHandler *Handler) GenerateOneTimePassword(ginContext *gin.Context) {
 }
 
 func (userHandler *Handler) VerifyOneTimePassword(ginContext *gin.Context) {
-	var VerifyOneTimePassDto userDto.VerifyOtpDto
+	var VerifyOneTimePassDto dto.VerifyOtpDto
 	err := ginContext.ShouldBindBodyWithJSON(&VerifyOneTimePassDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	userHandler.userService.HandleVerifyOneTimePassword(&VerifyOneTimePassDto)
@@ -47,7 +47,7 @@ func (userHandler *Handler) VerifyOneTimePassword(ginContext *gin.Context) {
 }
 
 func (userHandler *Handler) Login(ginContext *gin.Context) {
-	var loginUserDto userDto.LoginUserDto
+	var loginUserDto dto.LoginUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	generatedToken := userHandler.userService.HandleLogin(&loginUserDto)

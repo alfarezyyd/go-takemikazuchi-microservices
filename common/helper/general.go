@@ -2,7 +2,7 @@ package helper
 
 import (
 	"fmt"
-	"go-takemikazuchi-microservices/pkg/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
 	"math/rand"
 	"reflect"
 	"strconv"

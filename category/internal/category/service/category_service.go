@@ -1,9 +1,9 @@
 package service
 
 import (
-	"go-takemikazuchi-microservices/internal/category/dto"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/pkg/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-category/pkg/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices-user/pkg/dto"
 )
 
 type Service interface {

@@ -18,7 +18,7 @@ func NewGoogleMaps(viperConfig *viper.Viper) *GoogleMaps {
 
 func (googleMapsClient *GoogleMaps) InitializeGoogleMaps() *maps.Client {
 	if googleMapsClient.mapsClient == nil {
-		client, err := maps.NewClient(maps.WithmicroservicesKey(googleMapsClient.viperConfig.GetString("GOOGLE_MAPS_microservices_KEY")))
+		client, err := maps.NewClient(maps.WithAPIKey(googleMapsClient.viperConfig.GetString("GOOGLE_MAPS_microservices_KEY")))
 		if err != nil {
 			return nil
 		}

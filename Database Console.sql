@@ -22,3 +22,4 @@ DELETE FROM transactions;
 
 DROP TABLE IF EXISTS reviews;
 
+CREATE DATABASE go_takemikazuchi_microservices_user;

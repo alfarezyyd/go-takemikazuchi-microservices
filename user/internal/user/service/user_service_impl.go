@@ -8,10 +8,10 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/mapper"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices-common/pkg/validator"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/dto"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/mapper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices-user/internal/user/repository"
+	dto2 "github.com/alfarezyyd/go-takemikazuchi-microservices-user/pkg/dto"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
@@ -48,7 +48,7 @@ func NewService(
 	}
 }
 
-func (userService *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto) {
+func (userService *ServiceImpl) HandleRegister(createUserDto *dto2.CreateUserDto) {
 	err := userService.validatorService.ValidateStruct(createUserDto)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -61,7 +61,7 @@ func (userService *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto)
 		err = gormTransaction.Create(userModel).Error
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		if createUserDto.Email != "" {
-			userService.HandleGenerateOneTimePassword(&dto.GenerateOtpDto{
+			userService.HandleGenerateOneTimePassword(&dto2.GenerateOtpDto{
 				Email:  createUserDto.Email,
 				UserId: userModel.ID,
 			}, gormTransaction)
@@ -71,7 +71,7 @@ func (userService *ServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto, externalGormTransaction *gorm.DB) {
+func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto2.GenerateOtpDto, externalGormTransaction *gorm.DB) {
 	err := userService.validatorService.ValidateStruct(generateOneTimePassDto)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -109,7 +109,7 @@ func (userService *ServiceImpl) HandleGenerateOneTimePassword(generateOneTimePas
 	})
 }
 
-func (userService *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto.VerifyOtpDto) {
+func (userService *ServiceImpl) HandleVerifyOneTimePassword(verifyOtpDto *dto2.VerifyOtpDto) {
 	err := userService.validatorService.ValidateStruct(verifyOtpDto)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
@@ -154,7 +154,7 @@ func (userService *ServiceImpl) HandleGoogleCallback(tokenState string, queryCod
 	return nil
 }
 
-func (userService *ServiceImpl) HandleLogin(loginUserDto *dto.LoginUserDto) string {
+func (userService *ServiceImpl) HandleLogin(loginUserDto *dto2.LoginUserDto) string {
 	err := userService.validatorService.ValidateStruct(loginUserDto)
 	userService.validatorService.ParseValidationError(err)
 	var tokenString string
