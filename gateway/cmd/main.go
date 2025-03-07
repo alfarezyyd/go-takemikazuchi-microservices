@@ -70,6 +70,7 @@ func main() {
 	rootRouterGroup := ginEngine.Group("/")
 	validatorInstance, _ := configs.InitializeValidator()
 	userHandler := handler.NewUserHandler(validatorInstance, grpcConnection)
+	handler.NewCategoryHandler()
 	authenticationRoutes := routes.NewAuthenticationRoutes(rootRouterGroup, userHandler)
 	authenticationRoutes.Setup()
 	ginError := ginEngine.Run(":8080")

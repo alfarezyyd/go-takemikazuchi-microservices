@@ -36,6 +36,10 @@ message GoogleCallbackRequest {
   string queryCode = 2;
 }
 
+message UserJwtClaim {
+  string Email = 1;
+  string PhoneNumber = 2;
+}
 
 message CommandUserResponse{
   bool IsSuccess = 1;

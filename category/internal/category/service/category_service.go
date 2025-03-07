@@ -6,7 +6,7 @@ import (
 	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 )
 
-type Service interface {
+type CategoryService interface {
 	FindAll() []dto.CategoryResponseDto
 	HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *dto.CreateCategoryDto) *exception.ClientError
 	HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError

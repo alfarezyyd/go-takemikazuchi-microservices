@@ -1,15 +1,26 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+import "user.proto";
 option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/category";
 
 message CreateCategoryRequest{
   string Name = 1;
   string Description = 2;
+  UserJwtClaim userJwtClaim = 3;
 }
 
+
 message UpdateCategoryRequest{
-  string Name = 1;
-  string Description = 2;
+  string Id = 1;
+  string Name = 2;
+  string Description = 3;
+  UserJwtClaim userJwtClaim = 4;
+}
+
+message DeleteCategoryRequest {
+  string categoryId = 1;
+  UserJwtClaim userJwtClaim = 2;;
 }
 
 message CommandCategoryResponse{
@@ -23,11 +34,13 @@ message QueryCategoryResponse{
 }
 
 message GetQueryCategoryResponses{
-  repeated QueryCategoryResponse QueryCategoryResponses = 1; 
+  repeated QueryCategoryResponse QueryCategoryResponses = 1;
 }
 
 service CategoryService {
-  rpc CreateCategory(CreateCategoryRequest) returns (CommandCategoryResponse) {}
-  rpc UpdateCategory(CreateCategoryRequest) returns (CommandCategoryResponse) {}
+  rpc FindAll(google.protobuf.Empty) returns (QueryCategoryResponse);
+  rpc HandleCreate(CreateCategoryRequest) returns (CommandCategoryResponse);
+  rpc HandleUpdate(UpdateCategoryRequest) returns (CommandCategoryResponse);
+  rpc HandleDelete(DeleteCategoryRequest) returns (CommandCategoryResponse);
 }
 
