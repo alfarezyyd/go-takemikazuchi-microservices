@@ -3,27 +3,42 @@ package handler
 import (
 	"context"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/service"
+	categoryDto "github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	grpcCategory "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type CategoryHandler struct {
-	categoryService service.Service
+	categoryService service.CategoryService
 	grpcCategory.UnimplementedCategoryServiceServer
 }
 
-func NewCategoryHandler(grpcServer *grpc.Server, categoryService service.Service) {
+func NewCategoryHandler(grpcServer *grpc.Server, categoryService service.CategoryService) {
 	categoryHandler := &CategoryHandler{
 		categoryService: categoryService,
 	}
 	grpcCategory.RegisterCategoryServiceServer(grpcServer, categoryHandler)
 }
 
-func (categoryHandler *CategoryHandler) CreateCategory(ctx context.Context, categoryCreateRequest *grpcCategory.CreateCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateCategory not implemented")
+func (categoryHandler *CategoryHandler) FindAll(ctx context.Context, emptyProtobuf *emptypb.Empty) (*grpcCategory.QueryCategoryResponses, error) {
+	allCategory := categoryHandler.categoryService.FindAll()
+	return allCategory, nil
 }
-func (categoryHandler *CategoryHandler) UpdateCategory(ctx context.Context, categoryCreateRequest *grpcCategory.CreateCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateCategory not implemented")
+func (categoryHandler *CategoryHandler) HandleCreate(ctx context.Context, createCategoryRequest *grpcCategory.CreateCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
+	categoryHandler.categoryService.HandleCreate(createCategoryRequest.UserJwtClaim, &categoryDto.CreateCategoryDto{
+		Name:        createCategoryRequest.Name,
+		Description: createCategoryRequest.Description,
+	})
+	return &grpcCategory.CommandCategoryResponse{
+		IsSuccess: true,
+	}, nil
+}
+func (categoryHandler *CategoryHandler) HandleUpdate(ctx context.Context, updateCategoryRequest *grpcCategory.UpdateCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleUpdate not implemented")
+}
+func (categoryHandler *CategoryHandler) HandleDelete(ctx context.Context, deleteCategoryRequest *grpcCategory.DeleteCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleDelete not implemented")
 }

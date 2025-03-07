@@ -30,7 +30,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CategoryServiceClient interface {
-	FindAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*QueryCategoryResponse, error)
+	FindAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*QueryCategoryResponses, error)
 	HandleCreate(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	HandleUpdate(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	HandleDelete(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
@@ -44,9 +44,9 @@ func NewCategoryServiceClient(cc grpc.ClientConnInterface) CategoryServiceClient
 	return &categoryServiceClient{cc}
 }
 
-func (c *categoryServiceClient) FindAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*QueryCategoryResponse, error) {
+func (c *categoryServiceClient) FindAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*QueryCategoryResponses, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(QueryCategoryResponse)
+	out := new(QueryCategoryResponses)
 	err := c.cc.Invoke(ctx, CategoryService_FindAll_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (c *categoryServiceClient) HandleDelete(ctx context.Context, in *DeleteCate
 // All implementations must embed UnimplementedCategoryServiceServer
 // for forward compatibility.
 type CategoryServiceServer interface {
-	FindAll(context.Context, *emptypb.Empty) (*QueryCategoryResponse, error)
+	FindAll(context.Context, *emptypb.Empty) (*QueryCategoryResponses, error)
 	HandleCreate(context.Context, *CreateCategoryRequest) (*CommandCategoryResponse, error)
 	HandleUpdate(context.Context, *UpdateCategoryRequest) (*CommandCategoryResponse, error)
 	HandleDelete(context.Context, *DeleteCategoryRequest) (*CommandCategoryResponse, error)
@@ -102,7 +102,7 @@ type CategoryServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedCategoryServiceServer struct{}
 
-func (UnimplementedCategoryServiceServer) FindAll(context.Context, *emptypb.Empty) (*QueryCategoryResponse, error) {
+func (UnimplementedCategoryServiceServer) FindAll(context.Context, *emptypb.Empty) (*QueryCategoryResponses, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindAll not implemented")
 }
 func (UnimplementedCategoryServiceServer) HandleCreate(context.Context, *CreateCategoryRequest) (*CommandCategoryResponse, error) {

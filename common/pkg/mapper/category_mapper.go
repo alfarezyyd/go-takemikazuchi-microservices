@@ -3,6 +3,7 @@ package mapper
 import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/mitchellh/mapstructure"
@@ -14,14 +15,17 @@ func MapCategoryDtoIntoCategoryModel[T *dto.CreateCategoryDto | *dto.UpdateCateg
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 }
 
-func MapCategoryModelIntoCategoryResponse(categoriesModel []model.Category) []dto.CategoryResponseDto {
+func MapCategoryModelIntoCategoryResponse(categoriesModel []model.Category) category.QueryCategoryResponses {
 	var err error
-	var categoriesResponseDto []dto.CategoryResponseDto
+
+	var queryCategoryResponses = make([]*category.QueryCategoryResponse, 0)
 	for _, categoryModel := range categoriesModel {
-		var categoryResponseDto dto.CategoryResponseDto
-		err = mapstructure.Decode(categoryModel, &categoryResponseDto)
-		categoriesResponseDto = append(categoriesResponseDto, categoryResponseDto)
+		var queryCategoryResponse category.QueryCategoryResponse
+		err = mapstructure.Decode(categoryModel, &queryCategoryResponse)
+		queryCategoryResponses = append(queryCategoryResponses, &queryCategoryResponse)
 	}
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	return categoriesResponseDto
+	return category.QueryCategoryResponses{
+		QueryCategoryResponse: queryCategoryResponses,
+	}
 }

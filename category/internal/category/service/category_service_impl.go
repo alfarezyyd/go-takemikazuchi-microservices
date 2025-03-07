@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/repository"
 	categoryDto "github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -33,11 +33,10 @@ func NewService(
 	}
 }
 
-func (categoryService *CategoryServiceImpl) FindAll() []categoryDto.CategoryResponseDto {
+func (categoryService *CategoryServiceImpl) FindAll() *category.QueryCategoryResponses {
 	categoriesModel := categoryService.categoryRepository.FindAll(categoryService.dbConnection)
 	categoriesResponseDto := mapper.MapCategoryModelIntoCategoryResponse(categoriesModel)
-	fmt.Println(categoriesModel, categoriesResponseDto)
-	return categoriesResponseDto
+	return &categoriesResponseDto
 }
 
 func (categoryService *CategoryServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *categoryDto.CreateCategoryDto) *exception.ClientError {

@@ -33,12 +33,16 @@ message QueryCategoryResponse{
   string Description = 3;
 }
 
+message QueryCategoryResponses {
+  repeated QueryCategoryResponse queryCategoryResponse = 1;
+}
+
 message GetQueryCategoryResponses{
   repeated QueryCategoryResponse QueryCategoryResponses = 1;
 }
 
 service CategoryService {
-  rpc FindAll(google.protobuf.Empty) returns (QueryCategoryResponse);
+  rpc FindAll(google.protobuf.Empty) returns (QueryCategoryResponses);
   rpc HandleCreate(CreateCategoryRequest) returns (CommandCategoryResponse);
   rpc HandleUpdate(UpdateCategoryRequest) returns (CommandCategoryResponse);
   rpc HandleDelete(DeleteCategoryRequest) returns (CommandCategoryResponse);
