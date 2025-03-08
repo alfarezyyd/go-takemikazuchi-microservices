@@ -12,6 +12,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"googlemaps.github.io/maps"
 	"net/http"
+	"time"
 )
 
 func MapUserDtoIntoUserModel[T *dto.CreateUserDto](userTransferObject T) *model.User {
@@ -43,6 +44,9 @@ func MapUserModelIntoUserResponse(userModel *model.User) *dto.UserResponseDto {
 func MapUserResponseIntoQueryUserResponse(userResponse *dto.UserResponseDto) *grpcUser.QueryUserResponse {
 	var queryUserResponse grpcUser.QueryUserResponse
 	err := mapstructure.Decode(userResponse, &queryUserResponse)
+	queryUserResponse.CreatedAt = userResponse.CreatedAt.Format(time.RFC3339)
+	queryUserResponse.UpdatedAt = userResponse.UpdatedAt.Format(time.RFC3339)
+	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, nil))
 	return &queryUserResponse
 }

@@ -1,6 +1,7 @@
 package validator
 
 import (
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	universalTranslator "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
@@ -35,6 +36,7 @@ func (validatorService *ServiceImpl) ParseValidationError(validationError error)
 	if validationError != nil {
 		parsedMap := make(map[string]interface{})
 		for _, fieldError := range validationError.(validator.ValidationErrors) {
+			fmt.Println(fieldError.Translate(validatorService.engTranslator))
 			parsedMap[fieldError.Field()] = fieldError.Translate(validatorService.engTranslator)
 		}
 		panic(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, validationError, parsedMap))

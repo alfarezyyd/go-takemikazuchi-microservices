@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/service"
 	categoryDto "github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
@@ -32,10 +31,9 @@ func (categoryHandler *CategoryHandler) FindAll(ctx context.Context, emptyProtob
 	return allCategory, nil
 }
 func (categoryHandler *CategoryHandler) HandleCreate(ctx context.Context, createCategoryRequest *grpcCategory.CreateCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
-	fmt.Println(createCategoryRequest)
 	categoryHandler.categoryService.HandleCreate(ctx, &dto.JwtClaimDto{
-		Email:       &createCategoryRequest.UserJwtClaim.Email,
-		PhoneNumber: &createCategoryRequest.UserJwtClaim.PhoneNumber,
+		Email:       createCategoryRequest.UserJwtClaim.Email,
+		PhoneNumber: createCategoryRequest.UserJwtClaim.PhoneNumber,
 	}, &categoryDto.CreateCategoryDto{
 		Name:        createCategoryRequest.Name,
 		Description: createCategoryRequest.Description,

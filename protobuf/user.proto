@@ -37,8 +37,8 @@ message GoogleCallbackRequest {
 }
 
 message UserJwtClaim {
-  string Email = 1;
-  string PhoneNumber = 2;
+  optional string Email = 1;
+  optional string PhoneNumber = 2;
 }
 
 message CommandUserResponse{
@@ -64,8 +64,8 @@ message PayloadResponse {
 }
 
 message UserIdentifier {
-  string Email = 1;
-  string PhoneNumber = 2;
+  optional string Email = 1;
+  optional string PhoneNumber = 2;
 }
 
 

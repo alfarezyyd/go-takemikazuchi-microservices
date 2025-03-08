@@ -1,11 +1,15 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/repository"
 	categoryDto "github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -19,17 +23,20 @@ type CategoryServiceImpl struct {
 	categoryRepository repository.Repository
 	dbConnection       *gorm.DB
 	validatorService   validatorFeature.Service
+	serviceDiscovery   discovery.ServiceRegistry
 }
 
 func NewService(
 	categoryRepository repository.Repository,
 	dbConnection *gorm.DB,
 	validatorService validatorFeature.Service,
+	serviceDiscovery discovery.ServiceRegistry,
 ) *CategoryServiceImpl {
 	return &CategoryServiceImpl{
 		categoryRepository: categoryRepository,
 		dbConnection:       dbConnection,
 		validatorService:   validatorService,
+		serviceDiscovery:   serviceDiscovery,
 	}
 }
 
@@ -39,13 +46,19 @@ func (categoryService *CategoryServiceImpl) FindAll() *category.QueryCategoryRes
 	return &categoriesResponseDto
 }
 
-func (categoryService *CategoryServiceImpl) HandleCreate(userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *categoryDto.CreateCategoryDto) *exception.ClientError {
+func (categoryService *CategoryServiceImpl) HandleCreate(ctx context.Context, userJwtClaim *userDto.JwtClaimDto, categoryCreateDto *categoryDto.CreateCategoryDto) {
 	err := categoryService.validatorService.ValidateStruct(categoryCreateDto)
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userModel model.User
 		var categoryModel model.Category
-		err = gormTransaction.Where("email = ?", *userJwtClaim.Email).First(&userModel).Error
+		userGrpcConn, err := discovery.ServiceConnection(ctx, "userService", categoryService.serviceDiscovery)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("service down")))
+		userServiceClient := user.NewUserServiceClient(userGrpcConn)
+		userModel, err := userServiceClient.FindByIdentifier(ctx, &user.UserIdentifier{
+			Email:       userJwtClaim.Email,
+			PhoneNumber: userJwtClaim.PhoneNumber,
+		})
+		fmt.Println(err, userModel)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
 			return exception.NewClientError(http.StatusUnauthorized, exception.ErrUnauthorized, errors.New("only admin can create a category"))
@@ -56,7 +69,6 @@ func (categoryService *CategoryServiceImpl) HandleCreate(userJwtClaim *userDto.J
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
-	return nil
 }
 
 func (categoryService *CategoryServiceImpl) HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *categoryDto.UpdateCategoryDto) *exception.ClientError {

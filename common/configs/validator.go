@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	engTranslation "github.com/go-playground/validator/v10/translations/en"
 	"mime/multipart"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -166,21 +167,22 @@ func validateFileExtensionValidation(fieldLevel validator.FieldLevel) bool {
 }
 
 func conditionalRequired(fieldLevel validator.FieldLevel) bool {
-	fieldName := fieldLevel.Param()                    // Nama field yang terkait, misalnya "PhoneNumber"
-	structValue := fieldLevel.Parent()                 // Struct yang sedang divalidasi
-	relatedField := structValue.FieldByName(fieldName) // Ambil field berdasarkan nama
+	fieldName := fieldLevel.Param()
+	structValue := fieldLevel.Parent()
+	relatedField := structValue.FieldByName(fieldName)
 
-	// Pastikan field terkait ada dalam struct
-	if !relatedField.IsValid() {
-		return false
+	// Jika relatedField tidak valid atau nil, lewati validasi
+	if !relatedField.IsValid() || (relatedField.Kind() == reflect.Ptr && relatedField.IsNil()) {
+		return true // Lewati validasi karena tidak ada nilai yang memerlukan validasi
 	}
 
-	// Ambil nilai dari field yang sedang divalidasi dan field terkait
-	currentValue := fieldLevel.Field().String()
-	relatedValue := relatedField.String()
+	// Ambil nilai dari field yang sedang divalidasi
+	currentValue := fieldLevel.Field()
+	relatedValue := relatedField
 
-	// Jika field terkait kosong, maka field ini wajib diisi
-	return relatedValue != "" || currentValue != ""
+	fmt.Println(fieldName, currentValue, relatedValue)
+	// Jika relatedField kosong, maka field ini wajib diisi
+	return relatedValue.String() != "" || currentValue.String() != ""
 }
 
 // WeakPasswordValidator untuk mengecek kelemahan password

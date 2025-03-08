@@ -38,7 +38,7 @@ func main() {
 
 	serviceId := discovery.GenerateInstanceID(serviceName)
 	ctx := context.Background()
-	if err := consulServiceRegistry.Register(ctx, serviceId, serviceName, httpAddr); err != nil {
+	if err := consulServiceRegistry.Register(ctx, serviceId, serviceName, grpcAddr); err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
@@ -92,7 +92,7 @@ func main() {
 
 	userService := service.NewUserService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
 	handler.NewUserHandler(grpcServer, userService)
-	fmt.Println("Serving gRPC server at " + httpAddr)
+	fmt.Println("Serving gRPC server at " + grpcAddr)
 	err = grpcServer.Serve(tcpListener)
 
 	if err != nil {

@@ -22,6 +22,7 @@ var (
 	serviceName = "categoryService"
 	httpAddr    = ":7002"
 	consulAddr  = ":8500"
+	grpcAddr    = ":10002"
 )
 
 func main() {
@@ -33,7 +34,7 @@ func main() {
 
 	serviceId := discovery.GenerateInstanceID(serviceName)
 	ctx := context.Background()
-	if err := consulServiceRegistry.Register(ctx, serviceId, serviceName, httpAddr); err != nil {
+	if err := consulServiceRegistry.Register(ctx, serviceId, serviceName, grpcAddr); err != nil {
 		fmt.Println(err)
 		panic(err)
 	}
@@ -55,7 +56,7 @@ func main() {
 			log.Fatal("failed to start http server")
 		}
 	}()
-	tcpListener, err := net.Listen("tcp", ":9000")
+	tcpListener, err := net.Listen("tcp", grpcAddr)
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(middleware.RecoveryInterceptor),
 	)
@@ -84,7 +85,7 @@ func main() {
 	validatorInstance, engTranslator := configs.InitializeValidator()
 
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
-	categoryServiceInstance := categoryService.NewService(categoryServiceImpl, databaseConnection, validatorService)
+	categoryServiceInstance := categoryService.NewService(categoryServiceImpl, databaseConnection, validatorService, consulServiceRegistry)
 	categoryHandler.NewCategoryHandler(grpcServer, categoryServiceInstance)
 	fmt.Println("gRPC server listening on " + tcpListener.Addr().String())
 	err = grpcServer.Serve(tcpListener)

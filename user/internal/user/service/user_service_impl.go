@@ -187,16 +187,18 @@ func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequ
 func (userService *UserServiceImpl) FindByIdentifier(userIdentifierDto *userDto.UserIdentifierDto) *userDto.UserResponseDto {
 	err := userService.validatorService.ValidateStruct(userIdentifierDto)
 	userService.validatorService.ParseValidationError(err)
-	var userModel model.User
 
+	var userModel model.User
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		err := userService.dbConnection.Where(
 			"email = ? OR phone_number = ?",
 			userIdentifierDto.Email,
 			userIdentifierDto.PhoneNumber).First(&userModel).Error
+		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
+	fmt.Println(userModel)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return mapper.MapUserModelIntoUserResponse(&userModel)
 }

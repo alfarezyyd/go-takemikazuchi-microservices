@@ -2,10 +2,12 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
@@ -43,12 +45,15 @@ func (categoryHandler *CategoryHandler) Create(ginContext *gin.Context) {
 	defer cancelFunc()
 	gRCPClientConnection, err := discovery.ServiceConnection(timeoutBackground, "categoryService", categoryHandler.serviceRegistry)
 	categoryServiceClient := category.NewCategoryServiceClient(gRCPClientConnection)
-
 	_, clientError := categoryServiceClient.HandleCreate(timeoutBackground, &category.CreateCategoryRequest{
-		Name:         categoryCreateDto.Name,
-		Description:  categoryCreateDto.Description,
-		UserJwtClaim: userJwtClaim,
-	})
+		Name:        categoryCreateDto.Name,
+		Description: categoryCreateDto.Description,
+		UserJwtClaim: &user.UserJwtClaim{
+			Email:       userJwtClaim.Email,
+			PhoneNumber: userJwtClaim.PhoneNumber,
+		}})
+
+	fmt.Println(clientError)
 	exception.ParseGrpcError(ginContext, clientError)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Category has been created", nil))
 }
@@ -65,10 +70,13 @@ func (categoryHandler *CategoryHandler) Update(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 	categoryServiceClient := category.NewCategoryServiceClient(gRCPClientConnection)
 	_, clientError := categoryServiceClient.HandleUpdate(timeoutBackground, &category.UpdateCategoryRequest{
-		Id:           categoryId,
-		Name:         updateCategoryDto.Name,
-		Description:  updateCategoryDto.Description,
-		UserJwtClaim: userJwtClaim,
+		Id:          categoryId,
+		Name:        updateCategoryDto.Name,
+		Description: updateCategoryDto.Description,
+		UserJwtClaim: &user.UserJwtClaim{
+			Email:       userJwtClaim.Email,
+			PhoneNumber: userJwtClaim.PhoneNumber,
+		},
 	},
 	)
 	exception.ParseGrpcError(ginContext, clientError)
@@ -84,9 +92,11 @@ func (categoryHandler *CategoryHandler) Delete(ginContext *gin.Context) {
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 	categoryServiceClient := category.NewCategoryServiceClient(gRCPClientConnection)
 	_, clientError := categoryServiceClient.HandleDelete(timeoutBackground, &category.DeleteCategoryRequest{
-		CategoryId:   categoryId,
-		UserJwtClaim: userJwtClaim,
-	})
+		CategoryId: categoryId,
+		UserJwtClaim: &user.UserJwtClaim{
+			Email:       userJwtClaim.Email,
+			PhoneNumber: userJwtClaim.PhoneNumber,
+		}})
 	exception.ParseGrpcError(ginContext, clientError)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Category has been deleted", nil))
 }

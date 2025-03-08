@@ -24,9 +24,12 @@ DROP TABLE IF EXISTS reviews;
 
 CREATE DATABASE go_takemikazuchi_microservices_users;
 DROP DATABASE go_takemikazuchi_microservices_users;
+USE go_takemikazuchi_microservices_users;
+USE go_takemikazuchi_microservices_categories;
 
 SELECT * FROM users;
-SELECT * FROM categories;
+UPDATE users SET role = 'Admin' WHERE id = 19;
+SELECT * FROM users;
 
 DELETE FROM one_time_password_tokens;
 DELETE FROM users;
