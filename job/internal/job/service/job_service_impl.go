@@ -1,9 +1,10 @@
-package job
+package service
 
 import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/job/repository"
 	"github.com/google/uuid"
 	"go-takemikazuchi-microservices/internal/category"
 	jobDto "go-takemikazuchi-microservices/internal/job/dto"
@@ -27,7 +28,7 @@ import (
 
 type ServiceImpl struct {
 	validatorService      validatorFeature.Service
-	jobRepository         Repository
+	jobRepository         repository.Repository
 	userRepository        userFeature.Repository
 	categoryRepository    category.Repository
 	dbConnection          *gorm.DB
@@ -39,7 +40,7 @@ type ServiceImpl struct {
 }
 
 func NewService(
-	jobRepository Repository,
+	jobRepository repository.Repository,
 	userRepository userFeature.Repository,
 	categoryRepository category.Repository,
 	jobResourceRepository jobResourceFeature.Repository,

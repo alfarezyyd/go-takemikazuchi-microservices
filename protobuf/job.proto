@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "user.proto";
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job";
+
+message CreateJobRequest {
+  optional uint64 AddressId = 1;
+  uint64 CategoryId = 2;
+  string Title = 3;
+  string Description = 4;
+  double Latitude = 5;
+  double Longitude = 6;
+  string AdditionalInformationAddress = 7;
+  double Price = 8;
+  UserJwtClaim UserJwtClaim = 9;
+}
+
+message JobResponse {
+  repeated JobModel JobModels = 1;
+}
+
+message JobModel {
+  uint64 ID = 1;
+  string Title = 2;
+  string Description = 3;
+  double Price = 4;
+  string Status = 5;
+  optional  string   CreatedAt = 6;
+  optional  string UpdatedAt = 7;
+}
+
+message UpdateJobRequest {
+  optional uint64    AddressId = 1;
+  uint64 CategoryId = 2;
+  string  Title = 3;
+  string Description = 4;
+  double Latitude = 5;
+  double Longitude = 6;
+  string AdditionalInformationAddress = 7;
+  double Price = 8;
+  repeated FileName DeletedFileNames = 9;
+}
+
+message FileName {
+  string Name = 1;
+}
+
+service JobService {
+  rpc FindAll(google.protobuf.Empty) returns (JobResponse);
+  rpc HandleCreate(CreateJobRequest) returns (google.protobuf.Empty);
+}

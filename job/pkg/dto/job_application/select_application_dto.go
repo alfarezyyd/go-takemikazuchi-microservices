@@ -1,4 +1,4 @@
-package dto
+package job_application
 
 type SelectApplicationDto struct {
 	UserId uint64 `json:"user_id"`

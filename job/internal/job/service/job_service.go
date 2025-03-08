@@ -1,4 +1,4 @@
-package job
+package service
 
 import (
 	"go-takemikazuchi-microservices/internal/job/dto"

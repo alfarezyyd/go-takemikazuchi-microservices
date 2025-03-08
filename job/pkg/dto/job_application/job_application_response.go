@@ -1,4 +1,4 @@
-package dto
+package job_application
 
 type JobApplicationResponseDto struct {
 	Id        string `json:"id"`

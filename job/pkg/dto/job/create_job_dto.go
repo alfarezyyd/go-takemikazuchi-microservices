@@ -1,4 +1,4 @@
-package dto
+package job
 
 type CreateJobDto struct {
 	AddressId                    *uint64 `form:"address_id" validate:"omitempty,gt=0"`

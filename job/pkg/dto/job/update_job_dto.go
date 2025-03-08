@@ -1,4 +1,4 @@
-package dto
+package job
 
 type UpdateJobDto struct {
 	CategoryId       uint64   `form:"category_id"`

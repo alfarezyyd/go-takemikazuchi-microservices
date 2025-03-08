@@ -1,6 +1,7 @@
-package job
+package handler
 
 import (
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/job/service"
 	"github.com/gin-gonic/gin"
 	jobDto "go-takemikazuchi-microservices/internal/job/dto"
 	userDto "go-takemikazuchi-microservices/internal/user/dto"
@@ -11,10 +12,10 @@ import (
 )
 
 type Handler struct {
-	jobService Service
+	jobService service.Service
 }
 
-func NewHandler(jobService Service) *Handler {
+func NewHandler(jobService service.Service) *Handler {
 	return &Handler{
 		jobService: jobService,
 	}

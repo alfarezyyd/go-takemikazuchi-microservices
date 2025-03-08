@@ -1,4 +1,4 @@
-package job
+package repository
 
 import (
 	"go-takemikazuchi-microservices/internal/model"
