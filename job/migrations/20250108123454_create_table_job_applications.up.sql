@@ -6,6 +6,5 @@ CREATE TABLE job_applications
     status       ENUM ('Pending', 'Rejected', 'Accepted') DEFAULT 'Pending',
     created_at   TIMESTAMP                                DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMP                                DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (job_id) REFERENCES jobs (id),
-    FOREIGN KEY (applicant_id) REFERENCES users (id)
+    FOREIGN KEY (job_id) REFERENCES jobs (id)
 );

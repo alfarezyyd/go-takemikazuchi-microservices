@@ -23,6 +23,7 @@ DELETE FROM transactions;
 DROP TABLE IF EXISTS reviews;
 
 CREATE DATABASE go_takemikazuchi_microservices_users;
+CREATE DATABASE go_takemikazuchi_microservices_jobs;
 DROP DATABASE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_categories;
