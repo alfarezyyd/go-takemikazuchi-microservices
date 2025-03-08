@@ -2,9 +2,12 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/service"
 	categoryDto "github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	grpcCategory "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,6 +16,7 @@ import (
 
 type CategoryHandler struct {
 	categoryService service.CategoryService
+	serviceRegistry discovery.ServiceRegistry
 	grpcCategory.UnimplementedCategoryServiceServer
 }
 
@@ -28,7 +32,11 @@ func (categoryHandler *CategoryHandler) FindAll(ctx context.Context, emptyProtob
 	return allCategory, nil
 }
 func (categoryHandler *CategoryHandler) HandleCreate(ctx context.Context, createCategoryRequest *grpcCategory.CreateCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
-	categoryHandler.categoryService.HandleCreate(createCategoryRequest.UserJwtClaim, &categoryDto.CreateCategoryDto{
+	fmt.Println(createCategoryRequest)
+	categoryHandler.categoryService.HandleCreate(ctx, &dto.JwtClaimDto{
+		Email:       &createCategoryRequest.UserJwtClaim.Email,
+		PhoneNumber: &createCategoryRequest.UserJwtClaim.PhoneNumber,
+	}, &categoryDto.CreateCategoryDto{
 		Name:        createCategoryRequest.Name,
 		Description: createCategoryRequest.Description,
 	})

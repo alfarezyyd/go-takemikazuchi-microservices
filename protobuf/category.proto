@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "user.proto";
-option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/category";
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category";
 
 message CreateCategoryRequest{
   string Name = 1;
