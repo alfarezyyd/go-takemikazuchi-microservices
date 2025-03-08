@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/handler"
@@ -20,6 +19,7 @@ var (
 	serviceName = "gatewayService"
 	httpAddr    = ":7000"
 	consulAddr  = ":8500"
+	grpcAddr    = ":10001"
 )
 
 func main() {
@@ -68,11 +68,12 @@ func main() {
 	ginEngine.Use(exception.Interceptor())
 
 	rootRouterGroup := ginEngine.Group("/")
-	validatorInstance, _ := configs.InitializeValidator()
-	userHandler := handler.NewUserHandler(validatorInstance, grpcConnection)
-	handler.NewCategoryHandler()
+	userHandler := handler.NewUserHandler(grpcConnection)
+	categoryHandler := handler.NewCategoryHandler(consulServiceRegistry)
 	authenticationRoutes := routes.NewAuthenticationRoutes(rootRouterGroup, userHandler)
+	protectedRoutes := routes.NewProtectedRoutes(rootRouterGroup, categoryHandler, viperConfig)
 	authenticationRoutes.Setup()
+	protectedRoutes.Setup()
 	ginError := ginEngine.Run(":8080")
 	if ginError != nil {
 		panic(ginError)
