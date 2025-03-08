@@ -21,6 +21,7 @@ import (
 var (
 	serviceName = "userService"
 	httpAddr    = ":7001"
+	grpcAddr    = ":10001"
 	consulAddr  = ":8500"
 )
 
@@ -78,7 +79,7 @@ func main() {
 	databaseInstance := configs.NewDatabaseConnection(databaseCredentials)
 	databaseConnection := databaseInstance.GetDatabaseConnection()
 
-	tcpListener, err := net.Listen("tcp", ":9000")
+	tcpListener, err := net.Listen("tcp", grpcAddr)
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(middleware.RecoveryInterceptor),
 	)
