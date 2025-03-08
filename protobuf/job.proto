@@ -33,13 +33,25 @@ message JobModel {
 message UpdateJobRequest {
   optional uint64    AddressId = 1;
   uint64 CategoryId = 2;
-  string  Title = 3;
-  string Description = 4;
-  double Latitude = 5;
-  double Longitude = 6;
-  string AdditionalInformationAddress = 7;
-  double Price = 8;
-  repeated FileName DeletedFileNames = 9;
+  string  JobId = 3;
+  string  Title = 4;
+  string Description = 5;
+  double Latitude = 6;
+  double Longitude = 7;
+  string AdditionalInformationAddress = 8;
+  double Price = 9;
+  repeated FileName DeletedFileNames = 10;
+  UserJwtClaim UserJwtClaim = 11;
+}
+
+message DeleteJobRequest {
+  UserJwtClaim UserJwtClaim = 1;
+  string JobId = 2;
+}
+
+message JobCompleteRequest {
+  UserJwtClaim UserJwtClaim = 1;
+  string JobId = 2;
 }
 
 message FileName {
@@ -49,4 +61,7 @@ message FileName {
 service JobService {
   rpc FindAll(google.protobuf.Empty) returns (JobResponse);
   rpc HandleCreate(CreateJobRequest) returns (google.protobuf.Empty);
+  rpc HandleUpdate(UpdateJobRequest) returns (google.protobuf.Empty);
+  rpc HandleDelete(DeleteJobRequest) returns (google.protobuf.Empty);
+  rpc HandleRequestCompleted(JobCompleteRequest) returns (google.protobuf.Empty);
 }
