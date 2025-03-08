@@ -8,7 +8,6 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net/http"
@@ -16,14 +15,12 @@ import (
 )
 
 type UserHandler struct {
-	validatorInstance *validator.Validate
-	grpcConnection    *grpc.ClientConn
+	grpcConnection *grpc.ClientConn
 }
 
-func NewUserHandler(validatorInstance *validator.Validate, grpcConnection *grpc.ClientConn) *UserHandler {
+func NewUserHandler(grpcConnection *grpc.ClientConn) *UserHandler {
 	return &UserHandler{
-		validatorInstance: validatorInstance,
-		grpcConnection:    grpcConnection,
+		grpcConnection: grpcConnection,
 	}
 }
 

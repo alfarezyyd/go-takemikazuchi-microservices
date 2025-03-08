@@ -1,7 +1,7 @@
 syntax = "proto3";
 import "google/protobuf/empty.proto";
 
-option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/user";
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user";
 
 message CreateUserRequest {
   string Name = 1;
@@ -46,13 +46,27 @@ message CommandUserResponse{
 }
 
 message QueryUserResponse{
-  bool IsSuccess = 1;
+  uint64  ID = 1;
+  string Name = 2;
+  string Email = 3;
+  string Password = 4;
+  string Role = 5;
+  string PhoneNumber = 6;
+  string ProfilePicture = 7;
+  bool  IsActive = 8;
+  string CreatedAt = 9;
+  string  UpdatedAt = 10;
+  string EmailVerifiedAt = 11;
 }
 
 message PayloadResponse {
   string Payload = 1;
 }
 
+message UserIdentifier {
+  string Email = 1;
+  string PhoneNumber = 2;
+}
 
 
 service UserService{
@@ -62,4 +76,5 @@ service UserService{
   rpc HandleVerifyOneTimePassword(VerifyOtpRequest) returns (QueryUserResponse);
   rpc HandleGoogleAuthentication(google.protobuf.Empty) returns (PayloadResponse);
   rpc HandleGoogleCallback(GoogleCallbackRequest) returns (google.protobuf.Empty);
+  rpc FindByIdentifier(UserIdentifier) returns (QueryUserResponse);
 }

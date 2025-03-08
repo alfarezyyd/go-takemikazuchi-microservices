@@ -162,7 +162,7 @@ func (userService *UserServiceImpl) HandleGoogleCallback(tokenState string, quer
 	return nil
 }
 
-func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequest) (*user.PayloadResponse, error) {
+func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequest) string {
 	err := userService.validatorService.ValidateStruct(loginUserDto)
 	userService.validatorService.ParseValidationError(err)
 	var tokenString string
@@ -181,7 +181,22 @@ func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequ
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		return nil
 	})
-	return &user.PayloadResponse{
-		Payload: tokenString,
-	}, nil
+	return tokenString
+}
+
+func (userService *UserServiceImpl) FindByIdentifier(userIdentifierDto *userDto.UserIdentifierDto) *userDto.UserResponseDto {
+	err := userService.validatorService.ValidateStruct(userIdentifierDto)
+	userService.validatorService.ParseValidationError(err)
+	var userModel model.User
+
+	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		err := userService.dbConnection.Where(
+			"email = ? OR phone_number = ?",
+			userIdentifierDto.Email,
+			userIdentifierDto.PhoneNumber).First(&userModel).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return mapper.MapUserModelIntoUserResponse(&userModel)
 }

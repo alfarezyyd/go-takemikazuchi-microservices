@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	grpcUser "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"google.golang.org/grpc"
@@ -22,7 +23,10 @@ func NewUserHandler(grpcServer *grpc.Server, userService service.UserService) {
 }
 
 func (userHandler *UserHandler) HandleLogin(ctx context.Context, req *grpcUser.LoginUserRequest) (*grpcUser.PayloadResponse, error) {
-	return userHandler.userService.HandleLogin(req)
+	tokenString := userHandler.userService.HandleLogin(req)
+	return &grpcUser.PayloadResponse{
+		Payload: tokenString,
+	}, nil
 }
 
 func (userHandler *UserHandler) HandleRegister(ctx context.Context, req *grpcUser.CreateUserRequest) (*grpcUser.CommandUserResponse, error) {
@@ -62,4 +66,12 @@ func (userHandler *UserHandler) HandleGoogleCallback(ctx context.Context, google
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil
+}
+
+func (userHandler *UserHandler) FindByIdentifier(ctx context.Context, userIdentifier *grpcUser.UserIdentifier) (*grpcUser.QueryUserResponse, error) {
+	userResponseDto := userHandler.userService.FindByIdentifier(&dto.UserIdentifierDto{
+		Email:       userIdentifier.Email,
+		PhoneNumber: userIdentifier.PhoneNumber,
+	})
+	return mapper.MapUserResponseIntoQueryUserResponse(userResponseDto), nil
 }

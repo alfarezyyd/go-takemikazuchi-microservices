@@ -13,5 +13,6 @@ type UserService interface {
 	HandleVerifyOneTimePassword(verifyOtpDto *userDto.VerifyOtpDto)
 	HandleGoogleAuthentication() string
 	HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError
-	HandleLogin(*user.LoginUserRequest) (*user.PayloadResponse, error)
+	HandleLogin(*user.LoginUserRequest) string
+	FindByIdentifier(userIdentifierDto *userDto.UserIdentifierDto) *userDto.UserResponseDto
 }

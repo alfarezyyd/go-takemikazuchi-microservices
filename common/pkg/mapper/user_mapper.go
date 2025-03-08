@@ -3,6 +3,7 @@ package mapper
 import (
 	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	grpcUser "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
@@ -30,6 +31,20 @@ func MapJwtClaimIntoUserClaim(jwtClaim jwt.MapClaims) (*dto.JwtClaimDto, error) 
 		return nil, err
 	}
 	return &userClaim, nil
+}
+
+func MapUserModelIntoUserResponse(userModel *model.User) *dto.UserResponseDto {
+	var userResponse dto.UserResponseDto
+	err := mapstructure.Decode(userModel, &userResponse)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, nil))
+	return &userResponse
+}
+
+func MapUserResponseIntoQueryUserResponse(userResponse *dto.UserResponseDto) *grpcUser.QueryUserResponse {
+	var queryUserResponse grpcUser.QueryUserResponse
+	err := mapstructure.Decode(userResponse, &queryUserResponse)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, nil))
+	return &queryUserResponse
 }
 
 func MapReverseGeocodingIntoUserAddresses(geocodingResult *maps.GeocodingResult,
