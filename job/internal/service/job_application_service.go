@@ -1,8 +1,8 @@
 package service
 
 import (
-	"go-takemikazuchi-microservices/internal/job_application/dto"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 )
 
 type Service interface {

@@ -5,15 +5,14 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
-	jobDto "github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto/job"
-	jobApplicationDto "github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto/job_application"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto"
 	"github.com/go-viper/mapstructure/v2"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-func MapJobDtoIntoJobModel[T *jobDto.CreateJobDto | *jobDto.UpdateJobDto](jobDto T, jobModel *model.Job) {
+func MapJobDtoIntoJobModel[T *dto.CreateJobDto | *dto.UpdateJobDto](jobDto T, jobModel *model.Job) {
 	err := mapstructure.Decode(jobDto, &jobModel)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 }
@@ -29,10 +28,10 @@ func MapStringIntoJobResourceModel(jobId uint64, allFilePath []string) []*model.
 	return jobResourcesModel
 }
 
-func MapJobApplicationModelIntoJobApplicationResponse(jobApplicationsModel []model.JobApplication) []*jobApplicationDto.JobApplicationResponseDto {
-	var jobApplicationsResponse []*jobApplicationDto.JobApplicationResponseDto
+func MapJobApplicationModelIntoJobApplicationResponse(jobApplicationsModel []model.JobApplication) []*dto.JobApplicationResponseDto {
+	var jobApplicationsResponse []*dto.JobApplicationResponseDto
 	for _, jobApplicationModel := range jobApplicationsModel {
-		var jobApplicationResponseDto jobApplicationDto.JobApplicationResponseDto
+		var jobApplicationResponseDto dto.JobApplicationResponseDto
 		jobApplicationResponseDto.Id = strconv.FormatUint(jobApplicationModel.ID, 10)
 		jobApplicationResponseDto.FullName = jobApplicationModel.User.Name
 		jobApplicationResponseDto.AppliedAt = jobApplicationModel.CreatedAt.Format(time.RFC3339)
@@ -41,16 +40,23 @@ func MapJobApplicationModelIntoJobApplicationResponse(jobApplicationsModel []mod
 	return jobApplicationsResponse
 }
 
-func MapCreateJobDtoIntoCreateJobGrpc(createJobDto *jobDto.CreateJobDto) *job.CreateJobRequest {
+func MapCreateJobDtoIntoCreateJobGrpc(createJobDto *dto.CreateJobDto) *job.CreateJobRequest {
 	var createJobRequest job.CreateJobRequest
 	err := mapstructure.Decode(createJobDto, &createJobRequest)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &createJobRequest
 }
 
-func MapUpdateJobDtoIntoUpdateJobGrpc(updateJobDto *jobDto.UpdateJobDto) *job.UpdateJobRequest {
+func MapUpdateJobDtoIntoUpdateJobGrpc(updateJobDto *dto.UpdateJobDto) *job.UpdateJobRequest {
 	var updateJobRequest job.UpdateJobRequest
 	err := mapstructure.Decode(updateJobDto, &updateJobRequest)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &updateJobRequest
+}
+
+func MapCreateJobGrpcIntoCreateJobDto(createJobRequest *job.CreateJobRequest) *dto.CreateJobDto {
+	var createJobDto dto.CreateJobDto
+	err := mapstructure.Decode(createJobRequest, &createJobDto)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return &createJobDto
 }

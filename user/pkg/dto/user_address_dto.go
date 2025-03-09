@@ -1,9 +1,9 @@
 package dto
 
 type CreateUserAddressDto struct {
-	Latitude  string `json:"latitude" validate:"required"`
-	Longitude string `json:"longitude" validate:"required"`
-	UserId    uint64 `json:"user_id" validate:"required"`
+	Latitude  float64 `json:"latitude" validate:"required"`
+	Longitude float64 `json:"longitude" validate:"required"`
+	UserId    uint64  `json:"user_id" validate:"required"`
 }
 
 type SearchUserAddressDto struct {

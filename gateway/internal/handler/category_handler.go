@@ -9,7 +9,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto/user"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net/http"

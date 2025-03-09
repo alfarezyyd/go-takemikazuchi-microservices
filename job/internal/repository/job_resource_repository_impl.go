@@ -2,9 +2,9 @@ package repository
 
 import (
 	"fmt"
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 

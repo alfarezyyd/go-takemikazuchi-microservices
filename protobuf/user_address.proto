@@ -3,14 +3,14 @@ syntax = "proto3";
 option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user_address";
 
 message UserAddressCreateRequest {
-  string Latitude = 1;
-  string Longitude = 2;
+  double Latitude = 1;
+  double Longitude = 2;
   uint64 UserId = 3;
 }
 
 message UserAddressSearchRequest {
-  string UserId = 1;
-  string UserAddressId = 2;
+  uint64 UserId = 1;
+  uint64 UserAddressId = 2;
 }
 
 message QueryResponse {

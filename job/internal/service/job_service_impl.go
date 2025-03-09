@@ -1,19 +1,22 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
+	userAddressGrpc "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user_address"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/storage"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/repository"
-	jobDto "github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto/job"
+	jobDto "github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
-	"github.com/google/uuid"
 	"googlemaps.github.io/maps"
 	"gorm.io/gorm"
 	"mime/multipart"
@@ -41,7 +44,6 @@ func NewJobService(
 	//jobResourceRepository jobResourceFeature.Repository,
 	dbConnection *gorm.DB,
 	fileStorage storage.FileStorage,
-	mapsClient *maps.Client,
 	//userAddressRepository userAddressFeature.Repository,
 	//workerRepository worker.Repository,
 	validatorService validatorFeature.Service,
@@ -54,7 +56,6 @@ func NewJobService(
 		dbConnection: dbConnection,
 		//jobResourceRepository: jobResourceRepository,
 		fileStorage: fileStorage,
-		mapsClient:  mapsClient,
 		//userAddressRepository: userAddressRepository,
 		validatorService: validatorService,
 		//workerRepository:      workerRepository
@@ -62,37 +63,52 @@ func NewJobService(
 	}
 }
 
-func (jobService *JobServiceImpl) HandleCreate(userJwtClaims *dto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError {
+func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaims *dto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError {
 	err := jobService.validatorService.ValidateStruct(createJobDto)
 	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var jobModel model.Job
 		var userModel model.User
 		var userAddress model.UserAddress
-		discovery.ServiceConnection()
-		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		userGrpcConnection, err := discovery.ServiceConnection(ctx, "userService", jobService.serviceDiscovery)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+		userAddressGrpcClient := userAddressGrpc.NewUserAddressServiceClient(userGrpcConnection)
+		categoryGrpcClient := category.NewCategoryServiceClient(userGrpcConnection)
+		userGrpcClient := user.NewUserServiceClient(userGrpcConnection)
+		userGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
+			Email:       userJwtClaims.Email,
+			PhoneNumber: userJwtClaims.PhoneNumber,
+		})
 		if createJobDto.AddressId == nil {
-			jobService.userAddressRepository.Store(gormTransaction, &userAddress)
+			userAddressGrpcClient.UserAddressStore(ctx, &userAddressGrpc.UserAddressCreateRequest{
+				Latitude:  createJobDto.Latitude,
+				Longitude: createJobDto.Longitude,
+				UserId:    userModel.ID,
+			})
 		} else {
-			jobService.userAddressRepository.FindById(gormTransaction, createJobDto.AddressId, &userAddress)
+			userAddressGrpcClient.FindUserAddressById(ctx, &userAddressGrpc.UserAddressSearchRequest{
+				UserId:        userModel.ID,
+				UserAddressId: userAddress.ID,
+			})
 		}
-		isCategoryExists := jobService.categoryRepository.IsCategoryExists(createJobDto.CategoryId, gormTransaction)
-		if !isCategoryExists {
+		isCategoryExists, err := categoryGrpcClient.IsCategoryExists(ctx, &category.SearchCategoryRequest{CategoryId: createJobDto.CategoryId})
+		if err != nil {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
 		}
+		fmt.Println(isCategoryExists)
 		mapper.MapJobDtoIntoJobModel(createJobDto, &jobModel)
 		jobModel.UserId = userModel.ID
 		jobModel.AddressId = userAddress.ID
 		jobService.jobRepository.Store(&jobModel, gormTransaction)
-		uuidString := uuid.New().String()
-		var allFileName []string
-		for _, uploadedFile := range uploadedFiles {
-			openedFile, _ := uploadedFile.Open()
-			driverLicensePath := fmt.Sprintf("%s-%d-%s", uuidString, jobModel.ID, uploadedFile.Filename)
-			_, err = jobService.fileStorage.UploadFile(openedFile, driverLicensePath)
-			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("upload file failed")))
-			allFileName = append(allFileName, uploadedFile.Filename)
-		}
+		//uuidString := uuid.New().String()
+		//var allFileName []string
+		//for _, uploadedFile := range uploadedFiles {
+		//	openedFile, _ := uploadedFile.Open()
+		//	driverLicensePath := fmt.Sprintf("%s-%d-%s", uuidString, jobModel.ID, uploadedFile.Filename)
+		//	_, err = jobService.fileStorage.UploadFile(openedFile, driverLicensePath)
+		//	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("upload file failed")))
+		//	allFileName = append(allFileName, uploadedFile.Filename)
+		//}
 		//resourceModel := mapper.MapStringIntoJobResourceModel(jobModel.ID, allFileName)
 		//jobService.jobResourceRepository.BulkCreate(gormTransaction, resourceModel)
 		return nil

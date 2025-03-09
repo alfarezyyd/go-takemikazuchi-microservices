@@ -81,11 +81,11 @@ func main() {
 	fmt.Println(databaseCredentials)
 	databaseInstance := configs.NewDatabaseConnection(databaseCredentials)
 	databaseConnection := databaseInstance.GetDatabaseConnection()
-	categoryServiceImpl := categoryRepository.NewRepository()
+	categoryRepositoryInstance := categoryRepository.NewRepository()
 	validatorInstance, engTranslator := configs.InitializeValidator()
 
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
-	categoryServiceInstance := categoryService.NewService(categoryServiceImpl, databaseConnection, validatorService, consulServiceRegistry)
+	categoryServiceInstance := categoryService.NewService(categoryRepositoryInstance, databaseConnection, validatorService, consulServiceRegistry)
 	categoryHandler.NewCategoryHandler(grpcServer, categoryServiceInstance)
 	fmt.Println("gRPC server listening on " + tcpListener.Addr().String())
 	err = grpcServer.Serve(tcpListener)

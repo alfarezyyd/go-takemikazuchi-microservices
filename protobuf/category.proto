@@ -26,6 +26,10 @@ message DeleteCategoryRequest {
 message CommandCategoryResponse{
   bool IsSuccess = 1;
 }
+message CategoryExistsResponse{
+  bool IsExists = 1;
+}
+
 
 message QueryCategoryResponse{
   uint64 ID = 1;
@@ -41,10 +45,15 @@ message GetQueryCategoryResponses{
   repeated QueryCategoryResponse QueryCategoryResponses = 1;
 }
 
+message SearchCategoryRequest {
+  uint64 categoryId = 1;
+}
+
 service CategoryService {
   rpc FindAll(google.protobuf.Empty) returns (QueryCategoryResponses);
   rpc HandleCreate(CreateCategoryRequest) returns (CommandCategoryResponse);
   rpc HandleUpdate(UpdateCategoryRequest) returns (CommandCategoryResponse);
   rpc HandleDelete(DeleteCategoryRequest) returns (CommandCategoryResponse);
+  rpc IsCategoryExists(SearchCategoryRequest) returns (CategoryExistsResponse);
 }
 

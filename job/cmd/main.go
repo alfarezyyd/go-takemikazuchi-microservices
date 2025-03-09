@@ -7,6 +7,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/middleware"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/handler"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/repository"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/service"
 	"github.com/spf13/viper"
@@ -85,14 +86,11 @@ func main() {
 
 	jobRepository := repository.NewJobRepository()
 	validatorInstance, engTranslator := configs.InitializeValidator()
-	mailerService := configs.NewMailerService(viperConfig)
-	identityProvider := configs.NewIdentityProvider(viperConfig)
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
-	nominatimBaseUrl := viperConfig.GetString("NOMINATIM_BASE_URL")
-	httpClient := configs.NewHttpClient(nil, &nominatimBaseUrl)
 
-	userService := service.NewJobService(jobRepository, databaseConnection)
-	handler.NewUserHandler(grpcServer, userService)
+	jobService := service.NewJobService(jobRepository, databaseConnection, nil, validatorService, consulServiceRegistry)
+	handler.NewJobHandler(grpcServer, jobService)
+
 	fmt.Println("Serving gRPC server at " + grpcAddr)
 	err = grpcServer.Serve(tcpListener)
 

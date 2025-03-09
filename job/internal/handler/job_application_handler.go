@@ -2,12 +2,12 @@ package handler
 
 import (
 	"errors"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
-	"go-takemikazuchi-microservices/internal/job_application/dto"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 

@@ -48,3 +48,10 @@ func (categoryHandler *CategoryHandler) HandleUpdate(ctx context.Context, update
 func (categoryHandler *CategoryHandler) HandleDelete(ctx context.Context, deleteCategoryRequest *grpcCategory.DeleteCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleDelete not implemented")
 }
+
+func (categoryHandler *CategoryHandler) IsCategoryExists(ctx context.Context, searchCategoryRequest *grpcCategory.SearchCategoryRequest) (*grpcCategory.CategoryExistsResponse, error) {
+	isCategoryExists, _ := categoryHandler.categoryService.IsCategoryExists(searchCategoryRequest.CategoryId)
+	return &grpcCategory.CategoryExistsResponse{
+		IsExists: isCategoryExists,
+	}, nil
+}

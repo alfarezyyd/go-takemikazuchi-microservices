@@ -1,19 +1,19 @@
 package repository
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 
-type RepositoryImpl struct{}
+type JobApplicationRepositoryImpl struct{}
 
-func NewRepository() *RepositoryImpl {
-	return &RepositoryImpl{}
+func NewJobApplicationRepository() *JobApplicationRepositoryImpl {
+	return &JobApplicationRepositoryImpl{}
 }
 
-func (jobApplicationRepository *RepositoryImpl) FindAllApplication(gormTransaction *gorm.DB, jobId *uint64) []model.JobApplication {
+func (jobApplicationRepository *JobApplicationRepositoryImpl) FindAllApplication(gormTransaction *gorm.DB, jobId *uint64) []model.JobApplication {
 	var jobApplications []model.JobApplication
 	err := gormTransaction.
 		Preload("Job").
@@ -28,14 +28,14 @@ func (jobApplicationRepository *RepositoryImpl) FindAllApplication(gormTransacti
 	return jobApplications
 }
 
-func (jobApplicationRepository *RepositoryImpl) BulkRejectUpdate(gormTransaction *gorm.DB, jobId *uint64) {
+func (jobApplicationRepository *JobApplicationRepositoryImpl) BulkRejectUpdate(gormTransaction *gorm.DB, jobId *uint64) {
 	err := gormTransaction.Where("job_id = ?", jobId).Updates(model.JobApplication{
 		Status: "Rejected",
 	}).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (jobApplicationRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, userId *uint64, jobId *uint64) *model.JobApplication {
+func (jobApplicationRepository *JobApplicationRepositoryImpl) FindById(gormTransaction *gorm.DB, userId *uint64, jobId *uint64) *model.JobApplication {
 	var jobApplication model.JobApplication
 	err := gormTransaction.
 		Where("job_id = ? AND applicant_id = ?", jobId, userId).
@@ -44,7 +44,7 @@ func (jobApplicationRepository *RepositoryImpl) FindById(gormTransaction *gorm.D
 	return &jobApplication
 }
 
-func (jobApplicationRepository *RepositoryImpl) Update(gormTransaction *gorm.DB, jobApplicationModel *model.JobApplication) {
+func (jobApplicationRepository *JobApplicationRepositoryImpl) Update(gormTransaction *gorm.DB, jobApplicationModel *model.JobApplication) {
 	err := gormTransaction.
 		Where("id = ?", jobApplicationModel.ID).
 		Updates(jobApplicationModel).Error

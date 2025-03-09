@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 
-type Repository interface {
+type JobApplicationRepository interface {
 	BulkRejectUpdate(gormTransaction *gorm.DB, jobId *uint64)
 	Update(gormTransaction *gorm.DB, jobApplicationModel *model.JobApplication)
 	FindAllApplication(gormTransaction *gorm.DB, jobId *uint64) []model.JobApplication

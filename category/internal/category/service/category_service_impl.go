@@ -14,7 +14,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto/user"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"gorm.io/gorm"
 	"net/http"
 )
@@ -117,4 +117,16 @@ func (categoryService *CategoryServiceImpl) HandleDelete(categoryId string, user
 		return nil
 	})
 	return nil
+}
+
+func (categoryService *CategoryServiceImpl) IsCategoryExists(categoryId uint64) (bool, *exception.ClientError) {
+	var isCategoryExists bool
+	err := categoryService.validatorService.ValidateVar(categoryId, "required,gte=1")
+	categoryService.validatorService.ParseValidationError(err)
+	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		isCategoryExists = categoryService.categoryRepository.IsCategoryExists(categoryId, gormTransaction)
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return isCategoryExists, nil
 }

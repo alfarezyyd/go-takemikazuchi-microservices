@@ -20,10 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	CategoryService_FindAll_FullMethodName      = "/CategoryService/FindAll"
-	CategoryService_HandleCreate_FullMethodName = "/CategoryService/HandleCreate"
-	CategoryService_HandleUpdate_FullMethodName = "/CategoryService/HandleUpdate"
-	CategoryService_HandleDelete_FullMethodName = "/CategoryService/HandleDelete"
+	CategoryService_FindAll_FullMethodName          = "/CategoryService/FindAll"
+	CategoryService_HandleCreate_FullMethodName     = "/CategoryService/HandleCreate"
+	CategoryService_HandleUpdate_FullMethodName     = "/CategoryService/HandleUpdate"
+	CategoryService_HandleDelete_FullMethodName     = "/CategoryService/HandleDelete"
+	CategoryService_IsCategoryExists_FullMethodName = "/CategoryService/IsCategoryExists"
 )
 
 // CategoryServiceClient is the client API for CategoryService service.
@@ -34,6 +35,7 @@ type CategoryServiceClient interface {
 	HandleCreate(ctx context.Context, in *CreateCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	HandleUpdate(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	HandleDelete(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
+	IsCategoryExists(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*CategoryExistsResponse, error)
 }
 
 type categoryServiceClient struct {
@@ -84,6 +86,16 @@ func (c *categoryServiceClient) HandleDelete(ctx context.Context, in *DeleteCate
 	return out, nil
 }
 
+func (c *categoryServiceClient) IsCategoryExists(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*CategoryExistsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CategoryExistsResponse)
+	err := c.cc.Invoke(ctx, CategoryService_IsCategoryExists_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CategoryServiceServer is the server API for CategoryService service.
 // All implementations must embed UnimplementedCategoryServiceServer
 // for forward compatibility.
@@ -92,6 +104,7 @@ type CategoryServiceServer interface {
 	HandleCreate(context.Context, *CreateCategoryRequest) (*CommandCategoryResponse, error)
 	HandleUpdate(context.Context, *UpdateCategoryRequest) (*CommandCategoryResponse, error)
 	HandleDelete(context.Context, *DeleteCategoryRequest) (*CommandCategoryResponse, error)
+	IsCategoryExists(context.Context, *SearchCategoryRequest) (*CategoryExistsResponse, error)
 	mustEmbedUnimplementedCategoryServiceServer()
 }
 
@@ -113,6 +126,9 @@ func (UnimplementedCategoryServiceServer) HandleUpdate(context.Context, *UpdateC
 }
 func (UnimplementedCategoryServiceServer) HandleDelete(context.Context, *DeleteCategoryRequest) (*CommandCategoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleDelete not implemented")
+}
+func (UnimplementedCategoryServiceServer) IsCategoryExists(context.Context, *SearchCategoryRequest) (*CategoryExistsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsCategoryExists not implemented")
 }
 func (UnimplementedCategoryServiceServer) mustEmbedUnimplementedCategoryServiceServer() {}
 func (UnimplementedCategoryServiceServer) testEmbeddedByValue()                         {}
@@ -207,6 +223,24 @@ func _CategoryService_HandleDelete_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CategoryService_IsCategoryExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CategoryServiceServer).IsCategoryExists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CategoryService_IsCategoryExists_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CategoryServiceServer).IsCategoryExists(ctx, req.(*SearchCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CategoryService_ServiceDesc is the grpc.ServiceDesc for CategoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,6 +263,10 @@ var CategoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "HandleDelete",
 			Handler:    _CategoryService_HandleDelete_Handler,
+		},
+		{
+			MethodName: "IsCategoryExists",
+			Handler:    _CategoryService_IsCategoryExists_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
