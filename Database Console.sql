@@ -24,6 +24,8 @@ DROP TABLE IF EXISTS reviews;
 
 CREATE DATABASE go_takemikazuchi_microservices_users;
 CREATE DATABASE go_takemikazuchi_microservices_jobs;
+CREATE DATABASE go_takemikazuchi_microservices_workers;
+DROP DATABASE go_takemikazuchi_microservices_workers;
 DROP DATABASE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_categories;

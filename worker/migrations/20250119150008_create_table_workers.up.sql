@@ -11,6 +11,5 @@ CREATE TABLE workers
     emergency_phone_number VARCHAR(30),
     created_at             TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
     updated_at             TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
-    verified_at            TIMESTAMP    DEFAULT NULL,
-    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    verified_at            TIMESTAMP    DEFAULT NULL
 );
