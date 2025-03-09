@@ -1,14 +1,15 @@
 package service
 
 import (
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
+	"context"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto/user"
+	jobDto "github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"mime/multipart"
 )
 
-type Service interface {
-	HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *dto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError
+type JobService interface {
+	HandleCreate(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError
 	//HandleUpdate(userJwtClaims *userDto.JwtClaimDto, jobId string, updateJobDto *dto.UpdateJobDto, uploadedFiles []*multipart.FileHeader)
 	//HandleDelete(userJwtClaims *userDto.JwtClaimDto, jobId string) *exception.ClientError
 	//HandleRequestCompleted(userJwtClaims *userDto.JwtClaimDto, jobId *string)

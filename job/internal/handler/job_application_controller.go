@@ -1,4 +1,4 @@
-package job_application
+package handler
 
 import "github.com/gin-gonic/gin"
 

@@ -10,9 +10,9 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/storage"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/job/repository"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/repository"
 	jobDto "github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto/job"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto/user"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/google/uuid"
 	"googlemaps.github.io/maps"
 	"gorm.io/gorm"
@@ -62,21 +62,16 @@ func NewJobService(
 	}
 }
 
-func (jobService *JobServiceImpl) HandleCreate(userJwtClaims *userDto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError {
+func (jobService *JobServiceImpl) HandleCreate(userJwtClaims *dto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError {
 	err := jobService.validatorService.ValidateStruct(createJobDto)
 	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var jobModel model.Job
 		var userModel model.User
 		var userAddress model.UserAddress
+		discovery.ServiceConnection()
 		jobService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
 		if createJobDto.AddressId == nil {
-			//geoCodingRequest := &maps.GeocodingRequest{
-			//	LatLng: &maps.LatLng{Lat: createJobDto.Latitude, Lng: createJobDto.Longitude},
-			//}
-			//reverseGeocodingResponse, err := jobService.mapsClient.ReverseGeocode(context.Background(), geoCodingRequest)
-			//helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
-			//mapper.MapReverseGeocodingIntoUserAddresses(&reverseGeocodingResponse[0], &userAddress, userModel.ID, createJobDto.AdditionalInformationAddress)
 			jobService.userAddressRepository.Store(gormTransaction, &userAddress)
 		} else {
 			jobService.userAddressRepository.FindById(gormTransaction, createJobDto.AddressId, &userAddress)

@@ -1,7 +1,8 @@
-package job_application
+package service
 
 import (
 	"errors"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/repository"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"go-takemikazuchi-microservices/internal/job"
@@ -20,7 +21,7 @@ import (
 
 type ServiceImpl struct {
 	validatorService         validatorFeature.Service
-	jobApplicationRepository Repository
+	jobApplicationRepository repository.Repository
 	dbConnection             *gorm.DB
 	jobRepository            job.Repository
 	userRepository           userFeature.Repository
@@ -29,7 +30,7 @@ type ServiceImpl struct {
 func NewService(
 	validationInstance *validator.Validate,
 	engTranslator ut.Translator,
-	jobApplicationRepository Repository,
+	jobApplicationRepository repository.Repository,
 	dbConnection *gorm.DB,
 	jobRepository job.Repository,
 	userRepository userFeature.Repository,

@@ -1,4 +1,4 @@
-package job_resource
+package repository
 
 import (
 	"fmt"
