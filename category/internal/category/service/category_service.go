@@ -5,7 +5,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto/user"
 )
 
 type CategoryService interface {

@@ -14,7 +14,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
-	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto/user"
 	"gorm.io/gorm"
 	"net/http"
 )
