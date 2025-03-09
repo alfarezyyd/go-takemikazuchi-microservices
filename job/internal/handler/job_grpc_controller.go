@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
 	grpcJob "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -32,9 +31,8 @@ func (jobHandler *JobHandler) FindAll(ctx context.Context, emptyProto *emptypb.E
 func (jobHandler *JobHandler) HandleCreate(ctx context.Context, createJobRequest *job.CreateJobRequest) (*emptypb.Empty, error) {
 	createJobGrpc := mapper.MapCreateJobGrpcIntoCreateJobDto(createJobRequest)
 	userJwtClaimGrpc := mapper.MapUserJwtClaimGrpcIntoUserJwtClaim(createJobRequest.UserJwtClaim)
-	resultCreate := jobHandler.jobService.HandleCreate(ctx, userJwtClaimGrpc, createJobGrpc, nil)
-	fmt.Println(resultCreate)
-	return nil, status.Errorf(codes.Unimplemented, "method HandleCreate not implemented")
+	jobHandler.jobService.HandleCreate(ctx, userJwtClaimGrpc, createJobGrpc, nil)
+	return nil, nil
 }
 func (jobHandler *JobHandler) HandleUpdate(ctx context.Context, updateJobRequest *job.UpdateJobRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleUpdate not implemented")

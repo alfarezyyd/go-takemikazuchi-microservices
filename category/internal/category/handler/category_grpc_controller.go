@@ -8,8 +8,6 @@ import (
 	grpcCategory "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -43,10 +41,10 @@ func (categoryHandler *CategoryHandler) HandleCreate(ctx context.Context, create
 	}, nil
 }
 func (categoryHandler *CategoryHandler) HandleUpdate(ctx context.Context, updateCategoryRequest *grpcCategory.UpdateCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HandleUpdate not implemented")
+	return nil, nil
 }
 func (categoryHandler *CategoryHandler) HandleDelete(ctx context.Context, deleteCategoryRequest *grpcCategory.DeleteCategoryRequest) (*grpcCategory.CommandCategoryResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method HandleDelete not implemented")
+	return nil, nil
 }
 
 func (categoryHandler *CategoryHandler) IsCategoryExists(ctx context.Context, searchCategoryRequest *grpcCategory.SearchCategoryRequest) (*grpcCategory.CategoryExistsResponse, error) {

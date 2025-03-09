@@ -72,7 +72,8 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 		userGrpcConnection, err := discovery.ServiceConnection(ctx, "userService", jobService.serviceDiscovery)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		userAddressGrpcClient := userAddressGrpc.NewUserAddressServiceClient(userGrpcConnection)
-		categoryGrpcClient := category.NewCategoryServiceClient(userGrpcConnection)
+		categoryServiceConnection, err := discovery.ServiceConnection(ctx, "categoryService", jobService.serviceDiscovery)
+		categoryGrpcClient := category.NewCategoryServiceClient(categoryServiceConnection)
 		userGrpcClient := user.NewUserServiceClient(userGrpcConnection)
 		userModel, err := userGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
 			Email:       userJwtClaims.Email,
@@ -95,6 +96,7 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 			userAddress.ID = queryResponse.Id
 		}
+		fmt.Println(createJobDto.CategoryId)
 		isCategoryExists, err := categoryGrpcClient.IsCategoryExists(ctx, &category.SearchCategoryRequest{CategoryId: createJobDto.CategoryId})
 		fmt.Println(isCategoryExists, err, createJobDto.CategoryId)
 		if err != nil {
