@@ -6,6 +6,6 @@ import (
 )
 
 type UserAddressService interface {
-	Create(ctx context.Context, createUserAddressDto *dto.CreateUserAddressDto)
+	Create(ctx context.Context, createUserAddressDto *dto.CreateUserAddressDto) uint64
 	FindById(ctx context.Context, searchUserAddressDto *dto.SearchUserAddressDto)
 }

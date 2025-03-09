@@ -23,12 +23,12 @@ func NewUserAddressHandler(grpcServer *grpc.Server, userAddressService service.U
 }
 
 func (userAddressHandler *UserAddressHandler) UserAddressStore(ctx context.Context, userAddressCreateRequest *grpcUserAddress.UserAddressCreateRequest) (*grpcUserAddress.QueryResponse, error) {
-	userAddressHandler.userAddressService.Create(ctx, &dto.CreateUserAddressDto{
+	userAddressId := userAddressHandler.userAddressService.Create(ctx, &dto.CreateUserAddressDto{
 		Latitude:  userAddressCreateRequest.Latitude,
 		Longitude: userAddressCreateRequest.Longitude,
 		UserId:    userAddressCreateRequest.UserId,
 	})
-	return nil, status.Errorf(codes.Unimplemented, "method UserAddressStore not implemented")
+	return &grpcUserAddress.QueryResponse{Id: userAddressId}, nil
 }
 func (userAddressHandler *UserAddressHandler) FindUserAddressById(ctx context.Context, userAddressSearchRequest *grpcUserAddress.UserAddressSearchRequest) (*grpcUserAddress.QueryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindUserAddressById not implemented")

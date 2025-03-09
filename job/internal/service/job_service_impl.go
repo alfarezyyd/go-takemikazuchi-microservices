@@ -68,30 +68,35 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 	jobService.validatorService.ParseValidationError(err)
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var jobModel model.Job
-		var userModel model.User
 		var userAddress model.UserAddress
 		userGrpcConnection, err := discovery.ServiceConnection(ctx, "userService", jobService.serviceDiscovery)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		userAddressGrpcClient := userAddressGrpc.NewUserAddressServiceClient(userGrpcConnection)
 		categoryGrpcClient := category.NewCategoryServiceClient(userGrpcConnection)
 		userGrpcClient := user.NewUserServiceClient(userGrpcConnection)
-		userGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
+		userModel, err := userGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
 			Email:       userJwtClaims.Email,
 			PhoneNumber: userJwtClaims.PhoneNumber,
 		})
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		if createJobDto.AddressId == nil {
-			userAddressGrpcClient.UserAddressStore(ctx, &userAddressGrpc.UserAddressCreateRequest{
+			queryResponse, err := userAddressGrpcClient.UserAddressStore(ctx, &userAddressGrpc.UserAddressCreateRequest{
 				Latitude:  createJobDto.Latitude,
 				Longitude: createJobDto.Longitude,
 				UserId:    userModel.ID,
 			})
+			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+			userAddress.ID = queryResponse.Id
 		} else {
-			userAddressGrpcClient.FindUserAddressById(ctx, &userAddressGrpc.UserAddressSearchRequest{
+			queryResponse, err := userAddressGrpcClient.FindUserAddressById(ctx, &userAddressGrpc.UserAddressSearchRequest{
 				UserId:        userModel.ID,
 				UserAddressId: userAddress.ID,
 			})
+			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+			userAddress.ID = queryResponse.Id
 		}
 		isCategoryExists, err := categoryGrpcClient.IsCategoryExists(ctx, &category.SearchCategoryRequest{CategoryId: createJobDto.CategoryId})
+		fmt.Println(isCategoryExists, err, createJobDto.CategoryId)
 		if err != nil {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
 		}

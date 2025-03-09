@@ -28,6 +28,7 @@ DROP DATABASE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_categories;
 
+SELECT * FROM categories;
 SELECT * FROM users;
 UPDATE users SET role = 'Admin' WHERE id = 19;
 SELECT * FROM users;
