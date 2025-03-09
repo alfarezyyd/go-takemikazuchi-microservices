@@ -35,7 +35,7 @@ func NewUserAddressServiceImpl(userRepository repository.UserRepository, dbConne
 }
 
 func (userAddressServiceImpl *UserAddressServiceImpl) Create(ctx context.Context, createUserAddressDto *dto.CreateUserAddressDto) {
-	reverseResponse, err := userAddressServiceImpl.nominatimHttpClient.HTTPClient.Get(fmt.Sprintf("/reverse?lat=%s&lon=%s&format=json", createUserAddressDto.Latitude, createUserAddressDto.Longitude))
+	reverseResponse, err := userAddressServiceImpl.nominatimHttpClient.HTTPClient.Get(fmt.Sprintf("%s/reverse?lat=%f&lon=%f&format=json", *userAddressServiceImpl.nominatimHttpClient.BaseURL, createUserAddressDto.Latitude, createUserAddressDto.Longitude))
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("failed call reverse geocoding")))
 	responseBody, readErr := io.ReadAll(reverseResponse.Body)
 	helper.CheckErrorOperation(readErr, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("failed call reverse geocoding")))

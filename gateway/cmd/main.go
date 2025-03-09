@@ -9,8 +9,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"log"
 	"time"
 )
@@ -43,11 +41,9 @@ func main() {
 	}()
 	defer consulServiceRegistry.Deregister(ctx, serviceId, serviceName)
 
-	grpcConnection, err := grpc.NewClient(":9000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to create gRPC connection: %v", err)
 	}
-	defer grpcConnection.Close()
 	viperConfig := viper.New()
 	viperConfig.SetConfigFile(".env")
 	viperConfig.AddConfigPath(".")
@@ -68,7 +64,7 @@ func main() {
 	ginEngine.Use(exception.Interceptor())
 
 	rootRouterGroup := ginEngine.Group("/")
-	userHandler := handler.NewUserHandler(grpcConnection)
+	userHandler := handler.NewUserHandler(consulServiceRegistry)
 	categoryHandler := handler.NewCategoryHandler(consulServiceRegistry)
 	jobHandler := handler.NewJobHandler(consulServiceRegistry)
 	authenticationRoutes := routes.NewAuthenticationRoutes(rootRouterGroup, userHandler)

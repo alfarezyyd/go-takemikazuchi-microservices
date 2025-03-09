@@ -198,7 +198,6 @@ func (userService *UserServiceImpl) FindByIdentifier(userIdentifierDto *dto.User
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})
-	fmt.Println(userModel)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return mapper.MapUserModelIntoUserResponse(&userModel)
 }

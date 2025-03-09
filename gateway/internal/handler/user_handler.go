@@ -3,34 +3,37 @@ package handler
 import (
 	"context"
 	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
-	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net/http"
 	"time"
 )
 
 type UserHandler struct {
-	grpcConnection *grpc.ClientConn
+	serviceRegistry discovery.ServiceRegistry
 }
 
-func NewUserHandler(grpcConnection *grpc.ClientConn) *UserHandler {
+func NewUserHandler(serviceRegistry discovery.ServiceRegistry,
+) *UserHandler {
 	return &UserHandler{
-		grpcConnection: grpcConnection,
+		serviceRegistry: serviceRegistry,
 	}
 }
 
 func (userHandler *UserHandler) Register(ginContext *gin.Context) {
-	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
 	var createUserDto dto.CreateUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&createUserDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancelFunc()
+	grpcConnection, err := discovery.ServiceConnection(timeoutCtx, "userService", userHandler.serviceRegistry)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+	userClient := user.NewUserServiceClient(grpcConnection)
 	createUserRequest := user.CreateUserRequest{
 		Name:            createUserDto.Name,
 		Email:           createUserDto.Email,
@@ -64,12 +67,15 @@ func (userHandler *UserHandler) VerifyOneTimePassword(ginContext *gin.Context) {
 }
 
 func (userHandler *UserHandler) Login(ginContext *gin.Context) {
-	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
 	var loginUserDto dto.LoginUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancelFunc()
+	grpcConnection, err := discovery.ServiceConnection(timeoutCtx, "userService", userHandler.serviceRegistry)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+	userClient := user.NewUserServiceClient(grpcConnection)
+
 	payloadResponse, err := userClient.HandleLogin(timeoutCtx, &user.LoginUserRequest{
 		UserIdentifier: loginUserDto.UserIdentifier,
 		Password:       loginUserDto.Password,
@@ -84,21 +90,25 @@ func (userHandler *UserHandler) Login(ginContext *gin.Context) {
 }
 
 func (userHandler *UserHandler) LoginWithGoogle(ginContext *gin.Context) {
-	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
 	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancelFunc()
+	grpcConnection, err := discovery.ServiceConnection(timeout, "userService", userHandler.serviceRegistry)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+	userClient := user.NewUserServiceClient(grpcConnection)
 	authEndpoint, _ := userClient.HandleGoogleAuthentication(timeout, &emptypb.Empty{})
 	ginContext.Redirect(http.StatusSeeOther, authEndpoint.Payload)
 	ginContext.JSON(http.StatusOK, authEndpoint)
 }
 
 func (userHandler *UserHandler) GoogleProviderCallback(ginContext *gin.Context) {
-	userClient := user.NewUserServiceClient(userHandler.grpcConnection)
 	tokenState := ginContext.Query("state")
 	queryCode := ginContext.Query("code")
 	ctxTimeout, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancelFunc()
-	_, err := userClient.HandleGoogleCallback(ctxTimeout, &user.GoogleCallbackRequest{
+	grpcConnection, err := discovery.ServiceConnection(ctxTimeout, "userService", userHandler.serviceRegistry)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+	userClient := user.NewUserServiceClient(grpcConnection)
+	_, err = userClient.HandleGoogleCallback(ctxTimeout, &user.GoogleCallbackRequest{
 		TokenState: tokenState,
 		QueryCode:  queryCode,
 	})
