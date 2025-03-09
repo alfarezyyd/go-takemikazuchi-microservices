@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
@@ -22,5 +23,6 @@ func (workerWalletRepository *WorkerWalletRepositoryImpl) FindById(gormTransacti
 
 func (workerWalletRepository *WorkerWalletRepositoryImpl) Store(gormTransaction *gorm.DB, workerWalletModel *model.WorkerWallet) {
 	err := gormTransaction.Create(workerWalletModel).Error
+	fmt.Print(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

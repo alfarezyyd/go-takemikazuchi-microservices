@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/worker"
@@ -40,10 +41,11 @@ func (workerHandler *WorkerHandler) Register(ginContext *gin.Context) {
 	//}
 	timeoutBackground, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancelFunc()
-	gRCPClientConnection, err := discovery.ServiceConnection(timeoutBackground, "categoryService", workerHandler.serviceRegistry)
+	gRCPClientConnection, err := discovery.ServiceConnection(timeoutBackground, "workerService", workerHandler.serviceRegistry)
 	workerServiceClient := worker.NewWorkerServiceClient(gRCPClientConnection)
 	createWorkerRequest := mapper.MapCreateWorkerDtoIntoCreateWorkerRequest(createWorkerDto)
 	createWorkerRequest.UserJwtClaim = mapper.MapUserJwtClaimIntoUserJwtClaimGrpc(userJwtClaim)
+	fmt.Println(createWorkerRequest)
 	_, err = workerServiceClient.Create(timeoutBackground, createWorkerRequest)
 	exception.ParseGrpcError(ginContext, err)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))

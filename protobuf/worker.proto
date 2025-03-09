@@ -9,8 +9,9 @@ message CreateWorkerRequest {
   string EmergencyPhoneNumber = 2;
   string Location = 3;
   string WalletType = 4;
-  string AccountName = 5;
-  string BankName = 6;
+  string AccountNumber = 5;
+  string AccountName = 6;
+  string BankName = 7;
 }
 service WorkerService {
   rpc Create(CreateWorkerRequest) returns (google.protobuf.Empty);

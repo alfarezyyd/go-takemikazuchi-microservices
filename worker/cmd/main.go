@@ -85,7 +85,8 @@ func main() {
 
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
 	workerRepository := repository.NewWorkerRepository()
-	newWorkerService := service.NewWorkerService(workerRepository, validatorService, databaseConnection, nil, consulServiceRegistry)
+	workerWalletRepository := repository.NewWorkerWalletRepository()
+	newWorkerService := service.NewWorkerService(workerRepository, validatorService, databaseConnection, nil, consulServiceRegistry, workerWalletRepository)
 	handler.NewWorkerHandler(grpcServer, newWorkerService)
 	fmt.Println("gRPC server listening on " + tcpListener.Addr().String())
 	err = grpcServer.Serve(tcpListener)

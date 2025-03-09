@@ -21,16 +21,31 @@ func MapCreateWorkerWalletDtoIntoWorkerWalletModel(workerWalletModel *model.Work
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 }
 
+func MapCreateWorkerWalletDtoIntoCreateWorkerWalletRequest(createWorkerDto dto.CreateWorkerDto, createWorkerRequest *worker.CreateWorkerRequest) {
+	err := mapstructure.Decode(createWorkerDto.WalletInformation, createWorkerRequest)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
+}
+
 func MapCreateWorkerDtoIntoCreateWorkerRequest(createWorkerDto dto.CreateWorkerDto) *worker.CreateWorkerRequest {
 	var createWorkerRequest worker.CreateWorkerRequest
 	err := mapstructure.Decode(createWorkerDto, &createWorkerRequest)
+	MapCreateWorkerWalletDtoIntoCreateWorkerWalletRequest(createWorkerDto, &createWorkerRequest)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	return &createWorkerRequest
+}
+
+func MapCreateWorkerWalletRequestIntoCreateWorkerWalletDto(createWorkerRequest *worker.CreateWorkerRequest) *dto.CreateWorkerWalletDto {
+	var createWorkerWalletDto dto.CreateWorkerWalletDto
+	err := mapstructure.Decode(createWorkerRequest, &createWorkerWalletDto)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
+	return &createWorkerWalletDto
 }
 
 func MapCreateWorkerRequestIntoCreateWorkerDto(createWorkerRequest *worker.CreateWorkerRequest) *dto.CreateWorkerDto {
 	var createWorkerRequestDto dto.CreateWorkerDto
 	err := mapstructure.Decode(createWorkerRequest, &createWorkerRequestDto)
+	walletDto := MapCreateWorkerWalletRequestIntoCreateWorkerWalletDto(createWorkerRequest)
+	createWorkerRequestDto.WalletInformation = *walletDto
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	return &createWorkerRequestDto
 }
