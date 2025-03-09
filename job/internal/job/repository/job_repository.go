@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 
-type Repository interface {
+type JobRepository interface {
 	FindById(gormTransaction *gorm.DB, id *uint64) (*model.Job, error)
 	FindVerifyById(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) (*model.Job, error)
 	FindWithRelationship(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) *model.Job

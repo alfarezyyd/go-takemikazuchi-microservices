@@ -7,6 +7,8 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/middleware"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/job/repository"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/job/service"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"log"
@@ -81,13 +83,15 @@ func main() {
 		grpc.ChainUnaryInterceptor(middleware.RecoveryInterceptor),
 	)
 
-	userRepository := repository.NewRepository()
+	jobRepository := repository.NewJobRepository()
 	validatorInstance, engTranslator := configs.InitializeValidator()
 	mailerService := configs.NewMailerService(viperConfig)
 	identityProvider := configs.NewIdentityProvider(viperConfig)
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
+	nominatimBaseUrl := viperConfig.GetString("NOMINATIM_BASE_URL")
+	httpClient := configs.NewHttpClient(nil, &nominatimBaseUrl)
 
-	userService := service.NewUserService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
+	userService := service.NewJobService(jobRepository, databaseConnection)
 	handler.NewUserHandler(grpcServer, userService)
 	fmt.Println("Serving gRPC server at " + grpcAddr)
 	err = grpcServer.Serve(tcpListener)
