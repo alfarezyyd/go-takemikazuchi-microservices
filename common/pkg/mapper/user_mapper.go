@@ -51,6 +51,13 @@ func MapUserResponseIntoQueryUserResponse(userResponse *dto.UserResponseDto) *gr
 	return &queryUserResponse
 }
 
+func MapUserJwtClaimIntoUserJwtClaimGrpc(jwtClaim *dto.JwtClaimDto) *grpcUser.UserJwtClaim {
+	var userJwtClaim grpcUser.UserJwtClaim
+	err := mapstructure.Decode(jwtClaim, &userJwtClaim)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, nil))
+	return &userJwtClaim
+}
+
 func MapReverseGeocodingIntoUserAddresses(geocodingResult *maps.GeocodingResult,
 	userAddress *model.UserAddress,
 	userId uint64,

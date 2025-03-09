@@ -2,10 +2,9 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	grpcUser "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -70,7 +69,6 @@ func (userHandler *UserHandler) HandleGoogleCallback(ctx context.Context, google
 }
 
 func (userHandler *UserHandler) FindByIdentifier(ctx context.Context, userIdentifier *grpcUser.UserIdentifier) (*grpcUser.QueryUserResponse, error) {
-	fmt.Println(userIdentifier)
 	userResponseDto := userHandler.userService.FindByIdentifier(&dto.UserIdentifierDto{
 		Email:       *userIdentifier.Email,
 		PhoneNumber: *userIdentifier.PhoneNumber,
