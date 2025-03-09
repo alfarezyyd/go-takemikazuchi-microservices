@@ -7,9 +7,9 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/middleware"
 	validatorFeature "github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/validator"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/handler"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/repository"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/user/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/handler"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/repository"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/service"
 	"github.com/spf13/viper"
 	"google.golang.org/grpc"
 	"log"
@@ -84,14 +84,19 @@ func main() {
 		grpc.ChainUnaryInterceptor(middleware.RecoveryInterceptor),
 	)
 
-	userRepository := repository.NewRepository()
 	validatorInstance, engTranslator := configs.InitializeValidator()
 	mailerService := configs.NewMailerService(viperConfig)
 	identityProvider := configs.NewIdentityProvider(viperConfig)
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
 
+	userRepository := repository.NewUserRepository()
+	addressRepository := repository.NewUserAddressRepository()
+	nominatimBaseUrl := viperConfig.GetString("NOMINATIM_BASE_URL")
+	nominatimHttpClient := configs.NewHttpClient(nil, &nominatimBaseUrl)
 	userService := service.NewUserService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
+	userAddressService := service.NewUserAddressServiceImpl(userRepository, databaseConnection, addressRepository, validatorService, nominatimHttpClient)
 	handler.NewUserHandler(grpcServer, userService)
+	handler.NewUserAddressHandler(grpcServer, userAddressService)
 	fmt.Println("Serving gRPC server at " + grpcAddr)
 	err = grpcServer.Serve(tcpListener)
 
