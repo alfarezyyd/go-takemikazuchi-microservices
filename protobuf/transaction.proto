@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "user.proto";
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/transaction";
+
+message CreateTransactionRequest {
+  UserJwtClaim UserJwtClaim = 1;
+  uint64 JobId = 2;
+  uint64 ApplicantId = 3;
+}
+
+message PostPaymentRequest {
+  string TransactionId = 1;
+  string TransactionTime = 2;
+  string TransactionStatus = 3;
+  string StatusMessage = 4;
+  string StatusCode = 5;
+  string SignatureKey = 6;
+  string PaymentType = 7;
+  string OrderId = 8;
+  string MerchantId = 9;
+  string MaskedCard = 10;
+  string GrossAmount = 11;
+  string FraudStatus = 12;
+  string Eci = 13;
+  string Currency = 14;
+  string ChannelResponseMessage = 15;
+  string ChannelResponseCode = 16;
+  string  CardType = 17;
+  string Bank = 18;
+  string  ApprovalCode = 19;
+}
+
+message TransactionResponse {
+  string SnapToken = 1;
+}
+
+service TransactionService {
+  rpc Create(CreateTransactionRequest) returns (TransactionResponse);
+  rpc PostPayment(PostPaymentRequest) returns (google.protobuf.Empty);
+}
