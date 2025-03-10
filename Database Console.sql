@@ -68,3 +68,7 @@ DELETE
 FROM one_time_password_tokens;
 DELETE
 FROM users;
+
+DELETE FROM users;
+DELETE FROM one_time_password_tokens;
+DELETE FROM user_addresses;

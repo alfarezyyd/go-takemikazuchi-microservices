@@ -93,6 +93,5 @@ func (workerService *WorkerServiceImpl) Create(ctx context.Context, userJwtClaim
 		//workerService.workerResourceRepository.BulkStore(gormTransaction, workerResourcesModel)
 		return nil
 	})
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

@@ -58,7 +58,6 @@ func (categoryService *CategoryServiceImpl) HandleCreate(ctx context.Context, us
 			Email:       userJwtClaim.Email,
 			PhoneNumber: userJwtClaim.PhoneNumber,
 		})
-		fmt.Println(err, userModel)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
 			return exception.NewClientError(http.StatusUnauthorized, exception.ErrUnauthorized, errors.New("only admin can create a category"))

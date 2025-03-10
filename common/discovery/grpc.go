@@ -2,7 +2,6 @@ package discovery
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/rand"
 
@@ -12,9 +11,7 @@ import (
 
 func ServiceConnection(ctx context.Context, serviceName string, serviceRegistry ServiceRegistry) (*grpc.ClientConn, error) {
 	serviceAddress, err := serviceRegistry.Discover(ctx, serviceName)
-	fmt.Println(serviceAddress)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 

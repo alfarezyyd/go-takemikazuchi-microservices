@@ -47,7 +47,6 @@ func MapUserResponseIntoQueryUserResponse(userResponse *dto.UserResponseDto) *gr
 	err := mapstructure.Decode(userResponse, &queryUserResponse)
 	queryUserResponse.CreatedAt = userResponse.CreatedAt.Format(time.RFC3339)
 	queryUserResponse.UpdatedAt = userResponse.UpdatedAt.Format(time.RFC3339)
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, nil))
 	return &queryUserResponse
 }

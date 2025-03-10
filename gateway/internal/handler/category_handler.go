@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
@@ -53,7 +52,6 @@ func (categoryHandler *CategoryHandler) Create(ginContext *gin.Context) {
 			PhoneNumber: userJwtClaim.PhoneNumber,
 		}})
 
-	fmt.Println(clientError)
 	exception.ParseGrpcError(ginContext, clientError)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Category has been created", nil))
 }

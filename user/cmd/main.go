@@ -32,7 +32,6 @@ func main() {
 
 	consulServiceRegistry, err := discovery.NewRegistry(consulAddr, serviceName)
 	if err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 

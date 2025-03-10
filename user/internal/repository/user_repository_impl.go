@@ -17,7 +17,6 @@ func NewUserRepository() *UserRepositoryImpl {
 
 func (userRepository *UserRepositoryImpl) IsUserExists(gormTransaction *gorm.DB, queryClause string, argumentClause ...interface{}) (bool, error) {
 	var isUserExists bool
-	fmt.Println(queryClause, argumentClause)
 	err := gormTransaction.Model(model.User{}).
 		Select("COUNT(*) > 0").
 		Where(queryClause, argumentClause...).

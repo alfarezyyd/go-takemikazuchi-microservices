@@ -60,7 +60,6 @@ func (userService *UserServiceImpl) HandleRegister(createUserDto *dto.CreateUser
 		}
 		userModel := mapper.MapUserDtoIntoUserModel(createUserDto)
 		err = gormTransaction.Create(userModel).Error
-		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		if createUserDto.Email != "" {
 			userService.HandleGenerateOneTimePassword(&dto.GenerateOtpDto{
@@ -80,7 +79,6 @@ func (userService *UserServiceImpl) HandleRegister(createUserDto *dto.CreateUser
 func (userService *UserServiceImpl) HandleGenerateOneTimePassword(generateOneTimePassDto *dto.GenerateOtpDto, externalGormTransaction *gorm.DB) {
 	err := userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		if externalGormTransaction != nil {
-			fmt.Println("External Gorm Transaction")
 			gormTransaction = externalGormTransaction
 		}
 		var userModel model.User
@@ -110,7 +108,6 @@ func (userService *UserServiceImpl) HandleGenerateOneTimePassword(generateOneTim
 			"One Time Verification Token",
 			templateFile,
 			emailPayload)
-		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 		return nil
 	})
