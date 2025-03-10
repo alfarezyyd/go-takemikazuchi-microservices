@@ -85,11 +85,14 @@ func main() {
 	)
 
 	jobRepository := repository.NewJobRepository()
+	jobApplicationRepository := repository.NewJobApplicationRepository()
 	validatorInstance, engTranslator := configs.InitializeValidator()
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
 
 	jobService := service.NewJobService(jobRepository, databaseConnection, nil, validatorService, consulServiceRegistry)
+	jobApplicationService := service.NewJobApplicationService(validatorInstance, engTranslator, jobApplicationRepository, databaseConnection, jobRepository, validatorService)
 	handler.NewJobHandler(grpcServer, jobService)
+	handler.NewJobApplicationHandler(grpcServer, jobApplicationService)
 
 	fmt.Println("Serving gRPC server at " + grpcAddr)
 	err = grpcServer.Serve(tcpListener)
