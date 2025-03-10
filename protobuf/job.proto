@@ -24,10 +24,11 @@ message JobModel {
   uint64 ID = 1;
   string Title = 2;
   string Description = 3;
-  double Price = 4;
-  string Status = 5;
-  optional  string   CreatedAt = 6;
-  optional  string UpdatedAt = 7;
+  uint64 CategoryId = 4;
+  double Price = 5;
+  string Status = 6;
+  optional  string   CreatedAt = 7;
+  optional  string UpdatedAt = 8;
 }
 
 message UpdateJobRequest {

@@ -8,6 +8,7 @@ package category
 
 import (
 	context "context"
+	user "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -25,6 +26,7 @@ const (
 	CategoryService_HandleUpdate_FullMethodName     = "/CategoryService/HandleUpdate"
 	CategoryService_HandleDelete_FullMethodName     = "/CategoryService/HandleDelete"
 	CategoryService_IsCategoryExists_FullMethodName = "/CategoryService/IsCategoryExists"
+	CategoryService_FindById_FullMethodName         = "/CategoryService/FindById"
 )
 
 // CategoryServiceClient is the client API for CategoryService service.
@@ -36,6 +38,7 @@ type CategoryServiceClient interface {
 	HandleUpdate(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	HandleDelete(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	IsCategoryExists(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*CategoryExistsResponse, error)
+	FindById(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*user.QueryUserResponse, error)
 }
 
 type categoryServiceClient struct {
@@ -96,6 +99,16 @@ func (c *categoryServiceClient) IsCategoryExists(ctx context.Context, in *Search
 	return out, nil
 }
 
+func (c *categoryServiceClient) FindById(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*user.QueryUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(user.QueryUserResponse)
+	err := c.cc.Invoke(ctx, CategoryService_FindById_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CategoryServiceServer is the server API for CategoryService service.
 // All implementations must embed UnimplementedCategoryServiceServer
 // for forward compatibility.
@@ -105,6 +118,7 @@ type CategoryServiceServer interface {
 	HandleUpdate(context.Context, *UpdateCategoryRequest) (*CommandCategoryResponse, error)
 	HandleDelete(context.Context, *DeleteCategoryRequest) (*CommandCategoryResponse, error)
 	IsCategoryExists(context.Context, *SearchCategoryRequest) (*CategoryExistsResponse, error)
+	FindById(context.Context, *SearchCategoryRequest) (*user.QueryUserResponse, error)
 	mustEmbedUnimplementedCategoryServiceServer()
 }
 
@@ -129,6 +143,9 @@ func (UnimplementedCategoryServiceServer) HandleDelete(context.Context, *DeleteC
 }
 func (UnimplementedCategoryServiceServer) IsCategoryExists(context.Context, *SearchCategoryRequest) (*CategoryExistsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsCategoryExists not implemented")
+}
+func (UnimplementedCategoryServiceServer) FindById(context.Context, *SearchCategoryRequest) (*user.QueryUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindById not implemented")
 }
 func (UnimplementedCategoryServiceServer) mustEmbedUnimplementedCategoryServiceServer() {}
 func (UnimplementedCategoryServiceServer) testEmbeddedByValue()                         {}
@@ -241,6 +258,24 @@ func _CategoryService_IsCategoryExists_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CategoryService_FindById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchCategoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CategoryServiceServer).FindById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CategoryService_FindById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CategoryServiceServer).FindById(ctx, req.(*SearchCategoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // CategoryService_ServiceDesc is the grpc.ServiceDesc for CategoryService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -267,6 +302,10 @@ var CategoryService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IsCategoryExists",
 			Handler:    _CategoryService_IsCategoryExists_Handler,
+		},
+		{
+			MethodName: "FindById",
+			Handler:    _CategoryService_FindById_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -1,11 +1,17 @@
 package service
 
 import (
+	"context"
 	"crypto/sha512"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
+	jobApplication "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job_application"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -24,14 +30,15 @@ import (
 )
 
 type TransactionServiceImpl struct {
-	validatorInstance        *validator.Validate
-	engTranslator            ut.Translator
-	gormTransaction          *gorm.DB
-	midtransClient           *snap.Client
-	jobRepository            job.Repository
-	jobApplicationRepository jobApplication.Repository
-	transactionRepository    repository.Repository
-	viperConfig              *viper.Viper
+	validatorInstance *validator.Validate
+	engTranslator     ut.Translator
+	gormTransaction   *gorm.DB
+	midtransClient    *snap.Client
+	//jobRepository            job.Repository
+	//jobApplicationRepository jobApplication.Repository
+	transactionRepository repository.TransactionRepository
+	viperConfig           *viper.Viper
+	serviceRegistry       discovery.ServiceRegistry
 }
 
 func NewTransactionService(
@@ -39,34 +46,59 @@ func NewTransactionService(
 	engTranslator ut.Translator,
 	gormTransaction *gorm.DB,
 	midtransClient *snap.Client,
-	jobRepository job.Repository,
-	transactionRepository repository.Repository,
-	jobApplicationRepository jobApplication.Repository,
+	//jobRepository job.Repository,
+	transactionRepository repository.TransactionRepository,
+	//jobApplicationRepository jobApplication.Repository,
 	viperConfig *viper.Viper,
+	serviceRegistry discovery.ServiceRegistry,
 ) *TransactionServiceImpl {
 	return &TransactionServiceImpl{
-		validatorInstance:        validatorInstance,
-		engTranslator:            engTranslator,
-		gormTransaction:          gormTransaction,
-		midtransClient:           midtransClient,
-		jobRepository:            jobRepository,
-		transactionRepository:    transactionRepository,
-		viperConfig:              viperConfig,
-		jobApplicationRepository: jobApplicationRepository,
+		validatorInstance: validatorInstance,
+		engTranslator:     engTranslator,
+		gormTransaction:   gormTransaction,
+		midtransClient:    midtransClient,
+		//jobRepository:            jobRepository,
+		transactionRepository: transactionRepository,
+		viperConfig:           viperConfig,
+		serviceRegistry:       serviceRegistry,
+		//jobApplicationRepository: jobApplicationRepository,
 	}
 }
 
-func (transactionService *TransactionServiceImpl) Create(userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto) string {
+func (transactionService *TransactionServiceImpl) Create(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto) string {
 	var midtransSnapToken string
 	err := transactionService.validatorInstance.Struct(createTransactionDto)
 	exception.ParseValidationError(err, transactionService.engTranslator)
 	err = transactionService.gormTransaction.Transaction(func(gormTransaction *gorm.DB) error {
-		jobModel := transactionService.jobRepository.FindWithRelationship(gormTransaction, userJwtClaims.Email, &createTransactionDto.JobId)
-		jobApplicationModel := transactionService.jobApplicationRepository.FindById(gormTransaction, &createTransactionDto.ApplicantId, &createTransactionDto.JobId)
+		grpcUserConnection, err := discovery.ServiceConnection(ctx, "userService", transactionService.serviceRegistry)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("job service not found")))
+		grpcUserClient := user.NewUserServiceClient(grpcUserConnection)
+		userGrpcResponse, err := grpcUserClient.FindByIdentifier(ctx, &user.UserIdentifier{
+			Email:       userJwtClaims.Email,
+			PhoneNumber: userJwtClaims.PhoneNumber,
+		})
+		grpcJobConnection, err := discovery.ServiceConnection(ctx, "jobService", transactionService.serviceRegistry)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("job service not found")))
+		grpcJobClient := job.NewJobServiceClient(grpcJobConnection)
+		jobModel, err := grpcJobClient.FindById(ctx, &job.FindByIdRequest{
+			JobId:     createTransactionDto.JobId,
+			UserEmail: userGrpcResponse.Email,
+		})
+
+		grpcJobApplicationClient := jobApplication.NewJobApplicationServiceClient(grpcJobConnection)
+		jobApplicationModel, err := grpcJobApplicationClient.FindById(ctx, &jobApplication.FindByIdRequest{
+			ApplicantId: createTransactionDto.ApplicantId,
+			JobId:       createTransactionDto.JobId,
+		})
+		grpcCategoryConnection, err := discovery.ServiceConnection(ctx, "categoryService", transactionService.serviceRegistry)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("job service not found")))
+		grpcCategoryClient := category.NewCategoryServiceClient(grpcCategoryConnection)
+		categoryModel, err := grpcCategoryClient.FindById(ctx, &category.SearchCategoryRequest{CategoryId: jobModel.CategoryId})
+
 		uuidString := fmt.Sprintf("%s-%s", "order", uuid.New().String())
 		var transactionModel model.Transaction
 		transactionModel.ID = uuidString
-		mapper.ConstructTransactionModel(jobApplicationModel, jobModel, &transactionModel)
+		mapper.ConstructTransactionModel(jobApplicationModel, jobModel, &transactionModel, userGrpcResponse.ID)
 		transactionService.transactionRepository.Create(gormTransaction, &transactionModel)
 		midtransResponse, midtransError := transactionService.midtransClient.CreateTransaction(&snap.Request{
 			TransactionDetails: midtrans.TransactionDetails{
@@ -79,14 +111,14 @@ func (transactionService *TransactionServiceImpl) Create(userJwtClaims *userDto.
 					Name:     jobModel.Title,
 					Price:    int64(jobModel.Price),
 					Qty:      1,
-					Category: jobModel.Category.Name,
+					Category: categoryModel.Name,
 				},
 			},
 			CustomerDetail: &midtrans.CustomerDetails{
-				FName: jobModel.User.Name,
+				FName: userGrpcResponse.Name,
 				LName: "",
-				Email: jobModel.User.Email,
-				Phone: helper.ParseNullableValue(jobModel.User.PhoneNumber),
+				Email: userGrpcResponse.Email,
+				Phone: helper.ParseNullableValue(userGrpcResponse.PhoneNumber),
 			},
 		})
 		if midtransError != nil && helper.CheckErrorOperation(midtransError.GetRawError(), exception.NewClientError(http.StatusBadRequest, exception.ErrInvalidRequestBody, errors.New("error when create midtrans transaction"))) {
@@ -114,7 +146,7 @@ func (transactionService *TransactionServiceImpl) PostPayment(transactionNotific
 		transactionService.paymentOperation(transactionNotificationDto, transactionModel)
 		transactionModel.PaymentMethod = &transactionNotificationDto.PaymentType
 		transactionService.transactionRepository.Update(gormTransaction, transactionModel)
-		transactionService.jobRepository.Update(transactionModel.Job, gormTransaction)
+		//transactionService.jobRepository.Update(transactionModel.Job, gormTransaction)
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

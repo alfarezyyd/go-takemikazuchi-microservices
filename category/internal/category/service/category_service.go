@@ -14,4 +14,5 @@ type CategoryService interface {
 	HandleUpdate(categoryId string, userJwtClaim *userDto.JwtClaimDto, updateCategoryDto *dto.UpdateCategoryDto) *exception.ClientError
 	HandleDelete(categoryId string, userJwtClaim *userDto.JwtClaimDto) *exception.ClientError
 	IsCategoryExists(categoryId uint64) (bool, *exception.ClientError)
+	FindById(categoryId uint64) *category.QueryCategoryResponse
 }

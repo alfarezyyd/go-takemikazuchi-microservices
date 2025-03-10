@@ -42,3 +42,7 @@ func (validatorService *ServiceImpl) ParseValidationError(validationError error)
 		panic(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, validationError, parsedMap))
 	}
 }
+
+func (validatorService *ServiceImpl) GetEngTranslator() universalTranslator.Translator {
+	return validatorService.engTranslator
+}

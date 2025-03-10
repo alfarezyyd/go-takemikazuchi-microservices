@@ -48,7 +48,7 @@ USE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_categories;
 USE go_takemikazuchi_microservices_jobs;
 USE go_takemikazuchi_microservices_workers;
-SELECT * FROM workers;
+SELECT * FROM jobs;
 
 SELECT *
 FROM jobs;

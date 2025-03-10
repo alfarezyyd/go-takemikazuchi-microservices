@@ -42,7 +42,7 @@ func NewService(
 
 func (categoryService *CategoryServiceImpl) FindAll() *category.QueryCategoryResponses {
 	categoriesModel := categoryService.categoryRepository.FindAll(categoryService.dbConnection)
-	categoriesResponseDto := mapper.MapCategoryModelIntoCategoryResponse(categoriesModel)
+	categoriesResponseDto := mapper.MapCategoryModelIntoCategoryResponses(categoriesModel)
 	return &categoriesResponseDto
 }
 
@@ -129,4 +129,17 @@ func (categoryService *CategoryServiceImpl) IsCategoryExists(categoryId uint64) 
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return isCategoryExists, nil
+}
+
+func (categoryService *CategoryServiceImpl) FindById(categoryId uint64) *category.QueryCategoryResponse {
+	var categoryModel model.Category
+	err := categoryService.validatorService.ValidateVar(categoryId, "required,gte=1")
+	categoryService.validatorService.ParseValidationError(err)
+	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		err = gormTransaction.Where("id = ?", categoryId).First(&categoryModel).Error
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return mapper.MapCategoryModelIntoCategoryResponse(&categoryModel)
 }

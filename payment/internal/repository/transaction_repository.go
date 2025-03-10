@@ -1,11 +1,11 @@
 package repository
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 
-type Repository interface {
+type TransactionRepository interface {
 	FindById(gormTransaction *gorm.DB, id string) *model.Transaction
 	Create(gormTransaction *gorm.DB, transactionModel *model.Transaction)
 	Update(gormTransaction *gorm.DB, transactionModel *model.Transaction)

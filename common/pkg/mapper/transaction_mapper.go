@@ -2,6 +2,8 @@ package mapper
 
 import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
+	jobApplication "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job_application"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/transaction"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
@@ -10,9 +12,9 @@ import (
 	"net/http"
 )
 
-func ConstructTransactionModel(jobApplicationModel *model.JobApplication, jobModel *model.Job, transactionModel *model.Transaction) {
+func ConstructTransactionModel(jobApplicationModel *jobApplication.JobApplicationResponse, jobModel *job.JobModel, transactionModel *model.Transaction, userId uint64) {
 	transactionModel.JobID = jobModel.ID
-	transactionModel.PayerID = jobModel.UserId
+	transactionModel.PayerID = userId
 	transactionModel.PayeeID = jobApplicationModel.ApplicantId
 	transactionModel.Amount = jobModel.Price
 }

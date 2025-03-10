@@ -1,27 +1,27 @@
 package repository
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 
-type RepositoryImpl struct{}
+type TransactionRepositoryImpl struct{}
 
-func NewRepository() *RepositoryImpl {
-	return &RepositoryImpl{}
+func NewTransactionRepository() *TransactionRepositoryImpl {
+	return &TransactionRepositoryImpl{}
 
 }
 
-func (transactionRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, id string) *model.Transaction {
+func (transactionRepository *TransactionRepositoryImpl) FindById(gormTransaction *gorm.DB, id string) *model.Transaction {
 	var transactionModel model.Transaction
 	err := gormTransaction.Where("id = ?", id).First(&transactionModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return &transactionModel
 }
 
-func (transactionRepository *RepositoryImpl) FindWithRelationship(gormTransaction *gorm.DB, id string) *model.Transaction {
+func (transactionRepository *TransactionRepositoryImpl) FindWithRelationship(gormTransaction *gorm.DB, id string) *model.Transaction {
 	var transactionModel model.Transaction
 	err := gormTransaction.
 		Model(&model.Transaction{}).
@@ -39,12 +39,12 @@ func (transactionRepository *RepositoryImpl) FindWithRelationship(gormTransactio
 	return &transactionModel
 }
 
-func (transactionRepository *RepositoryImpl) Create(gormTransaction *gorm.DB, transactionModel *model.Transaction) {
+func (transactionRepository *TransactionRepositoryImpl) Create(gormTransaction *gorm.DB, transactionModel *model.Transaction) {
 	err := gormTransaction.Create(transactionModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (transactionRepository *RepositoryImpl) Update(gormTransaction *gorm.DB, transactionModel *model.Transaction) {
+func (transactionRepository *TransactionRepositoryImpl) Update(gormTransaction *gorm.DB, transactionModel *model.Transaction) {
 	err := gormTransaction.Where("id = ?", transactionModel.ID).Updates(transactionModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

@@ -55,5 +55,6 @@ service CategoryService {
   rpc HandleUpdate(UpdateCategoryRequest) returns (CommandCategoryResponse);
   rpc HandleDelete(DeleteCategoryRequest) returns (CommandCategoryResponse);
   rpc IsCategoryExists(SearchCategoryRequest) returns (CategoryExistsResponse);
+  rpc FindById(SearchCategoryRequest) returns (QueryUserResponse);
 }
 
