@@ -124,6 +124,18 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 	return nil
 }
 
+func (jobService *JobServiceImpl) FindById(ctx context.Context, userEmail *string, jobId *uint64) *jobDto.JobResponseDto {
+	var jobModel *model.Job
+	var err error
+	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		jobModel, err = jobService.jobRepository.FindVerifyById(gormTransaction, userEmail, jobId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return mapper.MapJobModelIntoJobResponseDto(jobModel)
+}
+
 //func (jobService *JobServiceImpl) HandleUpdate(userJwtClaims *userDto.JwtClaimDto, jobId string, updateJobDto *jobDto.UpdateJobDto, uploadedFiles []*multipart.FileHeader) {
 //	err := jobService.validatorService.ValidateStruct(updateJobDto)
 //	jobService.validatorService.ParseValidationError(err)

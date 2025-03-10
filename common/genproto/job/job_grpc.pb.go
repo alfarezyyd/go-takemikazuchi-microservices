@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	JobService_FindAll_FullMethodName                = "/JobService/FindAll"
+	JobService_FindById_FullMethodName               = "/JobService/FindById"
 	JobService_HandleCreate_FullMethodName           = "/JobService/HandleCreate"
 	JobService_HandleUpdate_FullMethodName           = "/JobService/HandleUpdate"
 	JobService_HandleDelete_FullMethodName           = "/JobService/HandleDelete"
@@ -32,6 +33,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type JobServiceClient interface {
 	FindAll(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*JobResponse, error)
+	FindById(ctx context.Context, in *FindByIdRequest, opts ...grpc.CallOption) (*JobModel, error)
 	HandleCreate(ctx context.Context, in *CreateJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	HandleUpdate(ctx context.Context, in *UpdateJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	HandleDelete(ctx context.Context, in *DeleteJobRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -50,6 +52,16 @@ func (c *jobServiceClient) FindAll(ctx context.Context, in *emptypb.Empty, opts 
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(JobResponse)
 	err := c.cc.Invoke(ctx, JobService_FindAll_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *jobServiceClient) FindById(ctx context.Context, in *FindByIdRequest, opts ...grpc.CallOption) (*JobModel, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JobModel)
+	err := c.cc.Invoke(ctx, JobService_FindById_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,6 +113,7 @@ func (c *jobServiceClient) HandleRequestCompleted(ctx context.Context, in *JobCo
 // for forward compatibility.
 type JobServiceServer interface {
 	FindAll(context.Context, *emptypb.Empty) (*JobResponse, error)
+	FindById(context.Context, *FindByIdRequest) (*JobModel, error)
 	HandleCreate(context.Context, *CreateJobRequest) (*emptypb.Empty, error)
 	HandleUpdate(context.Context, *UpdateJobRequest) (*emptypb.Empty, error)
 	HandleDelete(context.Context, *DeleteJobRequest) (*emptypb.Empty, error)
@@ -117,6 +130,9 @@ type UnimplementedJobServiceServer struct{}
 
 func (UnimplementedJobServiceServer) FindAll(context.Context, *emptypb.Empty) (*JobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindAll not implemented")
+}
+func (UnimplementedJobServiceServer) FindById(context.Context, *FindByIdRequest) (*JobModel, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindById not implemented")
 }
 func (UnimplementedJobServiceServer) HandleCreate(context.Context, *CreateJobRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleCreate not implemented")
@@ -165,6 +181,24 @@ func _JobService_FindAll_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(JobServiceServer).FindAll(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _JobService_FindById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobServiceServer).FindById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobService_FindById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobServiceServer).FindById(ctx, req.(*FindByIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -251,6 +285,10 @@ var JobService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindAll",
 			Handler:    _JobService_FindAll_Handler,
+		},
+		{
+			MethodName: "FindById",
+			Handler:    _JobService_FindById_Handler,
 		},
 		{
 			MethodName: "HandleCreate",

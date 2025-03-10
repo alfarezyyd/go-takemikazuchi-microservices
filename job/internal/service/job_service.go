@@ -10,6 +10,7 @@ import (
 
 type JobService interface {
 	HandleCreate(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, createJobDto *jobDto.CreateJobDto, uploadedFiles []*multipart.FileHeader) *exception.ClientError
+	FindById(ctx context.Context, userEmail *string, obId *uint64) *jobDto.JobResponseDto
 	//HandleUpdate(userJwtClaims *userDto.JwtClaimDto, jobId string, updateJobDto *dto.UpdateJobDto, uploadedFiles []*multipart.FileHeader)
 	//HandleDelete(userJwtClaims *userDto.JwtClaimDto, jobId string) *exception.ClientError
 	//HandleRequestCompleted(userJwtClaims *userDto.JwtClaimDto, jobId *string)

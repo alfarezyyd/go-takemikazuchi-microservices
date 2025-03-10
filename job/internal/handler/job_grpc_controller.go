@@ -17,7 +17,8 @@ type JobHandler struct {
 	job.UnimplementedJobServiceServer
 }
 
-func NewJobHandler(grpcServer *grpc.Server, jobService service.JobService) *JobHandler {
+func NewJobHandler(grpcServer *grpc.Server, jobService service.JobService,
+) *JobHandler {
 	jobHandler := &JobHandler{
 		jobService: jobService,
 	}
@@ -42,4 +43,9 @@ func (jobHandler *JobHandler) HandleDelete(ctx context.Context, deleteJobRequest
 }
 func (jobHandler *JobHandler) HandleRequestCompleted(ctx context.Context, jobCompleteRequest *job.JobCompleteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HandleRequestCompleted not implemented")
+}
+
+func (jobHandler *JobHandler) FindById(ctx context.Context, findByIdRequest *job.FindByIdRequest) (*job.JobModel, error) {
+	jobModel := jobHandler.jobService.FindById(ctx, &findByIdRequest.UserEmail, &findByIdRequest.JobId)
+	return mapper.MapJobResponseIntoJobModel(jobModel), nil
 }

@@ -60,3 +60,17 @@ func MapCreateJobGrpcIntoCreateJobDto(createJobRequest *job.CreateJobRequest) *d
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &createJobDto
 }
+
+func MapJobModelIntoJobResponseDto(jobModel *model.Job) *dto.JobResponseDto {
+	var jobResponseDto dto.JobResponseDto
+	err := mapstructure.Decode(jobModel, &jobResponseDto)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return &jobResponseDto
+}
+
+func MapJobResponseIntoJobModel(jobResponse *dto.JobResponseDto) *job.JobModel {
+	var jobModel job.JobModel
+	err := mapstructure.Decode(jobResponse, &jobModel)
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return &jobModel
+}

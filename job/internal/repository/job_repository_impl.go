@@ -78,16 +78,7 @@ func (jobRepository *JobRepositoryImpl) FindVerifyById(gormTransaction *gorm.DB,
 func (jobRepository *JobRepositoryImpl) FindWithRelationship(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) *model.Job {
 	var jobModel model.Job
 	err := gormTransaction.
-		Preload("User").
-		Preload("Category").
-		Joins("JOIN users ON users.id = jobs.user_id").
-		Joins("JOIN categories ON categories.id = jobs.category_id").
-		Select(`
-			jobs.*, 
-			jobs.id AS job_id, 
-			users.id AS user_id, users.name AS user_name, users.email AS user_email,
-			categories.id AS category_id, categories.name AS category_name
-		`).Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
+		Select("*").Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
 		First(&jobModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return &jobModel

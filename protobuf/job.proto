@@ -58,8 +58,25 @@ message FileName {
   string Name = 1;
 }
 
+
+message JobPayload {
+  uint64 Id = 1;
+  string Title = 2;
+  string Description = 3;
+  double Price = 4;
+  string Status = 5;
+  string CreatedAt = 6;
+  string UpdatedAt = 7;
+}
+
+message FindByIdRequest {
+  string UserEmail = 1;
+  uint64 JobId = 2;
+}
+
 service JobService {
   rpc FindAll(google.protobuf.Empty) returns (JobResponse);
+  rpc FindById(FindByIdRequest) returns (JobModel);
   rpc HandleCreate(CreateJobRequest) returns (google.protobuf.Empty);
   rpc HandleUpdate(UpdateJobRequest) returns (google.protobuf.Empty);
   rpc HandleDelete(DeleteJobRequest) returns (google.protobuf.Empty);
