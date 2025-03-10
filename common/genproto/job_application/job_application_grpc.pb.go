@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type JobApplicationServiceClient interface {
-	FindById(ctx context.Context, in *FindByIdRequest, opts ...grpc.CallOption) (*JobApplicationResponse, error)
+	FindById(ctx context.Context, in *FindJobApplicationByIdRequest, opts ...grpc.CallOption) (*JobApplicationResponse, error)
 }
 
 type jobApplicationServiceClient struct {
@@ -37,7 +37,7 @@ func NewJobApplicationServiceClient(cc grpc.ClientConnInterface) JobApplicationS
 	return &jobApplicationServiceClient{cc}
 }
 
-func (c *jobApplicationServiceClient) FindById(ctx context.Context, in *FindByIdRequest, opts ...grpc.CallOption) (*JobApplicationResponse, error) {
+func (c *jobApplicationServiceClient) FindById(ctx context.Context, in *FindJobApplicationByIdRequest, opts ...grpc.CallOption) (*JobApplicationResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(JobApplicationResponse)
 	err := c.cc.Invoke(ctx, JobApplicationService_FindById_FullMethodName, in, out, cOpts...)
@@ -51,7 +51,7 @@ func (c *jobApplicationServiceClient) FindById(ctx context.Context, in *FindById
 // All implementations must embed UnimplementedJobApplicationServiceServer
 // for forward compatibility.
 type JobApplicationServiceServer interface {
-	FindById(context.Context, *FindByIdRequest) (*JobApplicationResponse, error)
+	FindById(context.Context, *FindJobApplicationByIdRequest) (*JobApplicationResponse, error)
 	mustEmbedUnimplementedJobApplicationServiceServer()
 }
 
@@ -62,7 +62,7 @@ type JobApplicationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedJobApplicationServiceServer struct{}
 
-func (UnimplementedJobApplicationServiceServer) FindById(context.Context, *FindByIdRequest) (*JobApplicationResponse, error) {
+func (UnimplementedJobApplicationServiceServer) FindById(context.Context, *FindJobApplicationByIdRequest) (*JobApplicationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindById not implemented")
 }
 func (UnimplementedJobApplicationServiceServer) mustEmbedUnimplementedJobApplicationServiceServer() {}
@@ -87,7 +87,7 @@ func RegisterJobApplicationServiceServer(s grpc.ServiceRegistrar, srv JobApplica
 }
 
 func _JobApplicationService_FindById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FindByIdRequest)
+	in := new(FindJobApplicationByIdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func _JobApplicationService_FindById_Handler(srv interface{}, ctx context.Contex
 		FullMethod: JobApplicationService_FindById_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(JobApplicationServiceServer).FindById(ctx, req.(*FindByIdRequest))
+		return srv.(JobApplicationServiceServer).FindById(ctx, req.(*FindJobApplicationByIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

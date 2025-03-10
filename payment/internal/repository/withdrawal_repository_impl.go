@@ -1,18 +1,18 @@
 package repository
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"gorm.io/gorm"
 )
 
-type RepositoryImpl struct{}
+type WithdrawalRepositoryImpl struct{}
 
-func NewRepository() *RepositoryImpl {
-	return &RepositoryImpl{}
+func NewWithdrawalRepository() *WithdrawalRepositoryImpl {
+	return &WithdrawalRepositoryImpl{}
 }
-func (withdrawalRepository *RepositoryImpl) FindAll(gormTransaction *gorm.DB) []model.Withdrawal {
+func (withdrawalRepository *WithdrawalRepositoryImpl) FindAll(gormTransaction *gorm.DB) []model.Withdrawal {
 	var withdrawalsModel []model.Withdrawal
 	err := gormTransaction.Model(&model.Withdrawal{}).
 		Preload("Worker").
@@ -24,12 +24,12 @@ func (withdrawalRepository *RepositoryImpl) FindAll(gormTransaction *gorm.DB) []
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return withdrawalsModel
 }
-func (withdrawalRepository *RepositoryImpl) Create(gormTransaction *gorm.DB, withdrawalModel *model.Withdrawal) {
+func (withdrawalRepository *WithdrawalRepositoryImpl) Create(gormTransaction *gorm.DB, withdrawalModel *model.Withdrawal) {
 	err := gormTransaction.Create(withdrawalModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (withdrawalRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, withdrawalId *uint64) (*model.Withdrawal, error) {
+func (withdrawalRepository *WithdrawalRepositoryImpl) FindById(gormTransaction *gorm.DB, withdrawalId *uint64) (*model.Withdrawal, error) {
 	var withdrawalsModel model.Withdrawal
 	err := gormTransaction.Model(&model.Withdrawal{}).
 		Preload("Worker").
@@ -41,7 +41,7 @@ func (withdrawalRepository *RepositoryImpl) FindById(gormTransaction *gorm.DB, w
 		First(&withdrawalsModel).Error
 	return &withdrawalsModel, err
 }
-func (withdrawalRepository *RepositoryImpl) Update(gormTransaction *gorm.DB, withdrawalModel *model.Withdrawal) {
+func (withdrawalRepository *WithdrawalRepositoryImpl) Update(gormTransaction *gorm.DB, withdrawalModel *model.Withdrawal) {
 	err := gormTransaction.Where("id = ?", withdrawalModel.ID).Updates(withdrawalModel).Error
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }

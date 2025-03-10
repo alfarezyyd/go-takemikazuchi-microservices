@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job_application";
 
-message FindByIdRequest {
+message FindJobApplicationByIdRequest {
   uint64 applicantId = 1;
   uint64 jobId = 2;
 }
@@ -17,5 +17,5 @@ message JobApplicationResponse {
 }
 
 service JobApplicationService {
-  rpc FindById(FindByIdRequest) returns (JobApplicationResponse);
+  rpc FindById(FindJobApplicationByIdRequest) returns (JobApplicationResponse);
 }

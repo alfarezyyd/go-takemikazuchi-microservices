@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	serviceName = "categoryService"
+	serviceName = "paymentService"
 	httpAddr    = ":7002"
 	consulAddr  = ":8500"
 	grpcAddr    = ":10002"

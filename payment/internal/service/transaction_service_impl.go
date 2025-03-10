@@ -86,7 +86,7 @@ func (transactionService *TransactionServiceImpl) Create(ctx context.Context, us
 		})
 
 		grpcJobApplicationClient := jobApplication.NewJobApplicationServiceClient(grpcJobConnection)
-		jobApplicationModel, err := grpcJobApplicationClient.FindById(ctx, &jobApplication.FindByIdRequest{
+		jobApplicationModel, err := grpcJobApplicationClient.FindById(ctx, &jobApplication.FindJobApplicationByIdRequest{
 			ApplicantId: createTransactionDto.ApplicantId,
 			JobId:       createTransactionDto.JobId,
 		})

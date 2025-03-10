@@ -8,10 +8,7 @@ CREATE TABLE withdrawals
     requested_at     TIMESTAMP                                           DEFAULT CURRENT_TIMESTAMP, -- Waktu request pencairan
     processed_at     TIMESTAMP                                  NULL,                               -- Waktu pencairan diproses (null jika masih pending)
     admin_id         BIGINT UNSIGNED                            NULL,                               -- Admin yang memproses pencairan (null jika belum diproses)
-    rejection_reason TEXT                                       NULL,                               -- Alasan penolakan jika statusnya 'Rejected'
+    rejection_reason TEXT                                       NULL                                -- Alasan penolakan jika statusnya 'Rejected'
 
     -- Relasi
-    FOREIGN KEY (worker_id) REFERENCES users (id) ON DELETE CASCADE,
-    FOREIGN KEY (wallet_id) REFERENCES worker_wallets (id) ON DELETE CASCADE,
-    FOREIGN KEY (admin_id) REFERENCES users (id) ON DELETE SET NULL
 );
