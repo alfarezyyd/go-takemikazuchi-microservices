@@ -96,6 +96,7 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 			userAddress.ID = queryResponse.Id
 		}
+		fmt.Println("CHECKPOINT 3")
 		isCategoryExists, err := categoryGrpcClient.IsCategoryExists(ctx, &category.SearchCategoryRequest{CategoryId: createJobDto.CategoryId})
 		if err != nil {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
@@ -105,6 +106,7 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 		jobModel.UserId = userModel.ID
 		jobModel.AddressId = userAddress.ID
 		jobService.jobRepository.Store(&jobModel, gormTransaction)
+		fmt.Println("CHECKPOINT 4")
 		//uuidString := uuid.New().String()
 		//var allFileName []string
 		//for _, uploadedFile := range uploadedFiles {

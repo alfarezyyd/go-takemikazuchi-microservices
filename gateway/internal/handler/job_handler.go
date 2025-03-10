@@ -46,6 +46,7 @@ func (jobHandler *JobHandler) Create(ginContext *gin.Context) {
 	createJobGrpc := mapper.MapCreateJobDtoIntoCreateJobGrpc(&createJobDto)
 	createJobGrpc.UserJwtClaim = mapper.MapUserJwtClaimIntoUserJwtClaimGrpc(userJwtClaim)
 	_, clientError := jobClient.HandleCreate(timeoutCtx, createJobGrpc)
+	fmt.Println(clientError)
 	exception.ParseGrpcError(clientError)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
 }

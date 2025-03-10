@@ -9,7 +9,6 @@ import (
 )
 
 func CheckErrorOperation(indicatedError error, clientError *exception.ClientError) bool {
-	fmt.Println(indicatedError)
 	if indicatedError != nil {
 		panic(clientError)
 		return true
@@ -52,4 +51,11 @@ func ParseNullableValue(value interface{}) string {
 func GenerateOneTimePasswordToken() string {
 	num := rand.Intn(9000) + 1000
 	return strconv.Itoa(num)
+}
+
+func SafeDereference(ptr *string, defaultValue string) string {
+	if ptr == nil {
+		return defaultValue
+	}
+	return *ptr
 }
