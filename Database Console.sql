@@ -51,6 +51,7 @@ USE go_takemikazuchi_microservices_categories;
 USE go_takemikazuchi_microservices_jobs;
 USE go_takemikazuchi_microservices_workers;
 SELECT * FROM jobs;
+SELECT * FROM categories;
 
 SELECT *
 FROM jobs;
@@ -60,7 +61,7 @@ SELECT *
 FROM users;
 UPDATE users
 SET role = 'Admin'
-WHERE id = 19;
+WHERE id = 27;
 SELECT *
 FROM users;
 

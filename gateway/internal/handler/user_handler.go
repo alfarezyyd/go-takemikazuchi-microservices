@@ -44,7 +44,7 @@ func (userHandler *UserHandler) Register(ginContext *gin.Context) {
 	_, err = userClient.HandleRegister(timeoutCtx, &createUserRequest)
 	fmt.Println(err)
 	if err != nil {
-		exception.ParseGrpcError(ginContext, err)
+		exception.ParseGrpcError(err)
 		return
 	}
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User created successfully", nil))
@@ -81,7 +81,7 @@ func (userHandler *UserHandler) Login(ginContext *gin.Context) {
 		Password:       loginUserDto.Password,
 	})
 	if err != nil {
-		exception.ParseGrpcError(ginContext, err)
+		exception.ParseGrpcError(err)
 		return
 	}
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("User logged successfully", gin.H{

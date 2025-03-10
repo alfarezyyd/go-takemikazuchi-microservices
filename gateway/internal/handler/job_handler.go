@@ -46,7 +46,7 @@ func (jobHandler *JobHandler) Create(ginContext *gin.Context) {
 	createJobGrpc := mapper.MapCreateJobDtoIntoCreateJobGrpc(&createJobDto)
 	createJobGrpc.UserJwtClaim = mapper.MapUserJwtClaimIntoUserJwtClaimGrpc(userJwtClaim)
 	_, clientError := jobClient.HandleCreate(timeoutCtx, createJobGrpc)
-	exception.ParseGrpcError(ginContext, clientError)
+	exception.ParseGrpcError(clientError)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
 }
 
@@ -70,7 +70,7 @@ func (jobHandler *JobHandler) Update(ginContext *gin.Context) {
 	createJobGrpc.UserJwtClaim = mapper.MapUserJwtClaimIntoUserJwtClaimGrpc(userJwtClaim)
 	createJobGrpc.JobId = jobId
 	_, clientError := jobClient.HandleUpdate(timeoutCtx, createJobGrpc)
-	exception.ParseGrpcError(ginContext, clientError)
+	exception.ParseGrpcError(clientError)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", nil))
 }
 
@@ -86,7 +86,7 @@ func (jobHandler *JobHandler) Delete(ginContext *gin.Context) {
 		UserJwtClaim: mapper.MapUserJwtClaimIntoUserJwtClaimGrpc(userJwtClaim),
 		JobId:        jobId,
 	})
-	exception.ParseGrpcError(ginContext, clientError)
+	exception.ParseGrpcError(clientError)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Success", nil))
 }
 

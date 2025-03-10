@@ -45,6 +45,6 @@ func (workerHandler *WorkerHandler) Register(ginContext *gin.Context) {
 	createWorkerRequest := mapper.MapCreateWorkerDtoIntoCreateWorkerRequest(createWorkerDto)
 	createWorkerRequest.UserJwtClaim = mapper.MapUserJwtClaimIntoUserJwtClaimGrpc(userJwtClaim)
 	_, err = workerServiceClient.Create(timeoutBackground, createWorkerRequest)
-	exception.ParseGrpcError(ginContext, err)
+	exception.ParseGrpcError(err)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
 }

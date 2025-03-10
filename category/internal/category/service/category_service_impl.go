@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/repository"
 	categoryDto "github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
@@ -60,7 +59,7 @@ func (categoryService *CategoryServiceImpl) HandleCreate(ctx context.Context, us
 		})
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {
-			return exception.NewClientError(http.StatusUnauthorized, exception.ErrUnauthorized, errors.New("only admin can create a category"))
+			return exception.NewClientError(http.StatusUnauthorized, "Only admin can create a category", errors.New("only admin can create a category"))
 		}
 		mapper.MapCategoryDtoIntoCategoryModel(&categoryModel, categoryCreateDto)
 		err = gormTransaction.Create(&categoryModel).Error

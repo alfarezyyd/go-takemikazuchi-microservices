@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
@@ -12,6 +13,7 @@ import (
 
 func MapCategoryDtoIntoCategoryModel[T *dto.CreateCategoryDto | *dto.UpdateCategoryDto](categoryModel *model.Category, categoryDto T) {
 	err := mapstructure.Decode(categoryDto, &categoryModel)
+	fmt.Print(err)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 }
 func MapCategoryModelIntoCategoryResponse(categoryModel *model.Category) *category.QueryCategoryResponse {

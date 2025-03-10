@@ -70,8 +70,8 @@ func (userHandler *UserHandler) HandleGoogleCallback(ctx context.Context, google
 
 func (userHandler *UserHandler) FindByIdentifier(ctx context.Context, userIdentifier *grpcUser.UserIdentifier) (*grpcUser.QueryUserResponse, error) {
 	userResponseDto := userHandler.userService.FindByIdentifier(&dto.UserIdentifierDto{
-		Email:       userIdentifier.Email,
-		PhoneNumber: userIdentifier.PhoneNumber,
+		Email:       *userIdentifier.Email,
+		PhoneNumber: *userIdentifier.PhoneNumber,
 	})
 	return mapper.MapUserResponseIntoQueryUserResponse(userResponseDto), nil
 }

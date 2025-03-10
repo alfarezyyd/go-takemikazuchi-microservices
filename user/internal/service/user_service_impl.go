@@ -184,6 +184,7 @@ func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequ
 
 func (userService *UserServiceImpl) FindByIdentifier(userIdentifierDto *dto.UserIdentifierDto) *dto.UserResponseDto {
 	err := userService.validatorService.ValidateStruct(userIdentifierDto)
+	fmt.Println(err)
 	userService.validatorService.ParseValidationError(err)
 
 	var userModel model.User

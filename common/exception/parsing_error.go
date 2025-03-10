@@ -2,8 +2,6 @@ package exception
 
 import (
 	"errors"
-	"fmt"
-	"github.com/gin-gonic/gin"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
@@ -66,7 +64,7 @@ func ParseValidationError(validationError error, engTranslator ut.Translator) {
 	}
 }
 
-func ParseGrpcError(ginContext *gin.Context, err error) {
+func ParseGrpcError(err error) {
 	if err != nil {
 		// Cek apakah error berasal dari gRPC
 		statusRequest, ok := status.FromError(err)
@@ -101,18 +99,9 @@ func ParseGrpcError(ginContext *gin.Context, err error) {
 			default:
 				httpStatus = http.StatusInternalServerError // 500
 			}
-
-			// Kirim response HTTP berdasarkan error gRPC
-			ginContext.JSON(httpStatus, gin.H{
-				"status":  httpStatus,
-				"message": statusRequest.Message(),
-			})
+			panic(NewClientError(httpStatus, statusRequest.Message(), nil))
 		} else {
-			// Jika error tidak dikenali, gunakan 500 Internal Server Error
-			ginContext.JSON(http.StatusInternalServerError, gin.H{
-				"status":  http.StatusInternalServerError,
-				"message": fmt.Sprintf("Unexpected error: %v", err),
-			})
+			panic(NewClientError(http.StatusInternalServerError, err.Error(), nil))
 		}
 	}
 }

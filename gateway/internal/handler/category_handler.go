@@ -52,7 +52,7 @@ func (categoryHandler *CategoryHandler) Create(ginContext *gin.Context) {
 			PhoneNumber: userJwtClaim.PhoneNumber,
 		}})
 
-	exception.ParseGrpcError(ginContext, clientError)
+	exception.ParseGrpcError(clientError)
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Category has been created", nil))
 }
 
@@ -77,7 +77,7 @@ func (categoryHandler *CategoryHandler) Update(ginContext *gin.Context) {
 		},
 	},
 	)
-	exception.ParseGrpcError(ginContext, clientError)
+	exception.ParseGrpcError(clientError)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Category has been updated", nil))
 }
 
@@ -95,6 +95,6 @@ func (categoryHandler *CategoryHandler) Delete(ginContext *gin.Context) {
 			Email:       userJwtClaim.Email,
 			PhoneNumber: userJwtClaim.PhoneNumber,
 		}})
-	exception.ParseGrpcError(ginContext, clientError)
+	exception.ParseGrpcError(clientError)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Category has been deleted", nil))
 }
