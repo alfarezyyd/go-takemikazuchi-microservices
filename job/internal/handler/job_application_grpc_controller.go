@@ -1,36 +1,47 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	jobApplication "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job_application"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/internal/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto"
 	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"net/http"
 )
 
-type Handler struct {
-	jobApplicationService service.Service
+type JobApplicationHandler struct {
+	jobApplicationService service.JobApplicationService
+	jobApplication.UnimplementedJobApplicationServiceServer
 }
 
-func NewHandler(
-	jobApplicationService service.Service,
-) *Handler {
-	return &Handler{
+func NewJobApplicationHandler(grpcServer *grpc.Server, jobApplicationService service.JobApplicationService,
+) *JobApplicationHandler {
+	jobApplicationHandler := &JobApplicationHandler{
 		jobApplicationService: jobApplicationService,
 	}
+	jobApplication.RegisterJobApplicationServiceServer(grpcServer, jobApplicationHandler)
+	return jobApplicationHandler
 }
 
-func (jobApplicationHandler Handler) FindAllApplication(ginContext *gin.Context) {
+func (jobApplicationHandler *JobApplicationHandler) FindById(ctx context.Context, findIdByRequest *jobApplication.FindByIdRequest) (*jobApplication.JobApplicationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindById not implemented")
+}
+
+func (jobApplicationHandler *JobApplicationHandler) FindAllApplication(ginContext *gin.Context) {
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
 	jobId := ginContext.Param("jobId")
 	jobApplicationsResponseDto := jobApplicationHandler.jobApplicationService.FindAllApplication(userJwtClaim, jobId)
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Data retrieve successfully", jobApplicationsResponseDto))
 }
 
-func (jobApplicationHandler Handler) SelectApplication(ginContext *gin.Context) {
+func (jobApplicationHandler *JobApplicationHandler) SelectApplication(ginContext *gin.Context) {
 	var selectApplicationDto dto.SelectApplicationDto
 	err := ginContext.ShouldBindBodyWithJSON(&selectApplicationDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
@@ -39,7 +50,7 @@ func (jobApplicationHandler Handler) SelectApplication(ginContext *gin.Context) 
 	ginContext.JSON(http.StatusOK, helper.WriteSuccess("Application successfully selected", nil))
 }
 
-func (jobApplicationHandler Handler) Apply(ginContext *gin.Context) {
+func (jobApplicationHandler *JobApplicationHandler) Apply(ginContext *gin.Context) {
 	var applyJobApplication *dto.ApplyJobApplicationDto
 	err := ginContext.ShouldBindBodyWithJSON(&applyJobApplication)
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)

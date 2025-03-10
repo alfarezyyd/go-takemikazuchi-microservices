@@ -5,7 +5,7 @@ import (
 	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 )
 
-type Service interface {
+type JobApplicationService interface {
 	FindAllApplication(userJwtClaims *userDto.JwtClaimDto, jobId string) []*dto.JobApplicationResponseDto
 	HandleApply(userJwtClaims *userDto.JwtClaimDto, applyJobApplicationDto *dto.ApplyJobApplicationDto)
 	SelectApplication(userJwtClaims *userDto.JwtClaimDto, selectApplicationDto *dto.SelectApplicationDto)

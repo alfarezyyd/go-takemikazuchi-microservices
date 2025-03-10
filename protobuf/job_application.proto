@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job_application";
+
+message FindByIdRequest {
+  uint64 applicantId = 1;
+  uint64 jobId = 2;
+}
+
+message JobApplicationResponse {
+  uint64 ID = 1;
+  uint64 JobId = 2;
+  uint64 ApplicantId = 3;
+  string Status = 4;
+  string CreatedAt = 5;
+  string UpdatedAt = 6;
+}
+
+service JobApplicationService {
+  rpc FindById(FindByIdRequest) returns (JobApplicationResponse);
+}
