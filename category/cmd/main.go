@@ -76,7 +76,6 @@ func main() {
 		DatabasePassword: viperConfig.GetString("DATABASE_PASSWORD"),
 		DatabaseUsername: viperConfig.GetString("DATABASE_USERNAME"),
 	}
-	fmt.Println(databaseCredentials)
 	databaseInstance := configs.NewDatabaseConnection(databaseCredentials)
 	databaseConnection := databaseInstance.GetDatabaseConnection()
 	categoryRepositoryInstance := categoryRepository.NewRepository()

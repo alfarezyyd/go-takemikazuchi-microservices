@@ -70,6 +70,7 @@ func (userService *UserServiceImpl) HandleRegister(createUserDto *dto.CreateUser
 		return nil
 	})
 	gormError := exception.ParseGormError(err)
+	fmt.Println(gormError)
 	if gormError != nil {
 		return exception.ParseIntoGrpcError(gormError)
 	}

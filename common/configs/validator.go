@@ -180,7 +180,6 @@ func conditionalRequired(fieldLevel validator.FieldLevel) bool {
 	currentValue := fieldLevel.Field()
 	relatedValue := relatedField
 
-	fmt.Println(fieldName, currentValue, relatedValue)
 	// Jika relatedField kosong, maka field ini wajib diisi
 	return relatedValue.String() != "" || currentValue.String() != ""
 }
