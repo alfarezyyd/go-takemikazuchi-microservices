@@ -55,5 +55,5 @@ func (categoryHandler *CategoryHandler) IsCategoryExists(ctx context.Context, se
 }
 
 func (categoryHandler *CategoryHandler) FindById(ctx context.Context, searchCategoryRequest *grpcCategory.SearchCategoryRequest) (*grpcCategory.QueryCategoryResponse, error) {
-	return categoryHandler.categoryService.FindById, nil
+	return categoryHandler.categoryService.FindById(searchCategoryRequest.CategoryId), nil
 }

@@ -8,7 +8,6 @@ package category
 
 import (
 	context "context"
-	user "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -38,7 +37,7 @@ type CategoryServiceClient interface {
 	HandleUpdate(ctx context.Context, in *UpdateCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	HandleDelete(ctx context.Context, in *DeleteCategoryRequest, opts ...grpc.CallOption) (*CommandCategoryResponse, error)
 	IsCategoryExists(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*CategoryExistsResponse, error)
-	FindById(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*user.QueryUserResponse, error)
+	FindById(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*QueryCategoryResponse, error)
 }
 
 type categoryServiceClient struct {
@@ -99,9 +98,9 @@ func (c *categoryServiceClient) IsCategoryExists(ctx context.Context, in *Search
 	return out, nil
 }
 
-func (c *categoryServiceClient) FindById(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*user.QueryUserResponse, error) {
+func (c *categoryServiceClient) FindById(ctx context.Context, in *SearchCategoryRequest, opts ...grpc.CallOption) (*QueryCategoryResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(user.QueryUserResponse)
+	out := new(QueryCategoryResponse)
 	err := c.cc.Invoke(ctx, CategoryService_FindById_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -118,7 +117,7 @@ type CategoryServiceServer interface {
 	HandleUpdate(context.Context, *UpdateCategoryRequest) (*CommandCategoryResponse, error)
 	HandleDelete(context.Context, *DeleteCategoryRequest) (*CommandCategoryResponse, error)
 	IsCategoryExists(context.Context, *SearchCategoryRequest) (*CategoryExistsResponse, error)
-	FindById(context.Context, *SearchCategoryRequest) (*user.QueryUserResponse, error)
+	FindById(context.Context, *SearchCategoryRequest) (*QueryCategoryResponse, error)
 	mustEmbedUnimplementedCategoryServiceServer()
 }
 
@@ -144,7 +143,7 @@ func (UnimplementedCategoryServiceServer) HandleDelete(context.Context, *DeleteC
 func (UnimplementedCategoryServiceServer) IsCategoryExists(context.Context, *SearchCategoryRequest) (*CategoryExistsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsCategoryExists not implemented")
 }
-func (UnimplementedCategoryServiceServer) FindById(context.Context, *SearchCategoryRequest) (*user.QueryUserResponse, error) {
+func (UnimplementedCategoryServiceServer) FindById(context.Context, *SearchCategoryRequest) (*QueryCategoryResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindById not implemented")
 }
 func (UnimplementedCategoryServiceServer) mustEmbedUnimplementedCategoryServiceServer() {}

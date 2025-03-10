@@ -1,13 +1,12 @@
 package service
 
 import (
-	"go-takemikazuchi-microservices/internal/model"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/internal/withdrawal/dto"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 )
 
-type Service interface {
-	Create(userJwtClaims *userDto.JwtClaimDto, createWithdrawalDto *dto.CreateWithdrawalDto)
+type WithdrawalService interface {
+	Create(userJwtClaims *userDto.JwtClaimDto, createWithdrawalDto *userDto.CreateWithdrawalDto)
 	FindAll(userJwtClaims *userDto.JwtClaimDto) []model.Withdrawal
 	Update(claim *userDto.JwtClaimDto, withdrawalId *string)
 }

@@ -19,9 +19,9 @@ import (
 
 var (
 	serviceName = "paymentService"
-	httpAddr    = ":7002"
+	httpAddr    = ":7005"
 	consulAddr  = ":8500"
-	grpcAddr    = ":10002"
+	grpcAddr    = ":10005"
 )
 
 func main() {

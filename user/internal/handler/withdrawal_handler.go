@@ -2,20 +2,19 @@ package handler
 
 import (
 	"errors"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/payment/internal/service"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/service"
+	userDto "github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
-	userDto "go-takemikazuchi-microservices/internal/user/dto"
-	"go-takemikazuchi-microservices/internal/withdrawal/dto"
-	"go-takemikazuchi-microservices/pkg/exception"
-	"go-takemikazuchi-microservices/pkg/helper"
 	"net/http"
 )
 
 type Handler struct {
-	withdrawalService service.Service
+	withdrawalService service.WithdrawalService
 }
 
-func NewHandler(withdrawalService service.Service) *Handler {
+func NewHandler(withdrawalService service.WithdrawalService) *Handler {
 	return &Handler{
 		withdrawalService: withdrawalService,
 	}
@@ -28,7 +27,7 @@ func (withdrawalHandler *Handler) FindAll(ginContext *gin.Context) {
 }
 
 func (withdrawalHandler *Handler) Create(ginContext *gin.Context) {
-	var createWithdrawalDto dto.CreateWithdrawalDto
+	var createWithdrawalDto userDto.CreateWithdrawalDto
 	err := ginContext.ShouldBindBodyWithJSON(&createWithdrawalDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("error parsing body")))
 	userJwtClaim := ginContext.MustGet("claims").(*userDto.JwtClaimDto)
