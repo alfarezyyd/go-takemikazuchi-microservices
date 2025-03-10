@@ -65,12 +65,11 @@ func (jobRepository *JobRepositoryImpl) VerifyJobWorker(gormTransaction *gorm.DB
 	return isJobValid, err
 }
 
-func (jobRepository *JobRepositoryImpl) FindVerifyById(gormTransaction *gorm.DB, userEmail *string, jobId *uint64) (*model.Job, error) {
+func (jobRepository *JobRepositoryImpl) FindVerifyById(gormTransaction *gorm.DB, userId *uint64, jobId *uint64) (*model.Job, error) {
 	var jobModel model.Job
 	err := gormTransaction.Model(&model.Job{}).
-		Joins("JOIN users ON users.id = jobs.user_id").
-		Select("jobs.*").
-		Where("jobs.id = ? AND users.email = ?", jobId, userEmail).
+		Select("*").
+		Where("id = ? AND user_id = ?", jobId, userId).
 		First(&jobModel).Error
 	return &jobModel, err
 }

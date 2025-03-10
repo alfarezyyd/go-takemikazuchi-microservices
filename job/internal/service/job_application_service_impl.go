@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
@@ -77,8 +76,6 @@ func (jobApplicationService *JobApplicationServiceImpl) HandleApply(ctx context.
 			Email:       helper.SafeDereference(userJwtClaims.Email, ""),
 			PhoneNumber: helper.SafeDereference(userJwtClaims.PhoneNumber, ""),
 		})
-		fmt.Println(userJwtClaims.PhoneNumber)
-		fmt.Println(err)
 		exception.ParseGrpcError(err)
 		isJobExists := jobApplicationService.jobRepository.IsExists(applyJobApplicationDto.JobId, gormTransaction)
 		if !isJobExists {
@@ -93,12 +90,20 @@ func (jobApplicationService *JobApplicationServiceImpl) HandleApply(ctx context.
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
 
-func (jobApplicationService *JobApplicationServiceImpl) SelectApplication(userJwtClaims *userDto.JwtClaimDto, selectApplicationDto *dto.SelectApplicationDto) {
+func (jobApplicationService *JobApplicationServiceImpl) SelectApplication(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, selectApplicationDto *dto.SelectApplicationDto) {
 	err := jobApplicationService.validatorService.ValidateStruct(selectApplicationDto)
 	jobApplicationService.validatorService.ParseValidationError(err)
 	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		jobApplicationModel := jobApplicationService.jobApplicationRepository.FindById(gormTransaction, &selectApplicationDto.UserId, &selectApplicationDto.JobId)
-		id, err := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, userJwtClaims.Email, &selectApplicationDto.JobId)
+		userGrpcConnection, err := discovery.ServiceConnection(ctx, "userService", jobApplicationService.serviceDiscovery)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+		userAddressGrpcClient := user.NewUserServiceClient(userGrpcConnection)
+		identifier, err := userAddressGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
+			Email:       helper.SafeDereference(userJwtClaims.Email, ""),
+			PhoneNumber: helper.SafeDereference(userJwtClaims.PhoneNumber, ""),
+		})
+		exception.ParseGrpcError(err)
+		id, err := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, &identifier.ID, &selectApplicationDto.JobId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		jobModel := id
 		jobModel.Status = "Process"

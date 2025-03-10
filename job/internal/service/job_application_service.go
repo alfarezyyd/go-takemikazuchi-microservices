@@ -9,5 +9,5 @@ import (
 type JobApplicationService interface {
 	FindAllApplication(userJwtClaims *userDto.JwtClaimDto, jobId string) []*dto.JobApplicationResponseDto
 	HandleApply(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, applyJobApplicationDto *dto.ApplyJobApplicationDto)
-	SelectApplication(userJwtClaims *userDto.JwtClaimDto, selectApplicationDto *dto.SelectApplicationDto)
+	SelectApplication(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, selectApplicationDto *dto.SelectApplicationDto)
 }

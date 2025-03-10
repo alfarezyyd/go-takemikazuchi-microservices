@@ -128,8 +128,17 @@ func (jobService *JobServiceImpl) FindById(ctx context.Context, userEmail *strin
 	var jobModel *model.Job
 	var err error
 	err = jobService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		jobModel, err = jobService.jobRepository.FindVerifyById(gormTransaction, userEmail, jobId)
-		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+
+		userGrpcConnection, err := discovery.ServiceConnection(ctx, "userService", jobService.serviceDiscovery)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+		userAddressGrpcClient := user.NewUserServiceClient(userGrpcConnection)
+		identifier, err := userAddressGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
+			Email:       helper.SafeDereference(userEmail, ""),
+			PhoneNumber: helper.SafeDereference(userEmail, ""),
+		})
+		exception.ParseGrpcError(err)
+		jobModel, err = jobService.jobRepository.FindVerifyById(gormTransaction, &identifier.ID, jobId)
+
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

@@ -32,8 +32,14 @@ func (jobApplicationHandler *JobApplicationHandler) FindById(ctx context.Context
 func (jobApplicationHandler *JobApplicationHandler) FindAllApplication(ctx context.Context, findAllApplicationRequest *jobApplication.FindAllApplicationRequest) (*jobApplication.JobApplicationResponses, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindAllApplication not implemented")
 }
-func (jobApplicationHandler *JobApplicationHandler) SelectApplication(context.Context, *jobApplication.SelectApplicationRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SelectApplication not implemented")
+func (jobApplicationHandler *JobApplicationHandler) SelectApplication(ctx context.Context, selectApplicationRequest *jobApplication.SelectApplicationRequest) (*emptypb.Empty, error) {
+	jobApplicationHandler.jobApplicationService.SelectApplication(ctx,
+		mapper.MapUserJwtClaimGrpcIntoUserJwtClaim(selectApplicationRequest.UserJwtClaim),
+		&dto.SelectApplicationDto{
+			UserId: selectApplicationRequest.UserId,
+			JobId:  selectApplicationRequest.JobId,
+		})
+	return nil, nil
 }
 func (jobApplicationHandler *JobApplicationHandler) HandleApply(ctx context.Context, jobApplicationApplyRequest *jobApplication.ApplyRequest) (*emptypb.Empty, error) {
 	jobApplicationHandler.jobApplicationService.HandleApply(ctx, mapper.MapUserJwtClaimGrpcIntoUserJwtClaim(jobApplicationApplyRequest.UserJwtClaim), &dto.ApplyJobApplicationDto{
