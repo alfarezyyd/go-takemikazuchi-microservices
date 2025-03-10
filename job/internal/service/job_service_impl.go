@@ -76,8 +76,8 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 		categoryGrpcClient := category.NewCategoryServiceClient(categoryServiceConnection)
 		userGrpcClient := user.NewUserServiceClient(userGrpcConnection)
 		userModel, err := userGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
-			Email:       userJwtClaims.Email,
-			PhoneNumber: userJwtClaims.PhoneNumber,
+			Email:       helper.SafeDereference(userJwtClaims.Email, ""),
+			PhoneNumber: helper.SafeDereference(userJwtClaims.PhoneNumber, ""),
 		})
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 		if createJobDto.AddressId == nil {

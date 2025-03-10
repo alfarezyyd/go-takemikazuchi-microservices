@@ -8,25 +8,28 @@ import (
 )
 
 type ProtectedRoutes struct {
-	routerGroup        *gin.RouterGroup
-	categoryController handler.CategoryController
-	jobController      handler.JobController
-	viperConfig        *viper.Viper
-	workerController   handler.WorkerController
+	routerGroup              *gin.RouterGroup
+	categoryController       handler.CategoryController
+	jobController            handler.JobController
+	viperConfig              *viper.Viper
+	workerController         handler.WorkerController
+	jobApplicationController handler.JobApplicationController
 }
 
 func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 	categoryController handler.CategoryController,
 	jobController handler.JobController,
 	workerController handler.WorkerController,
+	jobApplicationController handler.JobApplicationController,
 	viperConfig *viper.Viper,
 ) *ProtectedRoutes {
 	routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	return &ProtectedRoutes{
-		routerGroup:        routerGroup,
-		jobController:      jobController,
-		categoryController: categoryController,
-		workerController:   workerController,
+		routerGroup:              routerGroup,
+		jobController:            jobController,
+		categoryController:       categoryController,
+		workerController:         workerController,
+		jobApplicationController: jobApplicationController,
 	}
 }
 
@@ -44,5 +47,11 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 
 	workerRouterGroup := protectedRoutes.routerGroup.Group("workers")
 	workerRouterGroup.POST("", protectedRoutes.workerController.Register)
+
+	jobApplicationRouterGroup := protectedRoutes.routerGroup.Group("job-applications")
+	jobApplicationRouterGroup.POST("", protectedRoutes.jobApplicationController.Apply)
+	jobApplicationRouterGroup.POST("/", protectedRoutes.jobApplicationController.SelectApplication)
+	jobApplicationRouterGroup.GET("/:jobId", protectedRoutes.jobApplicationController.FindAllApplication)
+	jobApplicationRouterGroup.POST("/select", protectedRoutes.jobApplicationController.SelectApplication)
 
 }

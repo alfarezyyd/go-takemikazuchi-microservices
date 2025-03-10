@@ -1,8 +1,12 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -22,6 +26,7 @@ type JobApplicationServiceImpl struct {
 	jobApplicationRepository repository.JobApplicationRepository
 	dbConnection             *gorm.DB
 	jobRepository            repository.JobRepository
+	serviceDiscovery         discovery.ServiceRegistry
 }
 
 func NewJobApplicationService(
@@ -31,12 +36,15 @@ func NewJobApplicationService(
 	dbConnection *gorm.DB,
 	jobRepository repository.JobRepository,
 	validatorService validatorFeature.Service,
+	serviceDiscovery discovery.ServiceRegistry,
+
 ) *JobApplicationServiceImpl {
 	return &JobApplicationServiceImpl{
 		validatorService:         validatorService,
 		jobApplicationRepository: jobApplicationRepository,
 		dbConnection:             dbConnection,
 		jobRepository:            jobRepository,
+		serviceDiscovery:         serviceDiscovery,
 	}
 }
 
@@ -57,13 +65,21 @@ func (jobApplicationService *JobApplicationServiceImpl) FindAllApplication(userJ
 	return jobApplicationsResponse
 }
 
-func (jobApplicationService *JobApplicationServiceImpl) HandleApply(userJwtClaims *userDto.JwtClaimDto, applyJobApplicationDto *dto.ApplyJobApplicationDto) {
+func (jobApplicationService *JobApplicationServiceImpl) HandleApply(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, applyJobApplicationDto *dto.ApplyJobApplicationDto) {
 	err := jobApplicationService.validatorService.ValidateStruct(applyJobApplicationDto)
 	jobApplicationService.validatorService.ParseValidationError(err)
 	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		var userModel model.User
 		var jobApplicationModel model.JobApplication
-		//jobApplicationService.userRepository.FindUserByEmail(userJwtClaims.Email, &userModel, gormTransaction)
+		userGrpcConnection, err := discovery.ServiceConnection(ctx, "userService", jobApplicationService.serviceDiscovery)
+		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
+		userAddressGrpcClient := user.NewUserServiceClient(userGrpcConnection)
+		userModel, err := userAddressGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
+			Email:       helper.SafeDereference(userJwtClaims.Email, ""),
+			PhoneNumber: helper.SafeDereference(userJwtClaims.PhoneNumber, ""),
+		})
+		fmt.Println(userJwtClaims.PhoneNumber)
+		fmt.Println(err)
+		exception.ParseGrpcError(err)
 		isJobExists := jobApplicationService.jobRepository.IsExists(applyJobApplicationDto.JobId, gormTransaction)
 		if !isJobExists {
 			exception.ThrowClientError(exception.NewClientError(http.StatusNotFound, exception.ErrNotFound, errors.New("job not exists")))

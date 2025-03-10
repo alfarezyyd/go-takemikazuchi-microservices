@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,7 +20,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	JobApplicationService_FindById_FullMethodName = "/JobApplicationService/FindById"
+	JobApplicationService_FindById_FullMethodName           = "/JobApplicationService/FindById"
+	JobApplicationService_FindAllApplication_FullMethodName = "/JobApplicationService/FindAllApplication"
+	JobApplicationService_SelectApplication_FullMethodName  = "/JobApplicationService/SelectApplication"
+	JobApplicationService_HandleApply_FullMethodName        = "/JobApplicationService/HandleApply"
 )
 
 // JobApplicationServiceClient is the client API for JobApplicationService service.
@@ -27,6 +31,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type JobApplicationServiceClient interface {
 	FindById(ctx context.Context, in *FindJobApplicationByIdRequest, opts ...grpc.CallOption) (*JobApplicationResponse, error)
+	FindAllApplication(ctx context.Context, in *FindAllApplicationRequest, opts ...grpc.CallOption) (*JobApplicationResponses, error)
+	SelectApplication(ctx context.Context, in *SelectApplicationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	HandleApply(ctx context.Context, in *ApplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type jobApplicationServiceClient struct {
@@ -47,11 +54,44 @@ func (c *jobApplicationServiceClient) FindById(ctx context.Context, in *FindJobA
 	return out, nil
 }
 
+func (c *jobApplicationServiceClient) FindAllApplication(ctx context.Context, in *FindAllApplicationRequest, opts ...grpc.CallOption) (*JobApplicationResponses, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(JobApplicationResponses)
+	err := c.cc.Invoke(ctx, JobApplicationService_FindAllApplication_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *jobApplicationServiceClient) SelectApplication(ctx context.Context, in *SelectApplicationRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, JobApplicationService_SelectApplication_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *jobApplicationServiceClient) HandleApply(ctx context.Context, in *ApplyRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, JobApplicationService_HandleApply_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // JobApplicationServiceServer is the server API for JobApplicationService service.
 // All implementations must embed UnimplementedJobApplicationServiceServer
 // for forward compatibility.
 type JobApplicationServiceServer interface {
 	FindById(context.Context, *FindJobApplicationByIdRequest) (*JobApplicationResponse, error)
+	FindAllApplication(context.Context, *FindAllApplicationRequest) (*JobApplicationResponses, error)
+	SelectApplication(context.Context, *SelectApplicationRequest) (*emptypb.Empty, error)
+	HandleApply(context.Context, *ApplyRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedJobApplicationServiceServer()
 }
 
@@ -64,6 +104,15 @@ type UnimplementedJobApplicationServiceServer struct{}
 
 func (UnimplementedJobApplicationServiceServer) FindById(context.Context, *FindJobApplicationByIdRequest) (*JobApplicationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindById not implemented")
+}
+func (UnimplementedJobApplicationServiceServer) FindAllApplication(context.Context, *FindAllApplicationRequest) (*JobApplicationResponses, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindAllApplication not implemented")
+}
+func (UnimplementedJobApplicationServiceServer) SelectApplication(context.Context, *SelectApplicationRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SelectApplication not implemented")
+}
+func (UnimplementedJobApplicationServiceServer) HandleApply(context.Context, *ApplyRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method HandleApply not implemented")
 }
 func (UnimplementedJobApplicationServiceServer) mustEmbedUnimplementedJobApplicationServiceServer() {}
 func (UnimplementedJobApplicationServiceServer) testEmbeddedByValue()                               {}
@@ -104,6 +153,60 @@ func _JobApplicationService_FindById_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _JobApplicationService_FindAllApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindAllApplicationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobApplicationServiceServer).FindAllApplication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobApplicationService_FindAllApplication_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobApplicationServiceServer).FindAllApplication(ctx, req.(*FindAllApplicationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _JobApplicationService_SelectApplication_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SelectApplicationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobApplicationServiceServer).SelectApplication(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobApplicationService_SelectApplication_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobApplicationServiceServer).SelectApplication(ctx, req.(*SelectApplicationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _JobApplicationService_HandleApply_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ApplyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobApplicationServiceServer).HandleApply(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobApplicationService_HandleApply_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobApplicationServiceServer).HandleApply(ctx, req.(*ApplyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // JobApplicationService_ServiceDesc is the grpc.ServiceDesc for JobApplicationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +217,18 @@ var JobApplicationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindById",
 			Handler:    _JobApplicationService_FindById_Handler,
+		},
+		{
+			MethodName: "FindAllApplication",
+			Handler:    _JobApplicationService_FindAllApplication_Handler,
+		},
+		{
+			MethodName: "SelectApplication",
+			Handler:    _JobApplicationService_SelectApplication_Handler,
+		},
+		{
+			MethodName: "HandleApply",
+			Handler:    _JobApplicationService_HandleApply_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

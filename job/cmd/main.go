@@ -90,7 +90,7 @@ func main() {
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
 
 	jobService := service.NewJobService(jobRepository, databaseConnection, nil, validatorService, consulServiceRegistry)
-	jobApplicationService := service.NewJobApplicationService(validatorInstance, engTranslator, jobApplicationRepository, databaseConnection, jobRepository, validatorService)
+	jobApplicationService := service.NewJobApplicationService(validatorInstance, engTranslator, jobApplicationRepository, databaseConnection, jobRepository, validatorService, consulServiceRegistry)
 	handler.NewJobHandler(grpcServer, jobService)
 	handler.NewJobApplicationHandler(grpcServer, jobApplicationService)
 

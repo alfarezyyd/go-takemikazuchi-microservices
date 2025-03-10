@@ -55,6 +55,10 @@ SELECT * FROM categories;
 
 SELECT *
 FROM jobs;
+
+SELECT *
+FROM job_applications;
+DELETE FROM job_applications;
 SELECT *
 FROM categories;
 SELECT *

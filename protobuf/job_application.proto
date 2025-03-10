@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+import "user.proto";
+import "google/protobuf/empty.proto";
 option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job_application";
 
 message FindJobApplicationByIdRequest {
@@ -16,6 +18,30 @@ message JobApplicationResponse {
   string UpdatedAt = 6;
 }
 
+message FindAllApplicationRequest{
+  UserJwtClaim UserJwtClaim = 1;
+  string JobId = 2;
+}
+
+message SelectApplicationRequest {
+  UserJwtClaim UserJwtClaim = 1;
+  uint64 UserId = 2;
+  uint64 JobId = 3;
+}
+
+
+message JobApplicationResponses {
+  repeated JobApplicationResponse JobApplicationResponses = 1;
+}
+
+message ApplyRequest {
+  UserJwtClaim UserJwtClaim = 1;
+  uint64 JobId = 2;
+}
+
 service JobApplicationService {
   rpc FindById(FindJobApplicationByIdRequest) returns (JobApplicationResponse);
+  rpc FindAllApplication(FindAllApplicationRequest) returns (JobApplicationResponses);
+  rpc SelectApplication(SelectApplicationRequest) returns (google.protobuf.Empty);
+  rpc HandleApply(ApplyRequest) returns (google.protobuf.Empty);
 }

@@ -64,8 +64,8 @@ message PayloadResponse {
 }
 
 message UserIdentifier {
-  optional string Email = 1;
-  optional string PhoneNumber = 2;
+  string Email = 1;
+  string PhoneNumber = 2;
 }
 
 
