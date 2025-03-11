@@ -14,6 +14,7 @@ type ProtectedRoutes struct {
 	viperConfig              *viper.Viper
 	workerController         handler.WorkerController
 	jobApplicationController handler.JobApplicationController
+	transactionController    handler.TransactionController
 }
 
 func NewProtectedRoutes(routerGroup *gin.RouterGroup,
@@ -22,6 +23,7 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 	workerController handler.WorkerController,
 	jobApplicationController handler.JobApplicationController,
 	viperConfig *viper.Viper,
+	transactionController handler.TransactionController,
 ) *ProtectedRoutes {
 	routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	return &ProtectedRoutes{
@@ -29,7 +31,9 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 		jobController:            jobController,
 		categoryController:       categoryController,
 		workerController:         workerController,
+		viperConfig:              viperConfig,
 		jobApplicationController: jobApplicationController,
+		transactionController:    transactionController,
 	}
 }
 
@@ -54,4 +58,6 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 	jobApplicationRouterGroup.GET("/:jobId", protectedRoutes.jobApplicationController.FindAllApplication)
 	jobApplicationRouterGroup.POST("/select", protectedRoutes.jobApplicationController.SelectApplication)
 
+	transactionRouterGroup := protectedRoutes.routerGroup.Group("transactions")
+	transactionRouterGroup.POST("", protectedRoutes.transactionController.Create)
 }

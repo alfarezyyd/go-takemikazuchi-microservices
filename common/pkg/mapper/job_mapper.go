@@ -1,6 +1,8 @@
 package mapper
 
 import (
+	"errors"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
@@ -8,7 +10,6 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/job/pkg/dto"
 	"github.com/go-viper/mapstructure/v2"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -32,7 +33,7 @@ func MapJobApplicationModelIntoJobApplicationResponse(jobApplicationsModel []mod
 	var jobApplicationsResponse []*dto.JobApplicationResponseDto
 	for _, jobApplicationModel := range jobApplicationsModel {
 		var jobApplicationResponseDto dto.JobApplicationResponseDto
-		jobApplicationResponseDto.Id = strconv.FormatUint(jobApplicationModel.ID, 10)
+		jobApplicationResponseDto.Id = jobApplicationModel.ID
 		jobApplicationResponseDto.FullName = jobApplicationModel.User.Name
 		jobApplicationResponseDto.AppliedAt = jobApplicationModel.CreatedAt.Format(time.RFC3339)
 		jobApplicationsResponse = append(jobApplicationsResponse, &jobApplicationResponseDto)
@@ -71,6 +72,9 @@ func MapJobModelIntoJobResponseDto(jobModel *model.Job) *dto.JobResponseDto {
 func MapJobResponseIntoJobModel(jobResponse *dto.JobResponseDto) *job.JobModel {
 	var jobModel job.JobModel
 	err := mapstructure.Decode(jobResponse, &jobModel)
-	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	jobModel.CreatedAt = &jobResponse.CreatedAt
+	jobModel.CreatedAt = &jobResponse.UpdatedAt
+	fmt.Print(err)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad payload")))
 	return &jobModel
 }

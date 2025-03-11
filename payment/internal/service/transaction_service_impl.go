@@ -66,6 +66,7 @@ func NewTransactionService(
 }
 
 func (transactionService *TransactionServiceImpl) Create(ctx context.Context, userJwtClaims *userDto.JwtClaimDto, createTransactionDto *dto.CreateTransactionDto) string {
+	fmt.Println("CHECKPOINT 1")
 	var midtransSnapToken string
 	err := transactionService.validatorInstance.Struct(createTransactionDto)
 	exception.ParseValidationError(err, transactionService.engTranslator)
@@ -90,16 +91,20 @@ func (transactionService *TransactionServiceImpl) Create(ctx context.Context, us
 			ApplicantId: createTransactionDto.ApplicantId,
 			JobId:       createTransactionDto.JobId,
 		})
+		fmt.Println("CHECKPOINT 2")
+
+		fmt.Println(jobModel)
 		grpcCategoryConnection, err := discovery.ServiceConnection(ctx, "categoryService", transactionService.serviceRegistry)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("job service not found")))
 		grpcCategoryClient := category.NewCategoryServiceClient(grpcCategoryConnection)
 		categoryModel, err := grpcCategoryClient.FindById(ctx, &category.SearchCategoryRequest{CategoryId: jobModel.CategoryId})
-
 		uuidString := fmt.Sprintf("%s-%s", "order", uuid.New().String())
 		var transactionModel model.Transaction
 		transactionModel.ID = uuidString
 		mapper.ConstructTransactionModel(jobApplicationModel, jobModel, &transactionModel, userGrpcResponse.ID)
+		fmt.Println("CHECKPOINT 3")
 		transactionService.transactionRepository.Create(gormTransaction, &transactionModel)
+		fmt.Println("CHECKPOINT 4")
 		midtransResponse, midtransError := transactionService.midtransClient.CreateTransaction(&snap.Request{
 			TransactionDetails: midtrans.TransactionDetails{
 				OrderID:  uuidString,
@@ -124,6 +129,7 @@ func (transactionService *TransactionServiceImpl) Create(ctx context.Context, us
 		if midtransError != nil && helper.CheckErrorOperation(midtransError.GetRawError(), exception.NewClientError(http.StatusBadRequest, exception.ErrInvalidRequestBody, errors.New("error when create midtrans transaction"))) {
 			return nil
 		}
+		fmt.Println("CHECKPOINT 5")
 		transactionModel.SnapToken = &midtransResponse.Token
 		midtransSnapToken = midtransResponse.Token
 		transactionService.transactionRepository.Update(gormTransaction, &transactionModel)

@@ -19,9 +19,9 @@ import (
 
 var (
 	serviceName = "paymentService"
-	httpAddr    = ":7005"
+	httpAddr    = ":7006"
 	consulAddr  = ":8500"
-	grpcAddr    = ":10005"
+	grpcAddr    = ":10006"
 )
 
 func main() {
@@ -84,7 +84,6 @@ func main() {
 
 	midtransService := configs.NewMidtransService(viperConfig)
 	midtransClient := midtransService.InitializeMidtransConfiguration()
-
 	transactionRepository := repository.NewTransactionRepository()
 	transactionService := service.NewTransactionService(validatorInstance, engTranslator, databaseConnection, midtransClient, transactionRepository, viperConfig, consulServiceRegistry)
 	handler.NewTransactionHandler(grpcServer, transactionService)

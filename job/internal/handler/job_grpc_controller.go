@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
 	grpcJob "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/job"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -47,5 +48,6 @@ func (jobHandler *JobHandler) HandleRequestCompleted(ctx context.Context, jobCom
 
 func (jobHandler *JobHandler) FindById(ctx context.Context, findByIdRequest *job.FindByIdRequest) (*job.JobModel, error) {
 	jobModel := jobHandler.jobService.FindById(ctx, &findByIdRequest.UserEmail, &findByIdRequest.JobId)
+	fmt.Println(jobModel)
 	return mapper.MapJobResponseIntoJobModel(jobModel), nil
 }

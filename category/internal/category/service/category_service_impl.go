@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/category/internal/category/repository"
 	categoryDto "github.com/alfarezyyd/go-takemikazuchi-microservices/category/pkg/dto"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
@@ -131,6 +132,7 @@ func (categoryService *CategoryServiceImpl) IsCategoryExists(categoryId uint64) 
 
 func (categoryService *CategoryServiceImpl) FindById(categoryId uint64) *category.QueryCategoryResponse {
 	var categoryModel model.Category
+	fmt.Println(categoryId)
 	err := categoryService.validatorService.ValidateVar(categoryId, "required,gte=1")
 	categoryService.validatorService.ParseValidationError(err)
 	err = categoryService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {

@@ -115,3 +115,26 @@ func (jobApplicationService *JobApplicationServiceImpl) SelectApplication(ctx co
 		return nil
 	})
 }
+
+func (jobApplicationService *JobApplicationServiceImpl) FindById(ctx context.Context, applicantId, jobId uint64) *dto.JobApplicationResponseDto {
+	err := jobApplicationService.validatorService.ValidateVar(applicantId, "required")
+	jobApplicationService.validatorService.ParseValidationError(err)
+	err = jobApplicationService.validatorService.ValidateVar(jobId, "required")
+	jobApplicationService.validatorService.ParseValidationError(err)
+	var jobApplicationModel *model.JobApplication
+
+	err = jobApplicationService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		jobApplicationModel = jobApplicationService.jobApplicationRepository.FindById(gormTransaction, &applicantId, &jobId)
+		return nil
+	})
+	return &dto.JobApplicationResponseDto{
+		Id:          jobApplicationModel.ID,
+		FullName:    "",
+		AppliedAt:   jobApplicationModel.CreatedAt.String(),
+		JobId:       jobApplicationModel.JobId,
+		ApplicantId: jobApplicationModel.ApplicantId,
+		Status:      jobApplicationModel.Status,
+		CreatedAt:   jobApplicationModel.CreatedAt.String(),
+		UpdatedAt:   jobApplicationModel.UpdatedAt.String(),
+	}
+}

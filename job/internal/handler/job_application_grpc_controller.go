@@ -26,7 +26,15 @@ func NewJobApplicationHandler(grpcServer *grpc.Server, jobApplicationService ser
 }
 
 func (jobApplicationHandler *JobApplicationHandler) FindById(ctx context.Context, findIdByRequest *jobApplication.FindJobApplicationByIdRequest) (*jobApplication.JobApplicationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FindById not implemented")
+	jobApplicationResponse := jobApplicationHandler.jobApplicationService.FindById(ctx, findIdByRequest.ApplicantId, findIdByRequest.JobId)
+	return &jobApplication.JobApplicationResponse{
+		ID:          jobApplicationResponse.Id,
+		JobId:       jobApplicationResponse.JobId,
+		ApplicantId: jobApplicationResponse.ApplicantId,
+		Status:      jobApplicationResponse.Status,
+		CreatedAt:   jobApplicationResponse.CreatedAt,
+		UpdatedAt:   jobApplicationResponse.UpdatedAt,
+	}, nil
 }
 
 func (jobApplicationHandler *JobApplicationHandler) FindAllApplication(ctx context.Context, findAllApplicationRequest *jobApplication.FindAllApplicationRequest) (*jobApplication.JobApplicationResponses, error) {

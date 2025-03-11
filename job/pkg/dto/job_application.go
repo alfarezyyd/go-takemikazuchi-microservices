@@ -5,9 +5,14 @@ type ApplyJobApplicationDto struct {
 }
 
 type JobApplicationResponseDto struct {
-	Id        string `json:"id"`
-	FullName  string `json:"full_name"`
-	AppliedAt string `json:"applied_at"`
+	Id          uint64 `json:"id"`
+	FullName    string `json:"full_name"`
+	AppliedAt   string `json:"applied_at"`
+	JobId       uint64 `json:"job_id"`
+	ApplicantId uint64 `json:"applicant_id"`
+	Status      string `json:"status"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
 }
 
 type SelectApplicationDto struct {

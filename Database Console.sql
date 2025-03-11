@@ -59,6 +59,7 @@ FROM jobs;
 
 SELECT *
 FROM job_applications;
+
 SELECT *
 FROM categories;
 SELECT *
