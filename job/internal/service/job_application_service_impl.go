@@ -103,14 +103,15 @@ func (jobApplicationService *JobApplicationServiceImpl) SelectApplication(ctx co
 			PhoneNumber: helper.SafeDereference(userJwtClaims.PhoneNumber, ""),
 		})
 		exception.ParseGrpcError(err)
-		id, err := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, &identifier.ID, &selectApplicationDto.JobId)
+		jobModel, err := jobApplicationService.jobRepository.FindVerifyById(gormTransaction, &identifier.ID, &selectApplicationDto.JobId)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
-		jobModel := id
+		jobModel.WorkerId = jobApplicationModel.ApplicantId
 		jobModel.Status = "Process"
 		jobApplicationModel.Status = "Accepted"
 		jobApplicationService.jobApplicationRepository.BulkRejectUpdate(gormTransaction, &jobModel.ID)
 		jobApplicationService.jobApplicationRepository.Update(gormTransaction, jobApplicationModel)
 		jobApplicationService.jobRepository.Update(jobModel, gormTransaction)
+
 		return nil
 	})
 }
