@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
@@ -25,6 +26,7 @@ import (
 	"github.com/midtrans/midtrans-go/snap"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
+	"log"
 	"net/http"
 	"strconv"
 )
@@ -39,6 +41,7 @@ type TransactionServiceImpl struct {
 	transactionRepository repository.TransactionRepository
 	viperConfig           *viper.Viper
 	serviceRegistry       discovery.ServiceRegistry
+	rabbitMQ              *configs.RabbitMQ
 }
 
 func NewTransactionService(
@@ -51,6 +54,7 @@ func NewTransactionService(
 	//jobApplicationRepository jobApplication.Repository,
 	viperConfig *viper.Viper,
 	serviceRegistry discovery.ServiceRegistry,
+	rabbitMQ *configs.RabbitMQ,
 ) *TransactionServiceImpl {
 	return &TransactionServiceImpl{
 		validatorInstance: validatorInstance,
@@ -61,6 +65,7 @@ func NewTransactionService(
 		transactionRepository: transactionRepository,
 		viperConfig:           viperConfig,
 		serviceRegistry:       serviceRegistry,
+		rabbitMQ:              rabbitMQ,
 		//jobApplicationRepository: jobApplicationRepository,
 	}
 }
@@ -148,6 +153,21 @@ func (transactionService *TransactionServiceImpl) PostPayment(transactionNotific
 		transactionModel.PaymentMethod = &transactionNotificationDto.PaymentType
 		transactionService.transactionRepository.Update(gormTransaction, transactionModel)
 		//transactionService.jobRepository.Update(transactionModel.Job, gormTransaction)
+
+		// Publish ke RabbitMQ
+		orderUpdateMessage := map[string]interface{}{
+			"order_id":   transactionModel.ID,
+			"status":     transactionNotificationDto.TransactionStatus,
+			"payment":    transactionNotificationDto.PaymentType,
+			"updated_at": transactionModel.UpdatedAt,
+		}
+
+		err := transactionService.rabbitMQ.Publish(orderUpdateMessage)
+		if err != nil {
+			log.Printf("Failed to publish message: %v", err)
+			return err
+		}
+
 		return nil
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))

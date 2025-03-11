@@ -82,7 +82,13 @@ func main() {
 	midtransService := configs.NewMidtransService(viperConfig)
 	midtransClient := midtransService.InitializeMidtransConfiguration()
 	transactionRepository := repository.NewTransactionRepository()
-	transactionService := service.NewTransactionService(validatorInstance, engTranslator, databaseConnection, midtransClient, transactionRepository, viperConfig, consulServiceRegistry)
+	rabbitMQURL := "amqp://guest:guest@localhost:5672/"
+	queueName := "order_update"
+	rabbitMQ, err := configs.NewRabbitMQ(rabbitMQURL, queueName)
+	if err != nil {
+		log.Fatalf("Failed to create rabbitMQ instance: %v", err)
+	}
+	transactionService := service.NewTransactionService(validatorInstance, engTranslator, databaseConnection, midtransClient, transactionRepository, viperConfig, consulServiceRegistry, rabbitMQ)
 	handler.NewTransactionHandler(grpcServer, transactionService)
 	fmt.Println("gRPC server listening on " + tcpListener.Addr().String())
 	err = grpcServer.Serve(tcpListener)
