@@ -11,6 +11,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/repository"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/service"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -80,6 +81,7 @@ func main() {
 
 	tcpListener, err := net.Listen("tcp", grpcAddr)
 	grpcServer := grpc.NewServer(
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(middleware.RecoveryInterceptor),
 	)
 

@@ -9,10 +9,14 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/otel"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"net/http"
 	"time"
 )
+
+var tracer = otel.Tracer("github.com/alfarezyyd/gateway/user_handler")
 
 type UserHandler struct {
 	serviceRegistry discovery.ServiceRegistry
@@ -70,13 +74,18 @@ func (userHandler *UserHandler) Login(ginContext *gin.Context) {
 	var loginUserDto dto.LoginUserDto
 	err := ginContext.ShouldBindBodyWithJSON(&loginUserDto)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
-	timeoutCtx, cancelFunc := context.WithTimeout(context.Background(), time.Second*15)
+	timeoutCtx, cancelFunc := context.WithTimeout(ginContext.Request.Context(), time.Second*15)
 	defer cancelFunc()
 	grpcConnection, err := discovery.ServiceConnection(timeoutCtx, "userService", userHandler.serviceRegistry)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 	userClient := user.NewUserServiceClient(grpcConnection)
-
-	payloadResponse, err := userClient.HandleLogin(timeoutCtx, &user.LoginUserRequest{
+	// Start tracing dari context yang benar
+	ctx, span := tracer.Start(timeoutCtx, "HandleLogin (Gateway)")
+	defer span.End()
+	// Ambil metadata dari context
+	md := metadata.Pairs("traceparent", span.SpanContext().TraceID().String())
+	ctx = metadata.NewOutgoingContext(ctx, md)
+	payloadResponse, err := userClient.HandleLogin(ctx, &user.LoginUserRequest{
 		UserIdentifier: loginUserDto.UserIdentifier,
 		Password:       loginUserDto.Password,
 	})

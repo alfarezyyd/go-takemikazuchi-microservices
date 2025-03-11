@@ -15,6 +15,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
+	"go.opentelemetry.io/otel"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"io"
@@ -22,6 +23,8 @@ import (
 	"os"
 	"time"
 )
+
+var tracer = otel.Tracer("github.com/alfarezyyd/user/service/user_service_impl")
 
 type UserServiceImpl struct {
 	userRepository   repository.UserRepository
@@ -160,13 +163,15 @@ func (userService *UserServiceImpl) HandleGoogleCallback(tokenState string, quer
 	return nil
 }
 
-func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequest) string {
+func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDto *user.LoginUserRequest) string {
+	newCtx, span := tracer.Start(ctx, "HandleLogin (User Service Impl)")
+	defer span.End()
 	err := userService.validatorService.ValidateStruct(loginUserDto)
 	userService.validatorService.ParseValidationError(err)
 	var tokenString string
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
-		err = gormTransaction.Where("email = ?", loginUserDto.UserIdentifier).Or("phone_number = ?", loginUserDto.UserIdentifier).First(&userModel).Error
+		err = gormTransaction.WithContext(newCtx).Where("email = ?", loginUserDto.UserIdentifier).Or("phone_number = ?", loginUserDto.UserIdentifier).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		err = bcrypt.CompareHashAndPassword([]byte(userModel.Password), []byte(loginUserDto.Password))
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, "User credentials invalid", err))
@@ -182,17 +187,19 @@ func (userService *UserServiceImpl) HandleLogin(loginUserDto *user.LoginUserRequ
 	return tokenString
 }
 
-func (userService *UserServiceImpl) FindByIdentifier(userIdentifierDto *dto.UserIdentifierDto) *dto.UserResponseDto {
+func (userService *UserServiceImpl) FindByIdentifier(ctx context.Context, userIdentifierDto *dto.UserIdentifierDto) *dto.UserResponseDto {
 	err := userService.validatorService.ValidateStruct(userIdentifierDto)
 	fmt.Println(err)
 	userService.validatorService.ParseValidationError(err)
 
 	var userModel model.User
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
-		err := userService.dbConnection.Where(
-			"email = ? OR phone_number = ?",
-			userIdentifierDto.Email,
-			userIdentifierDto.PhoneNumber).First(&userModel).Error
+		err := userService.dbConnection.
+			WithContext(ctx).
+			Where(
+				"email = ? OR phone_number = ?",
+				userIdentifierDto.Email,
+				userIdentifierDto.PhoneNumber).First(&userModel).Error
 		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil

@@ -1,0 +1,19 @@
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: "0.0.0.0:4318"
+
+exporters:
+  logging:
+    loglevel: debug
+  jaeger:
+    endpoint: "http://jaeger:14268/api/traces"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [ otlp ]
+      exporters: [ logging, jaeger ]

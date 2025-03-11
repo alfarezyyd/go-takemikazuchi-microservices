@@ -74,8 +74,8 @@ func (transactionService *TransactionServiceImpl) Create(ctx context.Context, us
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("job service not found")))
 		grpcUserClient := user.NewUserServiceClient(grpcUserConnection)
 		userGrpcResponse, err := grpcUserClient.FindByIdentifier(ctx, &user.UserIdentifier{
-			Email:       userJwtClaims.Email,
-			PhoneNumber: userJwtClaims.PhoneNumber,
+			Email:       helper.SafeDereference(userJwtClaims.Email, ""),
+			PhoneNumber: helper.SafeDereference(userJwtClaims.PhoneNumber, ""),
 		})
 		grpcJobConnection, err := discovery.ServiceConnection(ctx, "jobService", transactionService.serviceRegistry)
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("job service not found")))

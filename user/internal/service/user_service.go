@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
@@ -13,6 +14,6 @@ type UserService interface {
 	HandleVerifyOneTimePassword(verifyOtpDto *dto.VerifyOtpDto)
 	HandleGoogleAuthentication() string
 	HandleGoogleCallback(tokenState string, queryCode string) *exception.ClientError
-	HandleLogin(*user.LoginUserRequest) string
-	FindByIdentifier(userIdentifierDto *dto.UserIdentifierDto) *dto.UserResponseDto
+	HandleLogin(ctx context.Context, loginUserDto *user.LoginUserRequest) string
+	FindByIdentifier(ctx context.Context, userIdentifierDto *dto.UserIdentifierDto) *dto.UserResponseDto
 }

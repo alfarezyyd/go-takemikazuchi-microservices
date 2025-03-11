@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"log"
 	"math/rand"
 
@@ -21,6 +22,6 @@ func ServiceConnection(ctx context.Context, serviceName string, serviceRegistry 
 	return grpc.NewClient(
 		serviceAddress[rand.Intn(len(serviceAddress))],
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		// Add OpenTelemetry interceptors
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 }

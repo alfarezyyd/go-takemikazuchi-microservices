@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/handler"
@@ -40,7 +41,17 @@ func main() {
 		}
 	}()
 	defer consulServiceRegistry.Deregister(ctx, serviceId, serviceName)
+	traceProvider, err := configs.StartTracing()
+	if err != nil {
+		log.Fatalf("traceprovider: %v", err)
+	}
+	defer func() {
+		if err := traceProvider.Shutdown(context.Background()); err != nil {
+			log.Fatalf("traceprovider: %v", err)
+		}
+	}()
 
+	_ = traceProvider.Tracer("suruhAkuAja")
 	if err != nil {
 		log.Fatalf("Failed to create gRPC connection: %v", err)
 	}

@@ -2,14 +2,18 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	grpcUser "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
+
+var tracer = otel.Tracer("github.com/alfarezyyd/user/handler/user_grpc_controller")
 
 type UserHandler struct {
 	userService service.UserService
@@ -24,7 +28,15 @@ func NewUserHandler(grpcServer *grpc.Server, userService service.UserService) {
 }
 
 func (userHandler *UserHandler) HandleLogin(ctx context.Context, req *grpcUser.LoginUserRequest) (*grpcUser.PayloadResponse, error) {
-	tokenString := userHandler.userService.HandleLogin(req)
+	md, _ := metadata.FromIncomingContext(ctx)
+
+	// Gunakan metadata sebagai HeaderCarrier
+	ctx = otel.GetTextMapPropagator().Extract(ctx, propagation.HeaderCarrier(md))
+
+	// Mulai tracing dengan context yang sudah diperbarui
+	newCtx, span := tracer.Start(ctx, "HandleLogin (User Service)")
+	defer span.End()
+	tokenString := userHandler.userService.HandleLogin(newCtx, req)
 	return &grpcUser.PayloadResponse{
 		Payload: tokenString,
 	}, nil
@@ -70,8 +82,7 @@ func (userHandler *UserHandler) HandleGoogleCallback(ctx context.Context, google
 }
 
 func (userHandler *UserHandler) FindByIdentifier(ctx context.Context, userIdentifier *grpcUser.UserIdentifier) (*grpcUser.QueryUserResponse, error) {
-	fmt.Println(userIdentifier)
-	userResponseDto := userHandler.userService.FindByIdentifier(&dto.UserIdentifierDto{
+	userResponseDto := userHandler.userService.FindByIdentifier(ctx, &dto.UserIdentifierDto{
 		Email:       userIdentifier.Email,
 		PhoneNumber: userIdentifier.PhoneNumber,
 	})
