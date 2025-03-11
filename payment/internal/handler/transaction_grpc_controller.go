@@ -8,8 +8,6 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/payment/internal/service"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/payment/pkg/dto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -34,5 +32,7 @@ func (transactionHandler *TransactionHandler) Create(ctx context.Context, create
 	return &transaction.TransactionResponse{SnapToken: snapToken}, nil
 }
 func (transactionHandler *TransactionHandler) PostPayment(ctx context.Context, postPaymentRequest *transaction.PostPaymentRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method PostPayment not implemented")
+	notificationDto := mapper.MapTransactionNotificationGrpcIntoTransactionNotificationDto(postPaymentRequest)
+	transactionHandler.transactionService.PostPayment(notificationDto)
+	return nil, nil
 }

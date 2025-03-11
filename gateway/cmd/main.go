@@ -83,8 +83,10 @@ func main() {
 	jobApplicationHandler := handler.NewJobApplicationHandler(consulServiceRegistry)
 	transactionHandler := handler.NewTransactionHandler(consulServiceRegistry)
 	protectedRoutes := routes.NewProtectedRoutes(rootRouterGroup, categoryHandler, jobHandler, workerHandler, jobApplicationHandler, viperConfig, transactionHandler)
+	publicRoutes := routes.NewPublicRoutes(ginEngine.Group("/"), transactionHandler)
 	authenticationRoutes.Setup()
 	protectedRoutes.Setup()
+	publicRoutes.Setup()
 	ginError := ginEngine.Run(":8080")
 	if ginError != nil {
 		panic(ginError)

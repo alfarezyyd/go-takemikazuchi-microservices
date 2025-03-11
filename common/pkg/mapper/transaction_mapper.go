@@ -25,3 +25,10 @@ func MapTransactionNotificationDtoIntoTransactionNotificationGrpc(transactionNot
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
 	return &transactionPostPaymentRequest
 }
+
+func MapTransactionNotificationGrpcIntoTransactionNotificationDto(postPaymentRequest *transaction.PostPaymentRequest) *dto.TransactionNotificationDto {
+	var transactionNotificationDto dto.TransactionNotificationDto
+	err := mapstructure.Decode(postPaymentRequest, &transactionNotificationDto)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, err))
+	return &transactionNotificationDto
+}

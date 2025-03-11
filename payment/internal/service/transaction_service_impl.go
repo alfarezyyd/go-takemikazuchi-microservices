@@ -135,6 +135,7 @@ func (transactionService *TransactionServiceImpl) Create(ctx context.Context, us
 
 func (transactionService *TransactionServiceImpl) PostPayment(transactionNotificationDto *dto.TransactionNotificationDto) {
 	err := transactionService.gormTransaction.Transaction(func(gormTransaction *gorm.DB) error {
+
 		transactionModel := transactionService.transactionRepository.FindWithRelationship(gormTransaction, transactionNotificationDto.OrderId)
 		//SHA512(order_id+status_code+gross_amount+ServerKey)
 		notificationSignatureKey := fmt.Sprintf("%s%s%.2f%s", transactionModel.ID, transactionNotificationDto.StatusCode, transactionModel.Amount, transactionService.viperConfig.GetString("MIDTRANS_SERVER_KEY"))
@@ -160,12 +161,10 @@ func (transactionService *TransactionServiceImpl) paymentOperation(transactionNo
 				// TODO set transaction status on your database to 'challenge'
 				// e.g: 'Payment status challenged. Please take action on your Merchant Administration Portal
 			} else if transactionNotificationDto.FraudStatus == "accept" {
-				transactionModel.Job.Status = "On Working"
 				transactionModel.Status = "Completed"
 			}
 			break
 		case "settlement":
-			transactionModel.Job.Status = "On Working"
 			transactionModel.Status = "Completed"
 			break
 		case "deny":
@@ -174,7 +173,6 @@ func (transactionService *TransactionServiceImpl) paymentOperation(transactionNo
 			break
 		case "cancel":
 		case "expire":
-			transactionModel.Job.Status = "Closed"
 			transactionModel.Status = "Failed"
 			// TODO set transaction status on your databaase to 'failure'
 			break

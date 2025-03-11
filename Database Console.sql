@@ -50,9 +50,12 @@ USE go_takemikazuchi_microservices_users;
 USE go_takemikazuchi_microservices_categories;
 USE go_takemikazuchi_microservices_jobs;
 USE go_takemikazuchi_microservices_workers;
+USE go_takemikazuchi_microservices_payments;
+
 SELECT * FROM jobs;
 SELECT * FROM user_addresses;
 SELECT * FROM categories;
+SELECT * FROM transactions;
 
 SELECT *
 FROM jobs;

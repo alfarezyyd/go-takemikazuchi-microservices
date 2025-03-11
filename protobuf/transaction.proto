@@ -26,10 +26,10 @@ message PostPaymentRequest {
   string Eci = 13;
   string Currency = 14;
   string ChannelResponseMessage = 15;
-  string ChannelResponseCode = 16;
-  string  CardType = 17;
+  optional string ChannelResponseCode = 16;
+  string CardType = 17;
   string Bank = 18;
-  string  ApprovalCode = 19;
+  string ApprovalCode = 19;
 }
 
 message TransactionResponse {
