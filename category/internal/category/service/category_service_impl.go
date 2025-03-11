@@ -54,8 +54,8 @@ func (categoryService *CategoryServiceImpl) HandleCreate(ctx context.Context, us
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, errors.New("service down")))
 		userServiceClient := user.NewUserServiceClient(userGrpcConn)
 		userModel, err := userServiceClient.FindByIdentifier(ctx, &user.UserIdentifier{
-			Email:       userJwtClaim.Email,
-			PhoneNumber: userJwtClaim.PhoneNumber,
+			Email:       helper.SafeDereference(userJwtClaim.Email, ""),
+			PhoneNumber: helper.SafeDereference(userJwtClaim.PhoneNumber, ""),
 		})
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		if userModel.Role != "Admin" {

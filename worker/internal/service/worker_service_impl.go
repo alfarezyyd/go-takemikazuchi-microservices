@@ -64,8 +64,8 @@ func (workerService *WorkerServiceImpl) Create(ctx context.Context, userJwtClaim
 		var workerModel model.Worker
 		var workerWalletModel model.WorkerWallet
 		userModel, err := userGrpcClient.FindByIdentifier(ctx, &user.UserIdentifier{
-			Email:       userJwtClaim.Email,
-			PhoneNumber: userJwtClaim.PhoneNumber,
+			Email:       helper.SafeDereference(userJwtClaim.Email, ""),
+			PhoneNumber: helper.SafeDereference(userJwtClaim.PhoneNumber, ""),
 		})
 		helper.CheckErrorOperation(err, exception.NewClientError(http.StatusNotFound, exception.ErrNotFound, errors.New("user not found")))
 		mapper.MapCreateWorkerDtoIntoWorkerModel(&workerModel, createWorkerDto)

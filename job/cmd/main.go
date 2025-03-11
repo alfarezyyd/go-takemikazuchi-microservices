@@ -30,7 +30,7 @@ var (
 
 func main() {
 
-	consulServiceRegistry, err := discovery.NewRegistry(consulAddr, serviceName)
+	consulServiceRegistry, err := discovery.NewRegistry(consulAddr)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)

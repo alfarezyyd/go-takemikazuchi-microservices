@@ -14,7 +14,7 @@ type ConsulServiceRegistry struct {
 	consulClient *consul.Client
 }
 
-func NewRegistry(serviceAddress, serviceName string) (*ConsulServiceRegistry, error) {
+func NewRegistry(serviceAddress string) (*ConsulServiceRegistry, error) {
 	config := consul.DefaultConfig()
 	config.Address = serviceAddress
 
@@ -25,7 +25,6 @@ func NewRegistry(serviceAddress, serviceName string) (*ConsulServiceRegistry, er
 
 	return &ConsulServiceRegistry{client}, nil
 }
-
 func (serviceRegistry *ConsulServiceRegistry) Register(ctx context.Context, instanceID, serviceName, hostPort string) error {
 	host, portStr, found := strings.Cut(hostPort, ":")
 	if !found {
@@ -50,16 +49,13 @@ func (serviceRegistry *ConsulServiceRegistry) Register(ctx context.Context, inst
 		},
 	})
 }
-
 func (serviceRegistry *ConsulServiceRegistry) Deregister(ctx context.Context, instanceID string, serviceName string) error {
 	log.Printf("Deregistering service %s", instanceID)
 	return serviceRegistry.consulClient.Agent().CheckDeregister(instanceID)
 }
-
 func (serviceRegistry *ConsulServiceRegistry) HealthCheck(instanceID string, serviceName string) error {
 	return serviceRegistry.consulClient.Agent().UpdateTTL(instanceID, "online", consul.HealthPassing)
 }
-
 func (serviceRegistry *ConsulServiceRegistry) Discover(ctx context.Context, serviceName string) ([]string, error) {
 	entries, _, err := serviceRegistry.consulClient.Health().Service(serviceName, "", true, nil)
 	if err != nil {
