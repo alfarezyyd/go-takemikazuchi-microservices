@@ -2,7 +2,10 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
@@ -18,8 +21,10 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/pkg/dto"
 	"googlemaps.github.io/maps"
 	"gorm.io/gorm"
+	"log"
 	"mime/multipart"
 	"net/http"
+	"strconv"
 )
 
 type JobServiceImpl struct {
@@ -34,6 +39,7 @@ type JobServiceImpl struct {
 	//userAddressRepository userAddressFeature.Repository
 	//workerRepository      worker.Repository
 	serviceDiscovery discovery.ServiceRegistry
+	rabbitMQ         *configs.RabbitMQConsumer
 }
 
 func NewJobService(
@@ -47,7 +53,69 @@ func NewJobService(
 	//workerRepository worker.Repository,
 	validatorService validatorFeature.Service,
 	serviceDiscovery discovery.ServiceRegistry,
+	rabbitMQ *configs.RabbitMQConsumer,
 ) *JobServiceImpl {
+
+	go rabbitMQ.StartListening(func(body []byte) error {
+		var eventData map[string]interface{}
+		if err := json.Unmarshal(body, &eventData); err != nil {
+			return err
+		}
+
+		// 3. Proses pesan yang diterima
+		log.Printf("Processing order update: %v", eventData)
+
+		// Contoh: Update status job di database
+		orderID, ok := eventData["order_id"].(string)
+		if !ok {
+			return fmt.Errorf("invalid order ID format")
+		}
+		status, ok := eventData["status"].(string)
+		if !ok {
+			return fmt.Errorf("invalid status format")
+		}
+		jobId, ok := eventData["job_id"].(string)
+		if !ok {
+			return fmt.Errorf("invalid job id format")
+		}
+
+		err := dbConnection.Transaction(func(tx *gorm.DB) error {
+			// 4. Update Job Berdasarkan Order
+			parsedJobId, _ := strconv.ParseUint(jobId, 10, 64)
+			job, err := jobRepository.FindById(tx, &parsedJobId)
+			if err != nil {
+				return fmt.Errorf("job not found for order ID: %s", orderID)
+			}
+			switch status {
+			case "capture":
+				job.Status = "On Working"
+				break
+			case "settlement":
+				job.Status = "On Working"
+				break
+			case "deny":
+				// TODO you can ignore 'deny', because most of the time it allows payment retries
+				// and later can become success
+				break
+			case "cancel":
+			case "expire":
+				job.Status = "Closed"
+				// TODO set transaction status on your databaase to 'failure'
+				break
+			case "pending":
+				break
+			}
+			jobRepository.Update(job, tx)
+
+			log.Printf("Order update processed successfully for order ID: %s", orderID)
+			return nil
+		})
+		if err != nil {
+			log.Println(err)
+		}
+		return nil
+	})
+
 	return &JobServiceImpl{
 		jobRepository: jobRepository,
 		//userRepository:        userRepository,
@@ -59,6 +127,7 @@ func NewJobService(
 		validatorService: validatorService,
 		//workerRepository:      workerRepository
 		serviceDiscovery: serviceDiscovery,
+		rabbitMQ:         rabbitMQ,
 	}
 }
 

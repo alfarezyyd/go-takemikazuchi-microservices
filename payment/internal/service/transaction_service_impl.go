@@ -160,6 +160,7 @@ func (transactionService *TransactionServiceImpl) PostPayment(transactionNotific
 			"status":     transactionNotificationDto.TransactionStatus,
 			"payment":    transactionNotificationDto.PaymentType,
 			"updated_at": transactionModel.UpdatedAt,
+			"job_id":     strconv.FormatUint(transactionModel.JobID, 10),
 		}
 
 		err := transactionService.rabbitMQ.Publish(orderUpdateMessage)

@@ -23,6 +23,8 @@ var (
 	httpAddr    = ":7003"
 	grpcAddr    = ":10003"
 	consulAddr  = ":8500"
+	rabbitMQURL = "amqp://guest:guest@localhost:5672/"
+	queueName   = "order_update"
 )
 
 //TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
@@ -87,7 +89,12 @@ func main() {
 	validatorInstance, engTranslator := configs.InitializeValidator()
 	validatorService := validatorFeature.NewService(validatorInstance, engTranslator)
 
-	jobService := service.NewJobService(jobRepository, databaseConnection, nil, validatorService, consulServiceRegistry)
+	// 1. Buat RabbitMQ Consumer
+	consumer, err := configs.NewConsumer(rabbitMQURL, queueName)
+	if err != nil {
+		log.Fatalf("Failed to create RabbitMQ consumer: %v", err)
+	}
+	jobService := service.NewJobService(jobRepository, databaseConnection, nil, validatorService, consulServiceRegistry, consumer)
 	jobApplicationService := service.NewJobApplicationService(validatorInstance, engTranslator, jobApplicationRepository, databaseConnection, jobRepository, validatorService, consulServiceRegistry)
 	handler.NewJobHandler(grpcServer, jobService)
 	handler.NewJobApplicationHandler(grpcServer, jobApplicationService)
