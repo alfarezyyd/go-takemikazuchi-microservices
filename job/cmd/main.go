@@ -32,14 +32,12 @@ func main() {
 
 	consulServiceRegistry, err := discovery.NewRegistry(consulAddr)
 	if err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 
 	serviceId := discovery.GenerateInstanceID(serviceName)
 	ctx := context.Background()
 	if err := consulServiceRegistry.Register(ctx, serviceId, serviceName, grpcAddr); err != nil {
-		fmt.Println(err)
 		panic(err)
 	}
 	go func() {

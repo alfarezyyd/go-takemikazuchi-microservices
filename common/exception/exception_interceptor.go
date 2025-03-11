@@ -1,7 +1,6 @@
 package exception
 
 import (
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/web"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,7 +12,6 @@ func Interceptor() gin.HandlerFunc {
 			if occurredError := recover(); occurredError != nil {
 				// Check if it's our custom error
 				if clientError, ok := occurredError.(*ClientError); ok {
-					fmt.Println("panic occurred", clientError.GetRawError())
 					ginContext.AbortWithStatusJSON(
 						clientError.StatusCode,
 						web.NewResponseContract(false, clientError.Message, nil, &clientError.Trace),

@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
@@ -28,7 +27,6 @@ func (jobResourceRepository *RepositoryImpl) BulkCreate(gormTransaction *gorm.DB
 func (jobResourceRepository *RepositoryImpl) CountBulkByName(gormTransaction *gorm.DB, jobId uint64, deletedFilesName []string) int {
 	var countFile int
 	err := gormTransaction.Model(&model.JobResource{}).Select("COUNT(*)").Where("job_id = ? AND image_path IN (?)", jobId, deletedFilesName).First(&countFile).Error
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return countFile
 }

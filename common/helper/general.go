@@ -9,7 +9,6 @@ import (
 )
 
 func CheckErrorOperation(indicatedError error, clientError *exception.ClientError) bool {
-	fmt.Println(indicatedError)
 	if indicatedError != nil {
 		panic(clientError)
 		return true

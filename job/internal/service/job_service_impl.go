@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/category"
@@ -96,17 +95,14 @@ func (jobService *JobServiceImpl) HandleCreate(ctx context.Context, userJwtClaim
 			helper.CheckErrorOperation(err, exception.NewClientError(http.StatusInternalServerError, exception.ErrInternalServerError, err))
 			userAddress.ID = queryResponse.Id
 		}
-		fmt.Println("CHECKPOINT 3")
-		isCategoryExists, err := categoryGrpcClient.IsCategoryExists(ctx, &category.SearchCategoryRequest{CategoryId: createJobDto.CategoryId})
+		_, err = categoryGrpcClient.IsCategoryExists(ctx, &category.SearchCategoryRequest{CategoryId: createJobDto.CategoryId})
 		if err != nil {
 			exception.ThrowClientError(exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("category not found")))
 		}
-		fmt.Println(isCategoryExists)
 		mapper.MapJobDtoIntoJobModel(createJobDto, &jobModel)
 		jobModel.UserId = userModel.ID
 		jobModel.AddressId = userAddress.ID
 		jobService.jobRepository.Store(&jobModel, gormTransaction)
-		fmt.Println("CHECKPOINT 4")
 		//uuidString := uuid.New().String()
 		//var allFileName []string
 		//for _, uploadedFile := range uploadedFiles {
@@ -139,7 +135,6 @@ func (jobService *JobServiceImpl) FindById(ctx context.Context, userEmail *strin
 		jobModel, err = jobService.jobRepository.FindVerifyById(gormTransaction, &identifier.ID, jobId)
 		return nil
 	})
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 	return mapper.MapJobModelIntoJobResponseDto(jobModel)
 }

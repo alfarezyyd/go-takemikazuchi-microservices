@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
@@ -73,7 +72,6 @@ func (workerService *WorkerServiceImpl) Create(ctx context.Context, userJwtClaim
 		workerModel.UserId = userModel.ID
 		workerService.workerRepository.Store(gormTransaction, &workerModel)
 		workerWalletModel.WorkerID = workerModel.ID
-		fmt.Println(&workerWalletModel)
 		workerService.workerWalletRepository.Store(gormTransaction, &workerWalletModel)
 		//driverLicenseFile, _ := createWorkerWalletDocumentDto.DriverLicense.Open()
 		//identityCardFile, _ := createWorkerWalletDocumentDto.IdentityCard.Open()

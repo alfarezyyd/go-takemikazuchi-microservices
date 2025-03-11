@@ -73,7 +73,6 @@ func (userService *UserServiceImpl) HandleRegister(createUserDto *dto.CreateUser
 		return nil
 	})
 	gormError := exception.ParseGormError(err)
-	fmt.Println(gormError)
 	if gormError != nil {
 		return exception.ParseIntoGrpcError(gormError)
 	}
@@ -87,7 +86,6 @@ func (userService *UserServiceImpl) HandleGenerateOneTimePassword(generateOneTim
 		}
 		var userModel model.User
 		var oneTimePasswordToken model.OneTimePasswordToken
-		fmt.Println(generateOneTimePassDto)
 		err := gormTransaction.Where("email = ?", generateOneTimePassDto.Email).First(&userModel).Error
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		generatedOneTimePasswordToken := helper.GenerateOneTimePasswordToken()
@@ -189,7 +187,6 @@ func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDt
 
 func (userService *UserServiceImpl) FindByIdentifier(ctx context.Context, userIdentifierDto *dto.UserIdentifierDto) *dto.UserResponseDto {
 	err := userService.validatorService.ValidateStruct(userIdentifierDto)
-	fmt.Println(err)
 	userService.validatorService.ParseValidationError(err)
 
 	var userModel model.User
@@ -200,7 +197,6 @@ func (userService *UserServiceImpl) FindByIdentifier(ctx context.Context, userId
 				"email = ? OR phone_number = ?",
 				userIdentifierDto.Email,
 				userIdentifierDto.PhoneNumber).First(&userModel).Error
-		fmt.Println(err)
 		helper.CheckErrorOperation(err, exception.ParseGormError(err))
 		return nil
 	})

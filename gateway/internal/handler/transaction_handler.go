@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/discovery"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/transaction"
@@ -40,7 +39,6 @@ func (transactionHandler *TransactionHandler) Create(ginContext *gin.Context) {
 		JobId:        createTransactionDto.JobId,
 		ApplicantId:  createTransactionDto.ApplicantId,
 	})
-	fmt.Println(err)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("failed to parse body")))
 	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Transaction has been created", gin.H{
 		"token": midtransSnapToken.SnapToken,
