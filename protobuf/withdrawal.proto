@@ -1,0 +1,15 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+import "user.proto";
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/withdrawal";
+
+message CreateWithdrawal {
+  UserJwtClaim UserJwtClaim = 1;
+  uint64 WalletId = 2;
+  int64  Amount = 3;
+}
+
+service WithdrawalService {
+  rpc Create(CreateWithdrawal) returns (google.protobuf.Empty);
+}

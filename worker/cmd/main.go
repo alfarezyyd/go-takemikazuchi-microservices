@@ -84,7 +84,9 @@ func main() {
 	workerRepository := repository.NewWorkerRepository()
 	workerWalletRepository := repository.NewWorkerWalletRepository()
 	newWorkerService := service.NewWorkerService(workerRepository, validatorService, databaseConnection, nil, consulServiceRegistry, workerWalletRepository)
+	workerWalletService := service.NewWorkerWalletServiceImpl(validatorService, databaseConnection, workerWalletRepository, consulServiceRegistry)
 	handler.NewWorkerHandler(grpcServer, newWorkerService)
+	handler.NewWorkerWalletHandler(grpcServer, workerWalletService)
 	fmt.Println("gRPC server listening on " + tcpListener.Addr().String())
 	err = grpcServer.Serve(tcpListener)
 	if err != nil {

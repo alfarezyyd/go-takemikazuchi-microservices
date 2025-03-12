@@ -29,3 +29,8 @@ func (workerHandler *WorkerHandler) Create(ctx context.Context, createWorkerRequ
 	workerHandler.workerService.Create(ctx, userJwtClaimDto, createWorkerDto)
 	return nil, nil
 }
+
+func (workerHandler *WorkerHandler) FindById(ctx context.Context, searchWorkRequest *grpcWorker.SearchWorkerRequest) (*grpcWorker.WorkerResponse, error) {
+	workerResponseDto := workerHandler.workerService.FindById(ctx, &searchWorkRequest.UserId)
+	return mapper.MapWorkerResponseDtoIntoWorkerGrpc(workerResponseDto), nil
+}

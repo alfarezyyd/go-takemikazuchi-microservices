@@ -15,6 +15,7 @@ type ProtectedRoutes struct {
 	workerController         handler.WorkerController
 	jobApplicationController handler.JobApplicationController
 	transactionController    handler.TransactionController
+	withdrawalController     handler.WithdrawalController
 }
 
 func NewProtectedRoutes(routerGroup *gin.RouterGroup,
@@ -24,6 +25,7 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 	jobApplicationController handler.JobApplicationController,
 	viperConfig *viper.Viper,
 	transactionController handler.TransactionController,
+	withdrawalController handler.WithdrawalController,
 ) *ProtectedRoutes {
 	routerGroup.Use(middleware.AuthMiddleware(viperConfig))
 	return &ProtectedRoutes{
@@ -34,6 +36,7 @@ func NewProtectedRoutes(routerGroup *gin.RouterGroup,
 		viperConfig:              viperConfig,
 		jobApplicationController: jobApplicationController,
 		transactionController:    transactionController,
+		withdrawalController:     withdrawalController,
 	}
 }
 
@@ -60,4 +63,9 @@ func (protectedRoutes *ProtectedRoutes) Setup() {
 
 	transactionRouterGroup := protectedRoutes.routerGroup.Group("transactions")
 	transactionRouterGroup.POST("", protectedRoutes.transactionController.Create)
+
+	withdrawalRouterGroup := protectedRoutes.routerGroup.Group("withdrawals")
+	withdrawalRouterGroup.POST("", protectedRoutes.withdrawalController.Create)
+	//withdrawalRouterGroup.GET("", protectedRoutes.withdrawalController.FindAll)
+	//withdrawalRouterGroup.PUT("/:withdrawalId", protectedRoutes.withdrawalController.Update)
 }

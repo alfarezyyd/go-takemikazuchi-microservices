@@ -6,6 +6,6 @@ import (
 )
 
 type WorkerWalletRepository interface {
-	FindById(gormTransaction *gorm.DB, walletId *uint64)
+	FindById(gormTransaction *gorm.DB, walletId *uint64) *model.WorkerWallet
 	Store(gormTransaction *gorm.DB, workerWalletModel *model.WorkerWallet)
 }

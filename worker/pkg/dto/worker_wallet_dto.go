@@ -6,3 +6,15 @@ type CreateWorkerWalletDto struct {
 	AccountNumber string `form:"account_number" validate:"required,min=1,max=50"`
 	BankName      string `form:"bank_name" validate:"required,min=1,max=100" mapstructure:"BankName"`
 }
+
+type ResponseWorkerWalletDto struct {
+	ID            uint64
+	WorkerID      uint64
+	WalletType    string
+	AccountName   string
+	AccountNumber string
+	BankName      string
+	IsPrimary     bool
+	CreatedAt     string `mapstructure:"-"`
+	UpdatedAt     string `mapstructure:"-"`
+}

@@ -16,11 +16,6 @@ func MapCreateWorkerDtoIntoWorkerModel(workerModel *model.Worker, createWorkerDt
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 }
 
-func MapCreateWorkerWalletDtoIntoWorkerWalletModel(workerWalletModel *model.WorkerWallet, createWorkerWalletDto *dto.CreateWorkerWalletDto) {
-	err := mapstructure.Decode(createWorkerWalletDto, workerWalletModel)
-	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
-}
-
 func MapCreateWorkerWalletDtoIntoCreateWorkerWalletRequest(createWorkerDto dto.CreateWorkerDto, createWorkerRequest *worker.CreateWorkerRequest) {
 	err := mapstructure.Decode(createWorkerDto.WalletInformation, createWorkerRequest)
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
@@ -48,4 +43,18 @@ func MapCreateWorkerRequestIntoCreateWorkerDto(createWorkerRequest *worker.Creat
 	createWorkerRequestDto.WalletInformation = *walletDto
 	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
 	return &createWorkerRequestDto
+}
+
+func MapWorkerModelIntoWorkerResponse(workerModel *model.Worker) *dto.WorkerResponseDto {
+	var workerResponseDto dto.WorkerResponseDto
+	err := mapstructure.Decode(workerModel, &workerResponseDto)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
+	return &workerResponseDto
+}
+
+func MapWorkerResponseDtoIntoWorkerGrpc(workerResponse *dto.WorkerResponseDto) *worker.WorkerResponse {
+	var workerResponseGrpc *worker.WorkerResponse
+	err := mapstructure.Decode(workerResponse, &workerResponseGrpc)
+	helper.CheckErrorOperation(err, exception.NewClientError(http.StatusBadRequest, exception.ErrBadRequest, errors.New("bad request")))
+	return workerResponseGrpc
 }

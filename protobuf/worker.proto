@@ -13,6 +13,27 @@ message CreateWorkerRequest {
   string AccountName = 6;
   string BankName = 7;
 }
+
+message SearchWorkerRequest {
+  uint64 UserId = 1;
+}
+
+message WorkerResponse {
+  uint64 ID = 1;
+  uint64 UserId = 2;
+  float Rating = 3;
+  uint32 Revenue = 4;
+  uint32 CompletedJobs = 5;
+  string Location = 6;
+  bool Availability = 7;
+  bool Verified = 8;
+  string EmergencyPhoneNumber = 9;
+  string CreatedAt = 10;
+  string UpdatedAt = 11;
+  string VerifiedAt = 12;
+}
+
 service WorkerService {
   rpc Create(CreateWorkerRequest) returns (google.protobuf.Empty);
+  rpc FindById(SearchWorkerRequest) returns (WorkerResponse);
 }

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/worker_wallet";
+
+
+message SearchRequest {
+  uint64 UserId = 1;
+}
+
+message WorkerWalletResponse {
+  uint64 ID = 1;
+  uint64 WorkerId = 2;
+  string WalletType = 3;
+  string AccountName = 4;
+  string AccountNumber = 5;
+  string BankName = 6;
+  bool IsPrimary = 7;
+  string CreatedAt = 8;
+  string UpdatedAt = 9;
+}
+
+service WorkerWalletService {
+  rpc FindById(SearchRequest) returns (WorkerWalletResponse);
+}

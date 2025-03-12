@@ -91,12 +91,15 @@ func main() {
 
 	userRepository := repository.NewUserRepository()
 	addressRepository := repository.NewUserAddressRepository()
+	withdrawalRepository := repository.NewWithdrawalRepository()
 	nominatimBaseUrl := viperConfig.GetString("NOMINATIM_BASE_URL")
 	nominatimHttpClient := configs.NewHttpClient(nil, &nominatimBaseUrl)
 	userService := service.NewUserService(validatorService, userRepository, databaseConnection, mailerService, identityProvider, viperConfig)
 	userAddressService := service.NewUserAddressServiceImpl(userRepository, databaseConnection, addressRepository, validatorService, nominatimHttpClient)
+	withdrawalService := service.NewWithdrawalService(validatorService, withdrawalRepository, databaseConnection, userRepository, consulServiceRegistry)
 	handler.NewUserHandler(grpcServer, userService)
 	handler.NewUserAddressHandler(grpcServer, userAddressService)
+	handler.NewWithdrawalHandler(grpcServer, withdrawalService)
 	fmt.Println("Serving gRPC server at " + grpcAddr)
 	err = grpcServer.Serve(tcpListener)
 

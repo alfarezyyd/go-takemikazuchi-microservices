@@ -14,6 +14,7 @@ SELECT *
 FROM worker_resources;
 SELECT *
 FROM worker_wallets;
+UPDATE worker_wallets SET worker_id = 28 WHERE worker_id = 10;
 SELECT *
 FROM user_addresses;
 SELECT *

@@ -93,3 +93,14 @@ func (workerService *WorkerServiceImpl) Create(ctx context.Context, userJwtClaim
 	})
 	helper.CheckErrorOperation(err, exception.ParseGormError(err))
 }
+func (workerService *WorkerServiceImpl) FindById(ctx context.Context, userId *uint64) *dto.WorkerResponseDto {
+	var workerModel *model.Worker
+	var err error
+	err = workerService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
+		workerModel, err = workerService.workerRepository.FindById(gormTransaction, userId)
+		helper.CheckErrorOperation(err, exception.ParseGormError(err))
+		return nil
+	})
+	helper.CheckErrorOperation(err, exception.ParseGormError(err))
+	return mapper.MapWorkerModelIntoWorkerResponse(workerModel)
+}

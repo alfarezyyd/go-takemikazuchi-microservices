@@ -6,7 +6,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/worker/pkg/dto"
 )
 
-type WorkerService interface {
-	FindById(ctx context.Context, userId *uint64) *dto.WorkerResponseDto
+type WorkerWalletService interface {
+	FindById(ctx context.Context, walletId *uint64) *dto.ResponseWorkerWalletDto
 	Create(ctx context.Context, userJwtClaim *userDto.JwtClaimDto, createWorkerDto *dto.CreateWorkerDto)
 }
