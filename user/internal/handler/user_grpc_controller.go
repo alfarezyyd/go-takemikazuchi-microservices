@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	grpcUser "github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/user/internal/service"
@@ -36,13 +37,17 @@ func (userHandler *UserHandler) HandleLogin(ctx context.Context, req *grpcUser.L
 	// Mulai tracing dengan context yang sudah diperbarui
 	newCtx, span := tracer.Start(ctx, "HandleLogin (User Service)")
 	defer span.End()
-	tokenString := userHandler.userService.HandleLogin(newCtx, req)
+	tokenString := userHandler.userService.HandleLogin(newCtx, &dto.LoginUserDto{
+		UserIdentifier: req.UserIdentifier,
+		Password:       req.Password,
+	})
 	return &grpcUser.PayloadResponse{
 		Payload: tokenString,
 	}, nil
 }
 
 func (userHandler *UserHandler) HandleRegister(ctx context.Context, req *grpcUser.CreateUserRequest) (*grpcUser.CommandUserResponse, error) {
+	fmt.Println(req)
 	err := userHandler.userService.HandleRegister(&dto.CreateUserDto{
 		Name:            req.Name,
 		Email:           req.Email,

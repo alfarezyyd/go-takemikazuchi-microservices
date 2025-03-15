@@ -82,3 +82,11 @@ FROM users;
 DELETE FROM user_addresses;
 DELETE FROM one_time_password_tokens;
 DELETE FROM users;
+
+select * from workers;
+select * from worker_wallets;
+select * from jobs;
+select * from users;
+
+DELETE FROM workers WHERE id =13;
+DELETE FROM worker_wallets WHERE id = 4;

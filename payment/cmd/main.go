@@ -83,7 +83,7 @@ func main() {
 	midtransClient := midtransService.InitializeMidtransConfiguration()
 	transactionRepository := repository.NewTransactionRepository()
 	rabbitMQURL := "amqp://guest:guest@localhost:5672/"
-	queueName := "order_update"
+	queueName := "OrderUpdate"
 	rabbitMQ, err := configs.NewRabbitMQ(rabbitMQURL, queueName)
 	if err != nil {
 		log.Fatalf("Failed to create rabbitMQ instance: %v", err)

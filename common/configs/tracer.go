@@ -16,7 +16,6 @@ func StartTracing() (*trace.TracerProvider, error) {
 	headers := map[string]string{
 		"content-type": "application/json",
 	}
-
 	exporter, err := otlptrace.New(
 		context.Background(),
 		otlptracehttp.NewClient(

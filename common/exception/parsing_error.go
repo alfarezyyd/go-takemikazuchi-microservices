@@ -1,13 +1,16 @@
 package exception
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 	"net/http"
+	"strings"
 )
 
 func ParseGormError(err error) *ClientError {
@@ -68,6 +71,8 @@ func ParseGrpcError(err error) {
 	if err != nil {
 		// Cek apakah error berasal dari gRPC
 		statusRequest, ok := status.FromError(err)
+		var errorDetail interface{}
+		var statusMessage string = statusRequest.Message()
 		if ok {
 			// Mapping kode gRPC ke kode HTTP
 			var httpStatus int
@@ -75,6 +80,21 @@ func ParseGrpcError(err error) {
 			case codes.NotFound:
 				httpStatus = http.StatusNotFound // 404
 			case codes.InvalidArgument:
+				statusRequest.Message()
+				splitMessage := strings.Split(statusRequest.Message(), ": ")
+				statusMessage = splitMessage[0]
+				unparsedErrorDetail := splitMessage[1]
+				fmt.Println(splitMessage)
+				// Buat variable untuk menampung hasil unmarshal
+				var parsedData []map[string]interface{}
+
+				// Lakukan unmarshal dengan menangkap error
+				err := json.Unmarshal([]byte(unparsedErrorDetail), &parsedData)
+				if err != nil {
+					fmt.Println("Error Unmarshal:", err)
+					return
+				}
+				errorDetail = parsedData
 				httpStatus = http.StatusBadRequest // 400
 			case codes.DeadlineExceeded:
 				httpStatus = http.StatusGatewayTimeout // 504
@@ -99,7 +119,7 @@ func ParseGrpcError(err error) {
 			default:
 				httpStatus = http.StatusInternalServerError // 500
 			}
-			panic(NewClientError(httpStatus, statusRequest.Message(), nil))
+			panic(NewClientError(httpStatus, statusMessage, nil, errorDetail))
 		} else {
 			panic(NewClientError(http.StatusInternalServerError, err.Error(), nil))
 		}

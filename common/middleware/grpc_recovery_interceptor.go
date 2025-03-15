@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"google.golang.org/grpc"
@@ -28,7 +29,8 @@ func RecoveryInterceptor(
 				case codes.Unknown:
 					err = status.Errorf(codes.Unknown, "Kesalahan tidak diketahui: %s", clientError.Message)
 				case codes.InvalidArgument:
-					err = status.Errorf(codes.InvalidArgument, "Input tidak valid: %s", clientError.Message)
+					errorDetails, _ := json.Marshal(clientError.Trace) // Konversi ke JSON
+					err = status.Errorf(codes.InvalidArgument, "Input tidak valid: %s", string(errorDetails))
 				case codes.DeadlineExceeded:
 					err = status.Errorf(codes.DeadlineExceeded, "Request melebihi batas waktu: %s", clientError.Message)
 				case codes.NotFound:

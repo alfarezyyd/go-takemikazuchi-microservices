@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/configs"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
-	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/genproto/user"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/helper"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/model"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/pkg/mapper"
@@ -54,6 +53,7 @@ func NewUserService(
 
 func (userService *UserServiceImpl) HandleRegister(createUserDto *dto.CreateUserDto) error {
 	err := userService.validatorService.ValidateStruct(createUserDto)
+	fmt.Println(err)
 	userService.validatorService.ParseValidationError(err)
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		isUserExists, err := userService.userRepository.IsUserExists(gormTransaction, "phone_number = ? OR email = ?", createUserDto.PhoneNumber, createUserDto.Email)
@@ -161,11 +161,12 @@ func (userService *UserServiceImpl) HandleGoogleCallback(tokenState string, quer
 	return nil
 }
 
-func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDto *user.LoginUserRequest) string {
+func (userService *UserServiceImpl) HandleLogin(ctx context.Context, loginUserDto *dto.LoginUserDto) string {
 	newCtx, span := tracer.Start(ctx, "HandleLogin (User Service Impl)")
 	defer span.End()
 	err := userService.validatorService.ValidateStruct(loginUserDto)
 	userService.validatorService.ParseValidationError(err)
+	fmt.Println(loginUserDto)
 	var tokenString string
 	err = userService.dbConnection.Transaction(func(gormTransaction *gorm.DB) error {
 		var userModel model.User
