@@ -54,7 +54,7 @@ func (withdrawalHandler *WithdrawalHandler) Create(ginContext *gin.Context) {
 		Amount:       createWithdrawalDto.Amount,
 	})
 	exception.ParseGrpcError(err)
-	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Success", nil))
+	ginContext.JSON(http.StatusCreated, helper.WriteSuccess("Create withdrawal success", nil))
 }
 
 //func (withdrawalHandler *WithdrawalHandler) Update(ginContext *gin.Context) {
