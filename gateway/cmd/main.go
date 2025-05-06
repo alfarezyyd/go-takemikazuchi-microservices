@@ -32,14 +32,7 @@ func main() {
 	if err := consulServiceRegistry.Register(ctx, serviceId, serviceName, httpAddr); err != nil {
 		panic(err)
 	}
-	go func() {
-		for {
-			if err := consulServiceRegistry.HealthCheck(serviceId, serviceName); err != nil {
-				log.Fatal("failed to health check")
-			}
-			time.Sleep(time.Second * 1)
-		}
-	}()
+
 	defer consulServiceRegistry.Deregister(ctx, serviceId, serviceName)
 	traceProvider, err := configs.StartTracing()
 	if err != nil {

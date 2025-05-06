@@ -11,6 +11,13 @@ message CreateCategoryRequest{
 }
 
 
+service CategoryService {
+  rpc FindAll(google.protobuf.Empty) returns (QueryCategoryResponses);
+  rpc HandleCreate(CreateCategoryRequest) returns (CommandCategoryResponse);
+}
+
+
+
 message UpdateCategoryRequest{
   string Id = 1;
   string Name = 2;
@@ -48,13 +55,3 @@ message GetQueryCategoryResponses{
 message SearchCategoryRequest {
   uint64 categoryId = 1;
 }
-
-service CategoryService {
-  rpc FindAll(google.protobuf.Empty) returns (QueryCategoryResponses);
-  rpc HandleCreate(CreateCategoryRequest) returns (CommandCategoryResponse);
-  rpc HandleUpdate(UpdateCategoryRequest) returns (CommandCategoryResponse);
-  rpc HandleDelete(DeleteCategoryRequest) returns (CommandCategoryResponse);
-  rpc IsCategoryExists(SearchCategoryRequest) returns (CategoryExistsResponse);
-  rpc FindById(SearchCategoryRequest) returns (QueryCategoryResponse);
-}
-
