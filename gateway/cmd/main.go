@@ -56,7 +56,7 @@ func main() {
 
 	ginEngine := gin.Default()
 	ginEngine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
+		AllowOrigins:     []string{"http://localhost:3000"}, // atau domain frontend kamu
 		AllowMethods:     []string{"*"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"*"},
