@@ -7,6 +7,7 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/common/exception"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/handler"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/routes"
+	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/middleware"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -65,6 +66,7 @@ func main() {
 	}))
 	ginEngine.Use(gin.Recovery())
 	ginEngine.Use(exception.Interceptor())
+	ginEngine.Use(middleware.CorsMiddleware())
 
 	rootRouterGroup := ginEngine.Group("/")
 	userHandler := handler.NewUserHandler(consulServiceRegistry)
