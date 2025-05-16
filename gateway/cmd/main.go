@@ -60,7 +60,7 @@ func main() {
 		AllowMethods:     []string{"*"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"*"},
-		AllowCredentials: true,
+		AllowCredentials: false,
 
 		MaxAge: 12 * time.Hour,
 	}))
