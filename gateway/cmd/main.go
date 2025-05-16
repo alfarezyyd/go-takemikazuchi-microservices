@@ -8,11 +8,9 @@ import (
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/handler"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/internal/routes"
 	"github.com/alfarezyyd/go-takemikazuchi-microservices/gateway/middleware"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"log"
-	"time"
 )
 
 var (
@@ -56,14 +54,7 @@ func main() {
 	viperConfig.ReadInConfig()
 
 	ginEngine := gin.Default()
-	ginEngine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"*"},
-		ExposeHeaders:    []string{"*"},
-		AllowCredentials: false,
-		MaxAge:           12 * time.Hour,
-	}))
+
 	ginEngine.Use(gin.Recovery())
 	ginEngine.Use(exception.Interceptor())
 	ginEngine.Use(middleware.CorsMiddleware())
