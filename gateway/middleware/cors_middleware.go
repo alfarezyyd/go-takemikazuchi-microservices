@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
@@ -9,10 +10,7 @@ func CorsMiddleware() gin.HandlerFunc {
 	// Define allowed origins as a comma-separated string
 	originsString := "http://localhost:3001,http://localhost:3000"
 	var allowedOrigins []string
-	if originsString != "" {
-		// Split the originsString into individual origins and store them in allowedOrigins slice
-		allowedOrigins = strings.Split(originsString, ",")
-	}
+	allowedOrigins = strings.Split(originsString, ",")
 
 	// Return the actual middleware handler function
 	return func(c *gin.Context) {
@@ -31,6 +29,7 @@ func CorsMiddleware() gin.HandlerFunc {
 
 		// Check if the origin is allowed
 		if isOriginAllowed(origin, allowedOrigins) {
+			fmt.Println("CorsMiddleware")
 			// If the origin is allowed, set CORS headers in the response
 			c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
