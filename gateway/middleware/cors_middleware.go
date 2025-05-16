@@ -26,7 +26,7 @@ func CorsMiddleware() gin.HandlerFunc {
 
 		// Get the Origin header from the request
 		origin := c.Request.Header.Get("Origin")
-
+		fmt.Println("CORS TRIGGERED")
 		// Check if the origin is allowed
 		if isOriginAllowed(origin, allowedOrigins) {
 			fmt.Println("CorsMiddleware")
