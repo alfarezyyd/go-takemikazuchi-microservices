@@ -56,13 +56,12 @@ func main() {
 
 	ginEngine := gin.Default()
 	ginEngine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3001"}, // atau domain frontend kamu
-		AllowMethods:     []string{"*"},
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"*"},
 		ExposeHeaders:    []string{"*"},
 		AllowCredentials: false,
-
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}))
 	ginEngine.Use(gin.Recovery())
 	ginEngine.Use(exception.Interceptor())
